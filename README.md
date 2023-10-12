@@ -1,7 +1,8 @@
 
 # third-party-orchestrator
 
-This is a placeholder README.md for a new repository
+This orchestrates calls  / data from the two third-party services 
+i.e. third-party-developer & third-party application
 
 ### License
 
