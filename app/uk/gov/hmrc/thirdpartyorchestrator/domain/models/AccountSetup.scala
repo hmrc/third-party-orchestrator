@@ -14,17 +14,20 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.thirdpartyorchestrator.config
+package uk.gov.hmrc.thirdpartyorchestrator.domain.models
 
-import com.google.inject.AbstractModule
+import play.api.libs.json.Json
 
-import uk.gov.hmrc.thirdpartyorchestrator.connectors.{ConnectorMetrics, ConnectorMetricsImpl}
+case class AccountSetup(
+    roles: List[String] = List.empty,
+    rolesOther: Option[String] = None,
+    services: List[String] = List.empty,
+    servicesOther: Option[String] = None,
+    targets: List[String] = List.empty,
+    targetsOther: Option[String] = None,
+    incomplete: Boolean = true
+  )
 
-class Module extends AbstractModule {
-
-  override def configure(): Unit = {
-
-    bind(classOf[AppConfig]).asEagerSingleton()
-    bind(classOf[ConnectorMetrics]).to(classOf[ConnectorMetricsImpl])
-  }
+object AccountSetup {
+  implicit val format = Json.format[AccountSetup]
 }

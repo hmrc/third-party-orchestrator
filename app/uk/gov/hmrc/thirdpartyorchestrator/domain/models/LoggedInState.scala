@@ -14,17 +14,21 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.thirdpartyorchestrator.config
+package uk.gov.hmrc.thirdpartyorchestrator.domain.models
 
-import com.google.inject.AbstractModule
+import enumeratum.{EnumEntry, PlayEnum}
 
-import uk.gov.hmrc.thirdpartyorchestrator.connectors.{ConnectorMetrics, ConnectorMetricsImpl}
+sealed trait LoggedInState extends EnumEntry {
+  def isLoggedIn: Boolean                = this == LoggedInState.LOGGED_IN
+  def isPartLoggedInEnablingMFA: Boolean = this == LoggedInState.PART_LOGGED_IN_ENABLING_MFA
+}
 
-class Module extends AbstractModule {
+object LoggedInState extends PlayEnum[LoggedInState] {
 
-  override def configure(): Unit = {
+  val values = findValues
 
-    bind(classOf[AppConfig]).asEagerSingleton()
-    bind(classOf[ConnectorMetrics]).to(classOf[ConnectorMetricsImpl])
-  }
+  final case object LOGGED_IN extends LoggedInState
+
+  final case object PART_LOGGED_IN_ENABLING_MFA extends LoggedInState
+
 }

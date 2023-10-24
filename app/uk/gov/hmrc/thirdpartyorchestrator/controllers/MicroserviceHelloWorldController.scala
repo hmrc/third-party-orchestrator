@@ -26,7 +26,7 @@ import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 class MicroserviceHelloWorldController @Inject() (cc: ControllerComponents)
     extends BackendController(cc) {
 
-  def hello(): Action[AnyContent] = Action.async { implicit request =>
+  def hello(): Action[AnyContent] = Action.async {
     Future.successful(Ok("Hello world"))
   }
 }
