@@ -1,4 +1,3 @@
 # microservice specific routes
 
-GET        /hello-world             uk.gov.hmrc.thirdpartyorchestrator.controllers.MicroserviceHelloWorldController.hello()
 GET        /session/:id             uk.gov.hmrc.thirdpartyorchestrator.controllers.SessionController.getDeveloperForSession(id: String)
