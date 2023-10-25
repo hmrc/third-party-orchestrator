@@ -26,18 +26,11 @@ object Session {
   implicit val formatSession = Json.format[Session]
 }
 
-case class SessionRequest(sessionId: String)
-
-object SessionRequest {
-  implicit val formatSession = Json.format[SessionRequest]
-}
-
 case class SessionResponse(
     userId: UserId,
     email: LaxEmailAddress,
     firstName: String,
-    lastName: String,
-    organisation: Option[String] = None
+    lastName: String
   )
 
 object SessionResponse {
@@ -47,8 +40,7 @@ object SessionResponse {
       session.developer.userId,
       session.developer.email,
       session.developer.firstName,
-      session.developer.lastName,
-      session.developer.organisation
+      session.developer.lastName
     )
 
   implicit val format = Json.format[SessionResponse]

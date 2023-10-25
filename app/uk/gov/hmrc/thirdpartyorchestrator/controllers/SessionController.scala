@@ -27,22 +27,31 @@ import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import uk.gov.hmrc.thirdpartyorchestrator.domain.models.{SessionId, SessionResponse}
 import uk.gov.hmrc.thirdpartyorchestrator.services.SessionService
 
+object SessionController {
+  case class SessionRequest(sessionId: String)
+  implicit val formatSession = Json.format[SessionRequest]
+}
+
 @Singleton()
 class SessionController @Inject() (
     sessionService: SessionService,
     cc: ControllerComponents
   )(implicit val ec: ExecutionContext
-  ) extends BackendController(cc) {
+  ) extends BackendController(cc) with JsonUtils {
 
-  def getDeveloperForSession(id: String): Action[AnyContent] = Action.async { implicit request =>
-    Try(SessionId.unsafeApply(id)) match {
-      case Failure(_)         => Future.successful(BadRequest("Invalid session id"))
-      case Success(sessionId) => sessionService.fetch(sessionId).map { maybeSession =>
-          maybeSession match {
-            case Some(session) => Ok(Json.toJson(SessionResponse.from(session)))
-            case _             => NotFound("Unknown session id")
+  import SessionController._
+
+  def getDeveloperForSession(): Action[AnyContent] = Action.async { implicit request =>
+    withJsonBodyFromAnyContent[SessionRequest] { sessionRequest =>
+      Try(SessionId.unsafeApply(sessionRequest.sessionId)) match {
+        case Failure(_)         => Future.successful(BadRequest("Invalid session id"))
+        case Success(sessionId) => sessionService.fetch(sessionId).map { maybeSession =>
+            maybeSession match {
+              case Some(session) => Ok(Json.toJson(SessionResponse.from(session)))
+              case _             => NotFound("Unknown session id")
+            }
           }
-        }
+      }
     }
   }
 }
