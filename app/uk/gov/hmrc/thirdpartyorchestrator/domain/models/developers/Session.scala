@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.thirdpartyorchestrator.domain.models
+package uk.gov.hmrc.thirdpartyorchestrator.domain.models.developers
 
 import play.api.libs.json.Json
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId}
+import uk.gov.hmrc.thirdpartyorchestrator.domain.models.developers.LoggedInState
 
 case class Session(sessionId: SessionId, loggedInState: LoggedInState, developer: User)
 

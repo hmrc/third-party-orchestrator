@@ -24,7 +24,7 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.{Application, Configuration, Mode}
 
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.thirdpartyorchestrator.domain.models._
+import uk.gov.hmrc.thirdpartyorchestrator.domain.models.developers._
 import uk.gov.hmrc.thirdpartyorchestrator.utils.{SessionBuilder, WireMockExtensions}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax

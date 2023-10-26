@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.thirdpartyorchestrator.config
+package uk.gov.hmrc.thirdpartyorchestrator.domain.models.applications
 
-import javax.inject.{Inject, Singleton}
+import java.time.LocalDateTime
 
-import play.api.Configuration
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+import play.api.libs.json.Json
+import uk.gov.hmrc.apiplatform.modules.common.domain.services.LocalDateTimeFormatter
 
-@Singleton
-class AppConfig @Inject() (config: Configuration) extends ServicesConfig(config) {
+case class TermsOfUseAgreement(emailAddress: String, timeStamp: LocalDateTime, version: String)
 
-  val appName: String          = config.get[String]("appName")
-  val thirdPartyApplicationUrl = baseUrl("third-party-application")
-  val thirdPartyDeveloperUrl   = baseUrl("third-party-developer")
+object TermsOfUseAgreement {
+
+  implicit val dateFormat = LocalDateTimeFormatter.localDateTimeFormat
+  implicit val format     = Json.format[TermsOfUseAgreement]
 }

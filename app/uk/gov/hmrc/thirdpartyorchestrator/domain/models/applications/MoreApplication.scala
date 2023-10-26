@@ -14,20 +14,12 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.thirdpartyorchestrator.domain.models
+package uk.gov.hmrc.thirdpartyorchestrator.domain.models.applications
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Format, Json}
 
-case class AccountSetup(
-    roles: List[String] = List.empty,
-    rolesOther: Option[String] = None,
-    services: List[String] = List.empty,
-    servicesOther: Option[String] = None,
-    targets: List[String] = List.empty,
-    targetsOther: Option[String] = None,
-    incomplete: Boolean = true
-  )
+case class MoreApplication(allowAutoDelete: Boolean = true)
 
-object AccountSetup {
-  implicit val format = Json.format[AccountSetup]
+object MoreApplication {
+  implicit val format: Format[MoreApplication] = Json.format[MoreApplication]
 }

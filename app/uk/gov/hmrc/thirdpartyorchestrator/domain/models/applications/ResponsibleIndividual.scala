@@ -14,25 +14,20 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.thirdpartyorchestrator.domain.models
+package uk.gov.hmrc.thirdpartyorchestrator.domain.models.applications
 
-import java.{util => ju}
-import scala.util.control.Exception._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 
-case class SessionId(value: ju.UUID) extends AnyVal {
-  override def toString(): String = value.toString
-}
+case class ResponsibleIndividual(fullName: ResponsibleIndividual.Name, emailAddress: LaxEmailAddress)
 
-object SessionId {
+object ResponsibleIndividual {
   import play.api.libs.json.{Format, Json}
 
-  implicit val format: Format[SessionId] = Json.valueFormat[SessionId]
+  case class Name(value: String) extends AnyVal
 
-  def apply(raw: String): Option[SessionId] = allCatch.opt(SessionId(ju.UUID.fromString(raw)))
+  implicit val nameFormat = Json.valueFormat[Name]
 
-  def unsafeApply(raw: String): SessionId = apply(raw).getOrElse(throw new RuntimeException(s"$raw is not a valid SessionId"))
+  implicit val format: Format[ResponsibleIndividual] = Json.format[ResponsibleIndividual]
 
-// $COVERAGE-OFF$
-  def random: SessionId = SessionId(ju.UUID.randomUUID())
-// $COVERAGE-ON$
+  def build(name: String, email: String): ResponsibleIndividual = ResponsibleIndividual(Name(name), LaxEmailAddress(email))
 }

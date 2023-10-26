@@ -22,7 +22,8 @@ import scala.concurrent.{ExecutionContext, Future}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.thirdpartyorchestrator.connectors.ThirdPartyDeveloperConnector
-import uk.gov.hmrc.thirdpartyorchestrator.domain.models.{Session, SessionId}
+import uk.gov.hmrc.thirdpartyorchestrator.domain.models.developers.SessionId
+import uk.gov.hmrc.thirdpartyorchestrator.domain.models.developers.Session
 
 @Singleton
 class SessionService @Inject() (

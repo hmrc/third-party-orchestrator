@@ -19,7 +19,7 @@ package uk.gov.hmrc.thirdpartyorchestrator.utils
 import java.time.LocalDateTime
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
-import uk.gov.hmrc.thirdpartyorchestrator.domain.models._
+import uk.gov.hmrc.thirdpartyorchestrator.domain.models.developers._
 
 trait SessionBuilder {
 

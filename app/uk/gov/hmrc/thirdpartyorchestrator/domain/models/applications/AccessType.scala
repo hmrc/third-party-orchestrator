@@ -14,17 +14,13 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.thirdpartyorchestrator.config
+package uk.gov.hmrc.thirdpartyorchestrator.domain.models.applications
 
-import javax.inject.{Inject, Singleton}
+import uk.gov.hmrc.thirdpartyorchestrator.domain.utils.EnumJson
 
-import play.api.Configuration
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+object AccessType extends Enumeration {
+  type AccessType = Value
+  val STANDARD, PRIVILEGED, ROPC = Value
 
-@Singleton
-class AppConfig @Inject() (config: Configuration) extends ServicesConfig(config) {
-
-  val appName: String          = config.get[String]("appName")
-  val thirdPartyApplicationUrl = baseUrl("third-party-application")
-  val thirdPartyDeveloperUrl   = baseUrl("third-party-developer")
+  implicit val formatAccessType = EnumJson.enumFormat(AccessType)
 }

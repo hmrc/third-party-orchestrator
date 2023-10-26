@@ -14,17 +14,24 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.thirdpartyorchestrator.config
+package uk.gov.hmrc.thirdpartyorchestrator.domain.models.applications
 
-import javax.inject.{Inject, Singleton}
+import play.api.libs.json.Json
 
-import play.api.Configuration
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+case class Totp(secret: String, id: String)
 
-@Singleton
-class AppConfig @Inject() (config: Configuration) extends ServicesConfig(config) {
+object Totp {
+  implicit val format = Json.format[Totp]
+}
 
-  val appName: String          = config.get[String]("appName")
-  val thirdPartyApplicationUrl = baseUrl("third-party-application")
-  val thirdPartyDeveloperUrl   = baseUrl("third-party-developer")
+case class TotpId(production: String)
+
+object TotpId {
+  implicit val format = Json.format[TotpId]
+}
+
+case class TotpSecret(production: String)
+
+object TotpSecret {
+  implicit val format = Json.format[TotpSecret]
 }

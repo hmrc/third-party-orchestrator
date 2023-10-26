@@ -24,7 +24,7 @@ import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
-import uk.gov.hmrc.thirdpartyorchestrator.domain.models.{SessionId, SessionResponse}
+import uk.gov.hmrc.thirdpartyorchestrator.domain.models.developers.{SessionId, SessionResponse}
 import uk.gov.hmrc.thirdpartyorchestrator.services.SessionService
 
 object SessionController {

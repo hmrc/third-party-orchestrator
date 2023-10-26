@@ -21,7 +21,7 @@ import scala.concurrent.Future.successful
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
 import uk.gov.hmrc.thirdpartyorchestrator.connectors.ThirdPartyDeveloperConnector
-import uk.gov.hmrc.thirdpartyorchestrator.domain.models.{Session, SessionId}
+import uk.gov.hmrc.thirdpartyorchestrator.domain.models.developers.{SessionId, Session}
 
 trait ThirdPartyDeveloperConnectorMockModule extends MockitoSugar with ArgumentMatchersSugar {
 

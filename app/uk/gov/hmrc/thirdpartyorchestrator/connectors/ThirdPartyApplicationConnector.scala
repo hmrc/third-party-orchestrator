@@ -23,22 +23,23 @@ import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HttpClient, _}
 import uk.gov.hmrc.play.http.metrics.common.API
 
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.thirdpartyorchestrator.config.AppConfig
-import uk.gov.hmrc.thirdpartyorchestrator.domain.models.developers.{SessionId, Session}
+import uk.gov.hmrc.thirdpartyorchestrator.domain.models.applications.Application
 
 @Singleton
-class ThirdPartyDeveloperConnector @Inject() (
+class ThirdPartyApplicationConnector @Inject() (
     http: HttpClient,
     config: AppConfig,
     metrics: ConnectorMetrics
   )(implicit val ec: ExecutionContext
   ) {
 
-  lazy val serviceBaseUrl: String = config.thirdPartyDeveloperUrl
-  val api                         = API("third-party-developer")
+  lazy val serviceBaseUrl: String = config.thirdPartyApplicationUrl
+  val api                         = API("third-party-application")
 
-  def fetchSession(sessionId: SessionId)(implicit hc: HeaderCarrier): Future[Option[Session]] =
+  def fetchApplicationById(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[Application]] =
     metrics.record(api) {
-      http.GET[Option[Session]](s"$serviceBaseUrl/session/$sessionId")
+      http.GET[Option[Application]](s"$serviceBaseUrl/application/$applicationId")
     }
 }

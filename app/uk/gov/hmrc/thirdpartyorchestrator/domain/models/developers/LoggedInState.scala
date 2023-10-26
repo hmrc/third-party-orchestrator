@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.thirdpartyorchestrator.domain.models
+package uk.gov.hmrc.thirdpartyorchestrator.domain.models.developers
 
 import enumeratum.{EnumEntry, PlayEnum}
 
