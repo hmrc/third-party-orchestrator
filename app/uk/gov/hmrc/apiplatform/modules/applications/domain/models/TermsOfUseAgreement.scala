@@ -14,13 +14,18 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.thirdpartyorchestrator.domain.models.applications
+package uk.gov.hmrc.apiplatform.modules.applications.domain.models
 
-import uk.gov.hmrc.thirdpartyorchestrator.domain.utils.EnumJson
+import java.time.LocalDateTime
 
-object AccessType extends Enumeration {
-  type AccessType = Value
-  val STANDARD, PRIVILEGED, ROPC = Value
+import play.api.libs.json.Json
 
-  implicit val formatAccessType = EnumJson.enumFormat(AccessType)
+import uk.gov.hmrc.apiplatform.modules.common.domain.services.LocalDateTimeFormatter
+
+case class TermsOfUseAgreement(emailAddress: String, timeStamp: LocalDateTime, version: String)
+
+object TermsOfUseAgreement {
+
+  implicit val dateFormat = LocalDateTimeFormatter.localDateTimeFormat
+  implicit val format     = Json.format[TermsOfUseAgreement]
 }

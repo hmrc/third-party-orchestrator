@@ -59,13 +59,13 @@ class ApplicationControllerSpec extends BaseControllerSpec with Matchers {
 
     "return 400 if no query parameters" in new Setup {
       val requestNoParams = FakeRequest("GET", s"/applications/${applicationId}")
-      val result = controller.getApplication(applicationId)(requestNoParams)
+      val result          = controller.getApplication(applicationId)(requestNoParams)
       status(result) shouldBe Status.BAD_REQUEST
     }
 
     "return 400 if unexpected query parameters" in new Setup {
       val requestUnknownParams = FakeRequest("GET", s"/applications/${applicationId}?developers=all")
-      val result = controller.getApplication(applicationId)(requestUnknownParams)
+      val result               = controller.getApplication(applicationId)(requestUnknownParams)
       status(result) shouldBe Status.BAD_REQUEST
     }
 

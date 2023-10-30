@@ -21,8 +21,8 @@ import scala.concurrent.{ExecutionContext, Future}
 
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
-import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.thirdpartyorchestrator.domain.models.developers.{Developer, DeveloperResponse}
@@ -44,12 +44,12 @@ class ApplicationController @Inject() (
   def getApplication(applicationId: ApplicationId): Action[AnyContent] = Action.async { implicit request =>
     val queryBy = flattenValuesToValue(request.queryString.toList)
     queryBy match {
-      case ("developers", "verified") :: _   => getVerifiedCollaboratorsForApplication(applicationId)
-      case _                                 => Future.successful(BadRequest("Invalid query parameters"))
+      case ("developers", "verified") :: _ => getVerifiedCollaboratorsForApplication(applicationId)
+      case _                               => Future.successful(BadRequest("Invalid query parameters"))
     }
   }
 
   def flattenValuesToValue(list: List[(String, Seq[String])]) = {
     list.map { case (key, values) => (key, values.head) }.sorted
-  }  
+  }
 }

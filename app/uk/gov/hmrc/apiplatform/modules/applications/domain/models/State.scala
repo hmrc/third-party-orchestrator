@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.thirdpartyorchestrator.domain.models.applications
+package uk.gov.hmrc.apiplatform.modules.applications.domain.models
 
 import uk.gov.hmrc.thirdpartyorchestrator.domain.utils.EnumJson
 

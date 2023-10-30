@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.thirdpartyorchestrator.domain.models.applications
+package uk.gov.hmrc.apiplatform.modules.applications.domain.models
 
-case class ContactDetails(
-    fullname: String,
-    email: String,
-    telephoneNumber: String
-  )
+import java.time.LocalDateTime
 
-object ContactDetails {
-  import play.api.libs.json.Json
+import play.api.libs.json._
 
-  implicit val format = Json.format[ContactDetails]
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.SubmissionId
+
+case class TermsOfUseAcceptance(responsibleIndividual: ResponsibleIndividual, dateTime: LocalDateTime, submissionId: SubmissionId, submissionInstance: Int = 0)
+
+object TermsOfUseAcceptance {
+  implicit val format = Json.format[TermsOfUseAcceptance]
 }

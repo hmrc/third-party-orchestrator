@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.thirdpartyorchestrator.domain.models.applications
+package uk.gov.hmrc.apiplatform.modules.applications.domain.models
 
 import java.time.{LocalDateTime, ZoneOffset}
 
 import play.api.libs.json.{Format, OFormat}
 
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.State._
 import uk.gov.hmrc.apiplatform.modules.common.domain.services.LocalDateTimeFormatter
-import uk.gov.hmrc.thirdpartyorchestrator.domain.models.applications.State.{State, _}
 
 case class ApplicationState(
     name: State = TESTING,

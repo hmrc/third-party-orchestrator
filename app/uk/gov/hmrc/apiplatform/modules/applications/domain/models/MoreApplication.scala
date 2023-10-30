@@ -14,16 +14,12 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.thirdpartyorchestrator.domain.models.applications
+package uk.gov.hmrc.apiplatform.modules.applications.domain.models
 
-import java.time.LocalDateTime
+import play.api.libs.json.{Format, Json}
 
-import play.api.libs.json._
+case class MoreApplication(allowAutoDelete: Boolean = true)
 
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.SubmissionId
-
-case class TermsOfUseAcceptance(responsibleIndividual: ResponsibleIndividual, dateTime: LocalDateTime, submissionId: SubmissionId, submissionInstance: Int = 0)
-
-object TermsOfUseAcceptance {
-  implicit val format = Json.format[TermsOfUseAcceptance]
+object MoreApplication {
+  implicit val format: Format[MoreApplication] = Json.format[MoreApplication]
 }

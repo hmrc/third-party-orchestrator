@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.thirdpartyorchestrator.domain.models.applications
+package uk.gov.hmrc.apiplatform.modules.applications.domain.models
 
-final case class SellResellOrDistribute(answer: String) extends AnyVal
+case class IpAllowlist(
+    required: Boolean = false,
+    allowlist: Set[String] = Set.empty
+  )
 
-object SellResellOrDistribute {
-  import play.api.libs.json.{Format, Json}
+object IpAllowlist {
+  import play.api.libs.json.Json
 
-  implicit val format: Format[SellResellOrDistribute] = Json.valueFormat[SellResellOrDistribute]
+  implicit val formatIpAllowlist = Json.format[IpAllowlist]
 }

@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.thirdpartyorchestrator.domain.models.applications
+package uk.gov.hmrc.apiplatform.modules.applications.domain.models
 
 import java.time.LocalDateTime
 
 import play.api.libs.json._
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{Collaborator, RateLimitTier}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId}
 
 case class Application(

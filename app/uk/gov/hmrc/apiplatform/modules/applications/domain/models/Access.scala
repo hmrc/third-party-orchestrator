@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.thirdpartyorchestrator.domain.models.applications
+package uk.gov.hmrc.apiplatform.modules.applications.domain.models
 
 import play.api.libs.json._
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{PrivacyPolicyLocation, TermsAndConditionsLocation}
-import uk.gov.hmrc.thirdpartyorchestrator.domain.models.applications.AccessType._
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.AccessType._
 
 sealed trait Access {
   val accessType: AccessType.Value
