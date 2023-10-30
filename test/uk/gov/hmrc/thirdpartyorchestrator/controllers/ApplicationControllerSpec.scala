@@ -40,26 +40,38 @@ class ApplicationControllerSpec extends BaseControllerSpec with Matchers {
     val userId        = UserId.random
     val email         = LaxEmailAddress("bob@example.com")
     val developer     = buildMinimalDeveloper(userId, email, "Bob", "Fleming")
-    val request       = FakeRequest()
+    val request       = FakeRequest("GET", s"/applications/${applicationId}?developers=verified")
     val controller    = new ApplicationController(applicationServiceMock, Helpers.stubControllerComponents())
   }
 
   "getVerifiedCollaboratorsForApplication" should {
     "return 200 if successful" in new Setup {
       fetchVerifiedCollaboratorsForApplicationReturns(applicationId, Set(developer))
-      val result = controller.getVerifiedCollaboratorsForApplication(applicationId)(request)
+      val result = controller.getApplication(applicationId)(request)
       status(result) shouldBe Status.OK
     }
 
-    "return 200 if appplication found but no verified developers" in new Setup {
+    "return 200 if application found but no verified developers" in new Setup {
       fetchVerifiedCollaboratorsForApplicationReturnsNone(applicationId)
-      val result = controller.getVerifiedCollaboratorsForApplication(applicationId)(request)
+      val result = controller.getApplication(applicationId)(request)
       status(result) shouldBe Status.OK
+    }
+
+    "return 400 if no query parameters" in new Setup {
+      val requestNoParams = FakeRequest("GET", s"/applications/${applicationId}")
+      val result = controller.getApplication(applicationId)(requestNoParams)
+      status(result) shouldBe Status.BAD_REQUEST
+    }
+
+    "return 400 if unexpected query parameters" in new Setup {
+      val requestUnknownParams = FakeRequest("GET", s"/applications/${applicationId}?developers=all")
+      val result = controller.getApplication(applicationId)(requestUnknownParams)
+      status(result) shouldBe Status.BAD_REQUEST
     }
 
     "return 404 if application not found" in new Setup {
       fetchVerifiedCollaboratorsForApplicationNotFound(applicationId)
-      val result = controller.getVerifiedCollaboratorsForApplication(applicationId)(request)
+      val result = controller.getApplication(applicationId)(request)
       status(result) shouldBe Status.NOT_FOUND
     }
   }

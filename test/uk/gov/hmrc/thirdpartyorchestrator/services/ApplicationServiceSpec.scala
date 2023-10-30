@@ -49,7 +49,6 @@ class ApplicationServiceSpec extends AsyncHmrcSpec {
       ThirdPartyApplicationConnectorMock.FetchApplicationById.thenReturn(applicationId)(Some(application))
       ThirdPartyDeveloperConnectorMock.FetchDeveloper.thenReturn(userId)(Some(developer))
       val result = await(underTest.fetchVerifiedCollaboratorsForApplication(applicationId))
-      result.isRight shouldBe true
       result shouldBe Right(Set(developer))
     }
 

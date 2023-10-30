@@ -1,4 +1,4 @@
 # microservice specific routes
 
 POST        /session/validate                   uk.gov.hmrc.thirdpartyorchestrator.controllers.SessionController.getDeveloperForSession()
-GET         /applications/:id/verified-users    uk.gov.hmrc.thirdpartyorchestrator.controllers.ApplicationController.getVerifiedCollaboratorsForApplication(id: uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId)
+GET         /applications/:id                   uk.gov.hmrc.thirdpartyorchestrator.controllers.ApplicationController.getApplication(id: uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId)

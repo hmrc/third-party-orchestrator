@@ -17,11 +17,12 @@
 package uk.gov.hmrc.thirdpartyorchestrator.controllers
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 import play.api.libs.json.Json
-import play.api.mvc.{Action, AnyContent, ControllerComponents}
+import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
+import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.thirdpartyorchestrator.domain.models.developers.{Developer, DeveloperResponse}
@@ -34,9 +35,21 @@ class ApplicationController @Inject() (
   )(implicit val ec: ExecutionContext
   ) extends BackendController(cc) with JsonUtils {
 
-  def getVerifiedCollaboratorsForApplication(applicationId: ApplicationId): Action[AnyContent] = Action.async { implicit request =>
+  private def getVerifiedCollaboratorsForApplication(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Result] = {
     lazy val failed = (msg: String) => NotFound(msg)
     val success     = (developers: Set[Developer]) => Ok(Json.toJson(DeveloperResponse.from(developers)))
     applicationService.fetchVerifiedCollaboratorsForApplication(applicationId).map(_.fold(failed, success))
   }
+
+  def getApplication(applicationId: ApplicationId): Action[AnyContent] = Action.async { implicit request =>
+    val queryBy = flattenValuesToValue(request.queryString.toList)
+    queryBy match {
+      case ("developers", "verified") :: _   => getVerifiedCollaboratorsForApplication(applicationId)
+      case _                                 => Future.successful(BadRequest("Invalid query parameters"))
+    }
+  }
+
+  def flattenValuesToValue(list: List[(String, Seq[String])]) = {
+    list.map { case (key, values) => (key, values.head) }.sorted
+  }  
 }

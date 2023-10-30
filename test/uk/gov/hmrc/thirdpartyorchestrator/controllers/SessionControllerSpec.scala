@@ -63,7 +63,7 @@ class SessionControllerSpec extends BaseControllerSpec with Matchers {
 
       val result = controller.getDeveloperForSession()(request)
       status(result) shouldBe Status.BAD_REQUEST
-      contentAsString(result) shouldBe "Invalid session id"
+      contentAsString(result) shouldBe "Session id must be a UUID"
     }
 
     "return 400 if invalid json" in new Setup {

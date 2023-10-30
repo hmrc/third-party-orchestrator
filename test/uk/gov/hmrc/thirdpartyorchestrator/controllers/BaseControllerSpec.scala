@@ -24,7 +24,6 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.i18n.MessagesApi
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.crypto.CookieSigner
 import play.api.mvc.MessagesControllerComponents
 
 import uk.gov.hmrc.thirdpartyorchestrator.config.AppConfig
@@ -35,8 +34,6 @@ class BaseControllerSpec
     with GuiceOneAppPerSuite {
 
   implicit val appConfig: AppConfig = mock[AppConfig]
-
-  implicit val cookieSigner: CookieSigner = app.injector.instanceOf[CookieSigner]
 
   implicit lazy val materializer: Materializer = app.materializer
 

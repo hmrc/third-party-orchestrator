@@ -44,7 +44,7 @@ class SessionController @Inject() (
   def getDeveloperForSession(): Action[AnyContent] = Action.async { implicit request =>
     withJsonBodyFromAnyContent[SessionRequest] { sessionRequest =>
       Try(SessionId.unsafeApply(sessionRequest.sessionId)) match {
-        case Failure(_)         => Future.successful(BadRequest("Invalid session id"))
+        case Failure(_)         => Future.successful(BadRequest("Session id must be a UUID"))
         case Success(sessionId) => sessionService.fetch(sessionId).map { maybeSession =>
             maybeSession match {
               case Some(session) => Ok(Json.toJson(DeveloperResponse.from(session)))
