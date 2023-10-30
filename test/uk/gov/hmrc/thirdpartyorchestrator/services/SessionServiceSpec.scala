@@ -23,7 +23,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
-import uk.gov.hmrc.thirdpartyorchestrator.domain.models.developers.SessionId
+import uk.gov.hmrc.apiplatform.modules.developers.domain.models.SessionId
 import uk.gov.hmrc.thirdpartyorchestrator.mocks.connectors.ThirdPartyDeveloperConnectorMockModule
 import uk.gov.hmrc.thirdpartyorchestrator.utils.{AsyncHmrcSpec, DeveloperBuilder}
 

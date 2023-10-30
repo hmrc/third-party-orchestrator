@@ -24,7 +24,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
 import uk.gov.hmrc.thirdpartyorchestrator.connectors.{ThirdPartyApplicationConnector, ThirdPartyDeveloperConnector}
-import uk.gov.hmrc.thirdpartyorchestrator.domain.models.developers.Developer
+import uk.gov.hmrc.apiplatform.modules.developers.domain.models.Developer
 
 @Singleton
 class ApplicationService @Inject() (

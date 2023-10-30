@@ -25,7 +25,8 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
-import uk.gov.hmrc.thirdpartyorchestrator.domain.models.developers.{Developer, DeveloperResponse}
+import uk.gov.hmrc.thirdpartyorchestrator.domain.models.developers.{DeveloperResponse}
+import uk.gov.hmrc.apiplatform.modules.developers.domain.models.Developer
 import uk.gov.hmrc.thirdpartyorchestrator.services.ApplicationService
 
 @Singleton()

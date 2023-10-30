@@ -19,6 +19,8 @@ package uk.gov.hmrc.thirdpartyorchestrator.domain.models.developers
 import play.api.libs.json.Json
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId}
+import uk.gov.hmrc.apiplatform.modules.developers.domain.models.Session
+import uk.gov.hmrc.apiplatform.modules.developers.domain.models.Developer
 
 case class DeveloperResponse(
     userId: UserId,

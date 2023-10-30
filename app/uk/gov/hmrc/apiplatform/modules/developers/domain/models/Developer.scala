@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.thirdpartyorchestrator.domain.models.developers
+package uk.gov.hmrc.apiplatform.modules.developers.domain.models
 
 import java.time.LocalDateTime
 
 import play.api.libs.json.{Format, Json, _}
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId}
-import uk.gov.hmrc.thirdpartyorchestrator.domain.models.developers.MfaDetailFormats._
-import uk.gov.hmrc.thirdpartyorchestrator.domain.models.developers.{AccountSetup, EmailPreferences, MfaDetail}
+import uk.gov.hmrc.apiplatform.modules.developers.domain.models.MfaDetailFormats._
 
 case class Developer(
     email: LaxEmailAddress,

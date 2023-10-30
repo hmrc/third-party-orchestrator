@@ -14,21 +14,13 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.thirdpartyorchestrator.domain.models.developers
+package uk.gov.hmrc.apiplatform.modules.developers.domain.models
 
-import enumeratum.{EnumEntry, PlayEnum}
+import play.api.libs.json.Json
+import uk.gov.hmrc.apiplatform.modules.developers.domain.models.LoggedInState
 
-sealed trait LoggedInState extends EnumEntry {
-  def isLoggedIn: Boolean                = this == LoggedInState.LOGGED_IN
-  def isPartLoggedInEnablingMFA: Boolean = this == LoggedInState.PART_LOGGED_IN_ENABLING_MFA
-}
+case class Session(sessionId: SessionId, loggedInState: LoggedInState, developer: Developer)
 
-object LoggedInState extends PlayEnum[LoggedInState] {
-
-  val values = findValues
-
-  final case object LOGGED_IN extends LoggedInState
-
-  final case object PART_LOGGED_IN_ENABLING_MFA extends LoggedInState
-
+object Session {
+  implicit val formatSession = Json.format[Session]
 }

@@ -28,7 +28,8 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartyorchestrator.controllers.SessionController._
-import uk.gov.hmrc.thirdpartyorchestrator.domain.models.developers.{MfaId, SessionId}
+import uk.gov.hmrc.apiplatform.modules.developers.domain.models.SessionId
+import uk.gov.hmrc.apiplatform.modules.developers.domain.models.MfaId
 import uk.gov.hmrc.thirdpartyorchestrator.mocks.services.SessionServiceMock
 import uk.gov.hmrc.thirdpartyorchestrator.utils.DeveloperBuilder
 

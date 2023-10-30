@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.thirdpartyorchestrator.domain.models.developers
+package uk.gov.hmrc.apiplatform.modules.developers.domain.models
 
 import enumeratum.values.{StringEnum, StringEnumEntry, StringPlayJsonValueEnum}
 
