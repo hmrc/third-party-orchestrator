@@ -22,11 +22,9 @@ import play.api.libs.json.{Format, Json, _}
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId}
 import uk.gov.hmrc.thirdpartyorchestrator.domain.models.developers.MfaDetailFormats._
-import uk.gov.hmrc.thirdpartyorchestrator.domain.models.developers.MfaDetail
-import uk.gov.hmrc.thirdpartyorchestrator.domain.models.developers.AccountSetup
-import uk.gov.hmrc.thirdpartyorchestrator.domain.models.developers.EmailPreferences
+import uk.gov.hmrc.thirdpartyorchestrator.domain.models.developers.{AccountSetup, EmailPreferences, MfaDetail}
 
-case class User(
+case class Developer(
     email: LaxEmailAddress,
     firstName: String,
     lastName: String,
@@ -42,8 +40,8 @@ case class User(
     userId: UserId
   )
 
-object User extends EnvReads with EnvWrites {
+object Developer extends EnvReads with EnvWrites {
 
   implicit val dateTimeFormat: Format[LocalDateTime] = Format(DefaultLocalDateTimeReads, DefaultLocalDateTimeWrites)
-  implicit val format: OFormat[User]                 = Json.format[User]
+  implicit val format: OFormat[Developer]            = Json.format[Developer]
 }

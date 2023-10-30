@@ -25,11 +25,11 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.Stri
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
 import uk.gov.hmrc.thirdpartyorchestrator.domain.models.developers.SessionId
 import uk.gov.hmrc.thirdpartyorchestrator.mocks.connectors.ThirdPartyDeveloperConnectorMockModule
-import uk.gov.hmrc.thirdpartyorchestrator.utils.{AsyncHmrcSpec, SessionBuilder}
+import uk.gov.hmrc.thirdpartyorchestrator.utils.{AsyncHmrcSpec, DeveloperBuilder}
 
 class SessionServiceSpec extends AsyncHmrcSpec {
 
-  trait Setup extends ThirdPartyDeveloperConnectorMockModule with SessionBuilder {
+  trait Setup extends ThirdPartyDeveloperConnectorMockModule with DeveloperBuilder {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val underTest = new SessionService(ThirdPartyDeveloperConnectorMock.aMock)

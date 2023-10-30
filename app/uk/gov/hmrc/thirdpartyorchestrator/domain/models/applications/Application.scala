@@ -20,8 +20,8 @@ import java.time.LocalDateTime
 
 import play.api.libs.json._
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId}
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{Collaborator, RateLimitTier}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId}
 
 case class Application(
     id: ApplicationId,
@@ -34,7 +34,7 @@ case class Application(
     createdOn: LocalDateTime,
     lastAccess: Option[LocalDateTime],
     grantLength: Int,
-    lastAccessTokenUsage: Option[LocalDateTime] = None, 
+    lastAccessTokenUsage: Option[LocalDateTime] = None,
     redirectUris: List[String] = List.empty,
     termsAndConditionsUrl: Option[String] = None,
     privacyPolicyUrl: Option[String] = None,
@@ -50,4 +50,4 @@ case class Application(
 
 object Application {
   implicit val formatApplication = Json.format[Application]
-}  
+}

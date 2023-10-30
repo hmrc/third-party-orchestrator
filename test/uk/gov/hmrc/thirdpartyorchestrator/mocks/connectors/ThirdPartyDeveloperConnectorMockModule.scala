@@ -20,8 +20,9 @@ import scala.concurrent.Future.successful
 
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
 import uk.gov.hmrc.thirdpartyorchestrator.connectors.ThirdPartyDeveloperConnector
-import uk.gov.hmrc.thirdpartyorchestrator.domain.models.developers.{SessionId, Session}
+import uk.gov.hmrc.thirdpartyorchestrator.domain.models.developers.{Developer, Session, SessionId}
 
 trait ThirdPartyDeveloperConnectorMockModule extends MockitoSugar with ArgumentMatchersSugar {
 
@@ -32,6 +33,12 @@ trait ThirdPartyDeveloperConnectorMockModule extends MockitoSugar with ArgumentM
 
       def thenReturn(sessionId: SessionId)(session: Option[Session]) =
         when(aMock.fetchSession(eqTo(sessionId))(*)).thenReturn(successful(session))
+    }
+
+    object FetchDeveloper {
+
+      def thenReturn(developerId: UserId)(developer: Option[Developer]) =
+        when(aMock.fetchDeveloper(eqTo(developerId))(*)).thenReturn(successful(developer))
     }
   }
 

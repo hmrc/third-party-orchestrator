@@ -30,7 +30,7 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartyorchestrator.controllers.SessionController._
 import uk.gov.hmrc.thirdpartyorchestrator.domain.models.developers.{MfaId, SessionId}
 import uk.gov.hmrc.thirdpartyorchestrator.mocks.services.SessionServiceMock
-import uk.gov.hmrc.thirdpartyorchestrator.utils.SessionBuilder
+import uk.gov.hmrc.thirdpartyorchestrator.utils.DeveloperBuilder
 
 class SessionControllerSpec extends BaseControllerSpec with Matchers {
 
@@ -38,7 +38,7 @@ class SessionControllerSpec extends BaseControllerSpec with Matchers {
   implicit val formatDummySession = Json.format[DummySessionRequest]
 
   trait Setup
-      extends SessionServiceMock with SessionBuilder {
+      extends SessionServiceMock with DeveloperBuilder {
 
     implicit val hc = HeaderCarrier()
 

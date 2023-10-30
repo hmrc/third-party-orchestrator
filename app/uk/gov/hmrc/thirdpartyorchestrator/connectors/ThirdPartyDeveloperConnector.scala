@@ -23,8 +23,9 @@ import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HttpClient, _}
 import uk.gov.hmrc.play.http.metrics.common.API
 
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
 import uk.gov.hmrc.thirdpartyorchestrator.config.AppConfig
-import uk.gov.hmrc.thirdpartyorchestrator.domain.models.developers.{SessionId, Session}
+import uk.gov.hmrc.thirdpartyorchestrator.domain.models.developers.{Developer, Session, SessionId}
 
 @Singleton
 class ThirdPartyDeveloperConnector @Inject() (
@@ -41,4 +42,10 @@ class ThirdPartyDeveloperConnector @Inject() (
     metrics.record(api) {
       http.GET[Option[Session]](s"$serviceBaseUrl/session/$sessionId")
     }
+
+  def fetchDeveloper(userId: UserId)(implicit hc: HeaderCarrier): Future[Option[Developer]] = {
+    metrics.record(api) {
+      http.GET[Option[Developer]](s"$serviceBaseUrl/developer", Seq("developerId" -> userId.toString()))
+    }
+  }
 }

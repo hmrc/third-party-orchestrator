@@ -18,8 +18,30 @@ package uk.gov.hmrc.thirdpartyorchestrator.domain.models.developers
 
 import play.api.libs.json.Json
 
-case class Session(sessionId: SessionId, loggedInState: LoggedInState, developer: Developer)
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId}
 
-object Session {
-  implicit val formatSession = Json.format[Session]
+case class DeveloperResponse(
+    userId: UserId,
+    email: LaxEmailAddress,
+    firstName: String,
+    lastName: String
+  )
+
+object DeveloperResponse {
+
+  def from(session: Session): DeveloperResponse =
+    from(session.developer)
+
+  def from(developers: Set[Developer]): Set[DeveloperResponse] =
+    developers.map(from(_))
+
+  def from(developer: Developer): DeveloperResponse =
+    DeveloperResponse(
+      developer.userId,
+      developer.email,
+      developer.firstName,
+      developer.lastName
+    )
+
+  implicit val format = Json.format[DeveloperResponse]
 }

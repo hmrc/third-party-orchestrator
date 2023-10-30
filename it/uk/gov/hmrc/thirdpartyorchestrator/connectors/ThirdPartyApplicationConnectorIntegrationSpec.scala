@@ -27,7 +27,7 @@ import play.api.{Application, Configuration, Mode}
 
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.thirdpartyorchestrator.utils.{ApplicationBuilder, WireMockExtensions}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, UserId}
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.SubmissionId
 
 class ThirdPartyApplicationConnectorIntegrationSpec extends BaseConnectorIntegrationSpec
@@ -48,8 +48,9 @@ class ThirdPartyApplicationConnectorIntegrationSpec extends BaseConnectorIntegra
 
     val applicationId       = ApplicationId.random
     val clientId            = ClientId.random
+    val userId              = UserId.random
     val submissionId        = SubmissionId.random
-    val expectedApplication = buildApplication(applicationId, clientId, submissionId, "Petes test application", LocalDateTime.parse("2022-12-23T12:24:31.123"))
+    val expectedApplication = buildApplication(applicationId, clientId, userId, submissionId, "Petes test application", LocalDateTime.parse("2022-12-23T12:24:31.123"))
 
     val underTest: ThirdPartyApplicationConnector = app.injector.instanceOf[ThirdPartyApplicationConnector]
   }
@@ -70,7 +71,13 @@ class ThirdPartyApplicationConnectorIntegrationSpec extends BaseConnectorIntegra
                            |  "name": "Petes test application",
                            |  "deployedTo": "PRODUCTION",
                            |  "description": "app description",
-                           |  "collaborators": [],
+                           |  "collaborators": [
+                           |    {
+                           |      "userId": "$userId",
+                           |      "emailAddress": "bob@example.com",
+                           |      "role": "ADMINISTRATOR"
+                           |    }
+                           |  ],
                            |  "createdOn": "2022-12-23T12:24:31.123",
                            |  "lastAccess": "2023-10-02T12:24:31.123",
                            |  "grantLength": 18,
@@ -123,7 +130,7 @@ class ThirdPartyApplicationConnectorIntegrationSpec extends BaseConnectorIntegra
                            |  "moreApplication": {
                            |    "allowAutoDelete": false
                            |  }
-                           |}""".stripMargin)  
+                           |}""".stripMargin)
           )
       )
 

@@ -21,7 +21,7 @@ import java.time.LocalDateTime
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartyorchestrator.domain.models.developers._
 
-trait SessionBuilder {
+trait DeveloperBuilder {
 
   def buildSession(sessionId: SessionId, userId: UserId, authMfaId: MfaId, smsMfaId: MfaId, firstName: String, lastName: String, userEmail: LaxEmailAddress): Session = {
     Session(
@@ -38,8 +38,8 @@ trait SessionBuilder {
       lastName: String,
       authMfaId: MfaId,
       smsMfaId: MfaId
-    ): User = {
-    User(
+    ): Developer = {
+    Developer(
       emailAddress,
       firstName,
       lastName,
@@ -83,8 +83,8 @@ trait SessionBuilder {
       emailAddress: LaxEmailAddress,
       firstName: String,
       lastName: String
-    ): User = {
-    User(
+    ): Developer = {
+    Developer(
       emailAddress,
       firstName,
       lastName,

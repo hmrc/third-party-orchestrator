@@ -25,8 +25,9 @@ import play.api.{Application, Configuration, Mode}
 
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.thirdpartyorchestrator.domain.models.developers._
-import uk.gov.hmrc.thirdpartyorchestrator.utils.{SessionBuilder, WireMockExtensions}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
+import uk.gov.hmrc.thirdpartyorchestrator.utils.WireMockExtensions
+import uk.gov.hmrc.thirdpartyorchestrator.utils.DeveloperBuilder
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, UserId}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 
 class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrationSpec
@@ -42,15 +43,17 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
       .in(Mode.Test)
       .build()
 
-  trait Setup extends SessionBuilder {
+  trait Setup extends DeveloperBuilder {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    val userEmail       = "thirdpartydeveloper@example.com".toLaxEmail
-    val userId          = UserId.random
-    val authMfaId       = MfaId.random
-    val smsMfaId        = MfaId.random
-    val sessionId       = SessionId.random
-    val expectedSession = buildSession(sessionId, userId, authMfaId, smsMfaId, "John", "Doe", userEmail)
+    val userEmail         = "thirdpartydeveloper@example.com".toLaxEmail
+    val applicationId     = ApplicationId.random
+    val userId            = UserId.random
+    val authMfaId         = MfaId.random
+    val smsMfaId          = MfaId.random
+    val sessionId         = SessionId.random
+    val expectedSession   = buildSession(sessionId, userId, authMfaId, smsMfaId, "John", "Doe", userEmail)
+    val expectedDeveloper = buildDeveloper(userId, userEmail, "John", "Doe", authMfaId, smsMfaId)
 
     val underTest: ThirdPartyDeveloperConnector = app.injector.instanceOf[ThirdPartyDeveloperConnector]
   }
@@ -129,6 +132,80 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
       private val result = await(underTest.fetchSession(sessionId))
 
       result shouldBe Some(expectedSession)
+    }
+  }
+
+  "fetchDeveloper" should {
+    "return the developer" in new Setup {
+
+      stubFor(
+        get(urlPathEqualTo(s"/developer"))
+          .withQueryParam("developerId", equalTo(userId.toString()))
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withHeader("Content-Type", "application/json")
+              .withBody(s"""{
+                           |  "userId": "$userId",
+                           |  "email": "${userEmail.text}",
+                           |  "firstName": "John",
+                           |  "lastName": "Doe",
+                           |  "registrationTime": "2022-12-23T12:24:31.123",
+                           |  "lastModified": "2023-10-23T12:24:32.543",
+                           |  "verified": true,
+                           |  "organisation": "Example Corp",
+                           |  "accountSetup": {
+                           |    "roles": [
+                           |      "ROLE1"
+                           |    ],
+                           |    "services": [
+                           |      "SERVICE1"
+                           |    ],
+                           |    "targets": [
+                           |      "TARGET1"
+                           |    ],
+                           |    "incomplete": false
+                           |  },
+                           |  "mfaEnabled": true,
+                           |  "mfaDetails": [ 
+                           |     {
+                           |       "id": "$authMfaId",
+                           |       "name": "Petes App",
+                           |       "createdOn": "2022-12-28T11:21:31.123",
+                           |       "verified": true,
+                           |       "mfaType": "AUTHENTICATOR_APP"
+                           |     },
+                           |     {
+                           |       "id": "$smsMfaId",
+                           |       "name": "Petes Phone",
+                           |       "createdOn": "2023-01-21T11:21:31.123",
+                           |       "mobileNumber": "07123456789",
+                           |       "verified": true,
+                           |       "mfaType": "SMS"
+                           |     }
+                           |  ],
+                           |  "nonce": "2435364598347653405635324543645634575",
+                           |  "emailPreferences": { 
+                           |    "interests": [
+                           |      {
+                           |        "regime": "REGIME1",
+                           |        "services": [
+                           |          "SERVICE1",
+                           |          "SERVICE2"
+                           |        ]
+                           |      }
+                           |    ], 
+                           |    "topics": [
+                           |      "TECHNICAL"
+                           |    ] 
+                           |  }
+                           |}""".stripMargin)
+          )
+      )
+
+      private val result = await(underTest.fetchDeveloper(userId))
+
+      result shouldBe Some(expectedDeveloper)
     }
   }
 }

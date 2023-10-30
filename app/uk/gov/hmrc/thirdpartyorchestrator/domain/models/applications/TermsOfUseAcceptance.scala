@@ -25,5 +25,5 @@ import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.SubmissionId
 case class TermsOfUseAcceptance(responsibleIndividual: ResponsibleIndividual, dateTime: LocalDateTime, submissionId: SubmissionId, submissionInstance: Int = 0)
 
 object TermsOfUseAcceptance {
-  implicit val format     = Json.format[TermsOfUseAcceptance]
+  implicit val format = Json.format[TermsOfUseAcceptance]
 }
