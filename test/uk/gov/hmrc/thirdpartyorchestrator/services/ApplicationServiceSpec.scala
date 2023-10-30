@@ -55,7 +55,6 @@ class ApplicationServiceSpec extends AsyncHmrcSpec {
     "return None when application does not exist" in new Setup {
       ThirdPartyApplicationConnectorMock.FetchApplicationById.thenReturn(applicationId)(None)
       val result = await(underTest.fetchVerifiedCollaboratorsForApplication(applicationId))
-      result.isLeft shouldBe true
       result.left.value shouldBe "Application not found"
     }
   }
