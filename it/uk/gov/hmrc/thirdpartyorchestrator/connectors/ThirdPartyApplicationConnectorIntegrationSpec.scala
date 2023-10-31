@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.thirdpartyorchestrator.connectors
 
-import java.time.LocalDateTime
-
 import com.github.tomakehurst.wiremock.client.WireMock._
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 
@@ -28,7 +26,6 @@ import play.api.{Application, Configuration, Mode}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.thirdpartyorchestrator.utils.{ApplicationBuilder, WireMockExtensions}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, UserId}
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.SubmissionId
 
 class ThirdPartyApplicationConnectorIntegrationSpec extends BaseConnectorIntegrationSpec
     with GuiceOneAppPerSuite with WireMockExtensions {
@@ -49,8 +46,7 @@ class ThirdPartyApplicationConnectorIntegrationSpec extends BaseConnectorIntegra
     val applicationId       = ApplicationId.random
     val clientId            = ClientId.random
     val userId              = UserId.random
-    val submissionId        = SubmissionId.random
-    val expectedApplication = buildApplication(applicationId, clientId, userId, submissionId, "Petes test application", LocalDateTime.parse("2022-12-23T12:24:31.123"))
+    val expectedApplication = buildApplication(applicationId, clientId, userId)
 
     val underTest: ThirdPartyApplicationConnector = app.injector.instanceOf[ThirdPartyApplicationConnector]
   }
@@ -109,7 +105,7 @@ class ThirdPartyApplicationConnectorIntegrationSpec extends BaseConnectorIntegra
                            |            "emailAddress": "bob@example.com"
                            |          },
                            |          "dateTime": "2022-10-08T12:24:31.123",
-                           |          "submissionId": "${submissionId.value}",
+                           |          "submissionId": "4e62811a-7ab3-4421-a89e-65a8bad9b6ae",
                            |          "submissionInstance": 0
                            |        }
                            |      ]
@@ -118,7 +114,7 @@ class ThirdPartyApplicationConnectorIntegrationSpec extends BaseConnectorIntegra
                            |  },
                            |  "state": {
                            |    "name": "TESTING",
-                           |    "updatedOn": "${expectedApplication.state.updatedOn.toString()}"
+                           |    "updatedOn": "2022-10-08T12:24:31.123"
                            |  },
                            |  "rateLimitTier": "BRONZE",
                            |  "blocked": false,

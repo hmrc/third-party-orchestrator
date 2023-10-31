@@ -16,31 +16,18 @@
 
 package uk.gov.hmrc.apiplatform.modules.developers.domain.models
 
-import java.time.LocalDateTime
-
-import play.api.libs.json.{Format, Json, _}
+import play.api.libs.json._
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId}
-import uk.gov.hmrc.apiplatform.modules.developers.domain.models.MfaDetailFormats._
 
 case class Developer(
     email: LaxEmailAddress,
     firstName: String,
     lastName: String,
-    registrationTime: LocalDateTime,
-    lastModified: LocalDateTime,
     verified: Boolean,
-    accountSetup: Option[AccountSetup] = None,
-    organisation: Option[String] = None,
-    mfaEnabled: Boolean = false,
-    mfaDetails: List[MfaDetail],
-    nonce: Option[String] = None,
-    emailPreferences: EmailPreferences = EmailPreferences.noPreferences,
     userId: UserId
   )
 
 object Developer extends EnvReads with EnvWrites {
-
-  implicit val dateTimeFormat: Format[LocalDateTime] = Format(DefaultLocalDateTimeReads, DefaultLocalDateTimeWrites)
-  implicit val format: OFormat[Developer]            = Json.format[Developer]
+  implicit val format: OFormat[Developer] = Json.format[Developer]
 }

@@ -38,7 +38,7 @@ class SessionServiceSpec extends AsyncHmrcSpec {
     val userId    = UserId.random
     val now       = LocalDateTime.now
     val sessionId = SessionId.random
-    val session   = buildMinimalSession(sessionId, userId, "Bob", "Fleming", email)
+    val session   = buildSession(sessionId, userId, "Bob", "Fleming", email)
   }
 
   "fetchSession" should {

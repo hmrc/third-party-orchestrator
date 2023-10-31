@@ -16,71 +16,18 @@
 
 package uk.gov.hmrc.thirdpartyorchestrator.utils
 
-import java.time.LocalDateTime
-
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.SubmissionId
 
 trait ApplicationBuilder {
 
-  def buildApplication(applicationId: ApplicationId, clientId: ClientId, userId: UserId, submissionId: SubmissionId, name: String, createdOn: LocalDateTime): Application = {
+  def buildApplication(applicationId: ApplicationId, clientId: ClientId, userId: UserId): Application = {
     Application(
       applicationId,
       clientId,
-      "gateway-id",
-      name,
+      "Petes test application",
       "PRODUCTION",
-      Some("app description"),
-      Set(buildCollaborator(userId)),
-      createdOn,
-      Some(LocalDateTime.parse("2023-10-02T12:24:31.123")),
-      18,
-      None,
-      List.empty,
-      None,
-      None,
-      buildStandardAccess(submissionId),
-      ApplicationState.testing,
-      RateLimitTier.BRONZE,
-      None,
-      false,
-      false,
-      IpAllowlist(),
-      MoreApplication(false)
-    )
-  }
-
-  def buildStandardAccess(submissionId: SubmissionId): Standard = {
-    Standard(
-      List.empty,
-      None,
-      None,
-      Set.empty,
-      None,
-      Some(buildImportantSubmissionData(submissionId))
-    )
-  }
-
-  def buildImportantSubmissionData(submissionId: SubmissionId): ImportantSubmissionData = {
-    ImportantSubmissionData(
-      Some("https://www.example.com"),
-      ResponsibleIndividual(
-        ResponsibleIndividual.Name("Bob Fleming"),
-        LaxEmailAddress("bob@example.com")
-      ),
-      Set(ServerLocation.InUK),
-      TermsAndConditionsLocations.InDesktopSoftware,
-      PrivacyPolicyLocations.InDesktopSoftware,
-      List(TermsOfUseAcceptance(
-        ResponsibleIndividual(
-          ResponsibleIndividual.Name("Bob Fleming"),
-          LaxEmailAddress("bob@example.com")
-        ),
-        LocalDateTime.parse("2022-10-08T12:24:31.123"),
-        submissionId,
-        0
-      ))
+      Set(buildCollaborator(userId))
     )
   }
 

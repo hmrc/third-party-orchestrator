@@ -29,7 +29,6 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartyorchestrator.controllers.SessionController._
 import uk.gov.hmrc.apiplatform.modules.developers.domain.models.SessionId
-import uk.gov.hmrc.apiplatform.modules.developers.domain.models.MfaId
 import uk.gov.hmrc.thirdpartyorchestrator.mocks.services.SessionServiceMock
 import uk.gov.hmrc.thirdpartyorchestrator.utils.DeveloperBuilder
 
@@ -45,7 +44,7 @@ class SessionControllerSpec extends BaseControllerSpec with Matchers {
 
     val userId     = UserId.random
     val sessionId  = SessionId.random
-    val session    = buildSession(sessionId, userId, MfaId.random, MfaId.random, "Bob", "Fleming", LaxEmailAddress("bob@example.com"))
+    val session    = buildSession(sessionId, userId, "Bob", "Fleming", LaxEmailAddress("bob@example.com"))
     val controller = new SessionController(sessionServiceMock, Helpers.stubControllerComponents())
   }
 

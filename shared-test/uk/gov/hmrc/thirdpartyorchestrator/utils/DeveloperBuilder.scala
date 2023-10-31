@@ -16,69 +16,20 @@
 
 package uk.gov.hmrc.thirdpartyorchestrator.utils
 
-import java.time.LocalDateTime
-
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.developers.domain.models._
 
 trait DeveloperBuilder {
 
-  def buildSession(sessionId: SessionId, userId: UserId, authMfaId: MfaId, smsMfaId: MfaId, firstName: String, lastName: String, userEmail: LaxEmailAddress): Session = {
+  def buildSession(sessionId: SessionId, userId: UserId, firstName: String, lastName: String, userEmail: LaxEmailAddress): Session = {
     Session(
       sessionId,
       LoggedInState.LOGGED_IN,
-      buildDeveloper(userId, userEmail, firstName, lastName, authMfaId, smsMfaId)
+      buildDeveloper(userId, userEmail, firstName, lastName)
     )
   }
 
   def buildDeveloper(
-      userId: UserId,
-      emailAddress: LaxEmailAddress,
-      firstName: String,
-      lastName: String,
-      authMfaId: MfaId,
-      smsMfaId: MfaId
-    ): Developer = {
-    Developer(
-      emailAddress,
-      firstName,
-      lastName,
-      LocalDateTime.parse("2022-12-23T12:24:31.123"),
-      LocalDateTime.parse("2023-10-23T12:24:32.543"),
-      true,
-      Some(AccountSetup(List("ROLE1"), None, List("SERVICE1"), None, List("TARGET1"), None, false)),
-      Some("Example Corp"),
-      true,
-      List(
-        AuthenticatorAppMfaDetailSummary(
-          authMfaId,
-          "Petes App",
-          LocalDateTime.parse("2022-12-28T11:21:31.123"),
-          true
-        ),
-        SmsMfaDetailSummary(
-          smsMfaId,
-          "Petes Phone",
-          LocalDateTime.parse("2023-01-21T11:21:31.123"),
-          "07123456789",
-          true
-        )
-      ),
-      Some("2435364598347653405635324543645634575"),
-      EmailPreferences(List(TaxRegimeInterests("REGIME1", Set("SERVICE1", "SERVICE2"))), Set(EmailTopic.TECHNICAL)),
-      userId
-    )
-  }
-
-  def buildMinimalSession(sessionId: SessionId, userId: UserId, firstName: String, lastName: String, userEmail: LaxEmailAddress): Session = {
-    Session(
-      sessionId,
-      LoggedInState.LOGGED_IN,
-      buildMinimalDeveloper(userId, userEmail, firstName, lastName)
-    )
-  }
-
-  def buildMinimalDeveloper(
       userId: UserId,
       emailAddress: LaxEmailAddress,
       firstName: String,
@@ -88,15 +39,7 @@ trait DeveloperBuilder {
       emailAddress,
       firstName,
       lastName,
-      LocalDateTime.parse("2022-12-23T12:24:31.123"),
-      LocalDateTime.parse("2023-10-23T12:24:32.543"),
       true,
-      None,
-      None,
-      false,
-      List.empty,
-      None,
-      EmailPreferences.noPreferences,
       userId
     )
   }

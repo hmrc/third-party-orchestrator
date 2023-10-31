@@ -28,7 +28,7 @@ import uk.gov.hmrc.thirdpartyorchestrator.utils.WireMockExtensions
 import uk.gov.hmrc.thirdpartyorchestrator.utils.DeveloperBuilder
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, UserId}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.developers.domain.models.{MfaId, SessionId}
+import uk.gov.hmrc.apiplatform.modules.developers.domain.models.SessionId
 
 class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrationSpec
     with GuiceOneAppPerSuite with WireMockExtensions {
@@ -49,11 +49,9 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
     val userEmail         = "thirdpartydeveloper@example.com".toLaxEmail
     val applicationId     = ApplicationId.random
     val userId            = UserId.random
-    val authMfaId         = MfaId.random
-    val smsMfaId          = MfaId.random
     val sessionId         = SessionId.random
-    val expectedSession   = buildSession(sessionId, userId, authMfaId, smsMfaId, "John", "Doe", userEmail)
-    val expectedDeveloper = buildDeveloper(userId, userEmail, "John", "Doe", authMfaId, smsMfaId)
+    val expectedSession   = buildSession(sessionId, userId,  "John", "Doe", userEmail)
+    val expectedDeveloper = buildDeveloper(userId, userEmail, "John", "Doe")
 
     val underTest: ThirdPartyDeveloperConnector = app.injector.instanceOf[ThirdPartyDeveloperConnector]
   }
@@ -94,14 +92,14 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
                            |    "mfaEnabled": true,
                            |    "mfaDetails": [ 
                            |       {
-                           |         "id": "$authMfaId",
+                           |         "id": "5e62811a-7ab3-4421-a89e-65a8bad9b6ad",
                            |         "name": "Petes App",
                            |         "createdOn": "2022-12-28T11:21:31.123",
                            |         "verified": true,
                            |         "mfaType": "AUTHENTICATOR_APP"
                            |       },
                            |       {
-                           |         "id": "$smsMfaId",
+                           |         "id": "6e62811a-7ab3-4421-a89e-65a8bad9b6ac",
                            |         "name": "Petes Phone",
                            |         "createdOn": "2023-01-21T11:21:31.123",
                            |         "mobileNumber": "07123456789",
@@ -169,14 +167,14 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
                            |  "mfaEnabled": true,
                            |  "mfaDetails": [ 
                            |     {
-                           |       "id": "$authMfaId",
+                           |       "id": "5e62811a-7ab3-4421-a89e-65a8bad9b6ad",
                            |       "name": "Petes App",
                            |       "createdOn": "2022-12-28T11:21:31.123",
                            |       "verified": true,
                            |       "mfaType": "AUTHENTICATOR_APP"
                            |     },
                            |     {
-                           |       "id": "$smsMfaId",
+                           |       "id": "6e62811a-7ab3-4421-a89e-65a8bad9b6ac",
                            |       "name": "Petes Phone",
                            |       "createdOn": "2023-01-21T11:21:31.123",
                            |       "mobileNumber": "07123456789",

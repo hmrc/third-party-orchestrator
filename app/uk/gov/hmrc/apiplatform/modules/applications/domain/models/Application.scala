@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.apiplatform.modules.applications.domain.models
 
-import java.time.LocalDateTime
-
 import play.api.libs.json._
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId}
@@ -25,26 +23,9 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, Clie
 case class Application(
     id: ApplicationId,
     clientId: ClientId,
-    gatewayId: String,
     name: String,
     deployedTo: String,
-    description: Option[String] = None,
-    collaborators: Set[Collaborator],
-    createdOn: LocalDateTime,
-    lastAccess: Option[LocalDateTime],
-    grantLength: Int,
-    lastAccessTokenUsage: Option[LocalDateTime] = None,
-    redirectUris: List[String] = List.empty,
-    termsAndConditionsUrl: Option[String] = None,
-    privacyPolicyUrl: Option[String] = None,
-    access: Access = Standard(),
-    state: ApplicationState = ApplicationState(name = State.TESTING),
-    rateLimitTier: RateLimitTier = RateLimitTier.BRONZE,
-    checkInformation: Option[CheckInformation] = None,
-    blocked: Boolean = false,
-    trusted: Boolean = false,
-    ipAllowlist: IpAllowlist = IpAllowlist(),
-    moreApplication: MoreApplication = MoreApplication()
+    collaborators: Set[Collaborator]
   )
 
 object Application {

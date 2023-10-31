@@ -16,15 +16,14 @@
 
 package uk.gov.hmrc.thirdpartyorchestrator.services
 
-import java.time.LocalDateTime
 import scala.concurrent.ExecutionContext.Implicits.global
 
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, UserId}
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.SubmissionId
 import uk.gov.hmrc.thirdpartyorchestrator.mocks.connectors.{ThirdPartyApplicationConnectorMockModule, ThirdPartyDeveloperConnectorMockModule}
+import uk.gov.hmrc.thirdpartyorchestrator.services.ApplicationService.GetApplicationResult
 import uk.gov.hmrc.thirdpartyorchestrator.utils.{ApplicationBuilder, AsyncHmrcSpec, DeveloperBuilder}
 
 class ApplicationServiceSpec extends AsyncHmrcSpec {
@@ -37,11 +36,9 @@ class ApplicationServiceSpec extends AsyncHmrcSpec {
     val applicationId = ApplicationId.random
     val email         = "thirdpartydeveloper@example.com".toLaxEmail
     val userId        = UserId.random
-    val now           = LocalDateTime.now
     val clientId      = ClientId.random
-    val submissionId  = SubmissionId.random
-    val developer     = buildMinimalDeveloper(userId, email, "Bob", "Fleming")
-    val application   = buildApplication(applicationId, clientId, userId, submissionId, "Petes app", now)
+    val developer     = buildDeveloper(userId, email, "Bob", "Fleming")
+    val application   = buildApplication(applicationId, clientId, userId)
   }
 
   "fetchVerifiedCollaboratorsForApplication" should {
@@ -49,7 +46,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec {
       ThirdPartyApplicationConnectorMock.FetchApplicationById.thenReturn(applicationId)(Some(application))
       ThirdPartyDeveloperConnectorMock.FetchDeveloper.thenReturn(userId)(Some(developer))
       val result = await(underTest.fetchVerifiedCollaboratorsForApplication(applicationId))
-      result shouldBe Right(Set(developer))
+      result shouldBe Right(GetApplicationResult(application, Set(developer)))
     }
 
     "return None when application does not exist" in new Setup {

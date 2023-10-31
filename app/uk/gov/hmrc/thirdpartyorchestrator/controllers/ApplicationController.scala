@@ -25,9 +25,9 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
-import uk.gov.hmrc.thirdpartyorchestrator.domain.models.developers.{DeveloperResponse}
-import uk.gov.hmrc.apiplatform.modules.developers.domain.models.Developer
+import uk.gov.hmrc.thirdpartyorchestrator.domain.models.applications.ApplicationResponse
 import uk.gov.hmrc.thirdpartyorchestrator.services.ApplicationService
+import uk.gov.hmrc.thirdpartyorchestrator.services.ApplicationService.GetApplicationResult
 
 @Singleton()
 class ApplicationController @Inject() (
@@ -38,7 +38,7 @@ class ApplicationController @Inject() (
 
   private def getVerifiedCollaboratorsForApplication(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Result] = {
     lazy val failed = (msg: String) => NotFound(msg)
-    val success     = (developers: Set[Developer]) => Ok(Json.toJson(DeveloperResponse.from(developers)))
+    val success     = (result: GetApplicationResult) => Ok(Json.toJson(ApplicationResponse.from(result.application, result.developers)))
     applicationService.fetchVerifiedCollaboratorsForApplication(applicationId).map(_.fold(failed, success))
   }
 
