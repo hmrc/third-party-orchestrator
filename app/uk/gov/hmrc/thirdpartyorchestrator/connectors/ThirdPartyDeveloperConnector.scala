@@ -24,8 +24,8 @@ import uk.gov.hmrc.http.{HttpClient, _}
 import uk.gov.hmrc.play.http.metrics.common.API
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
+import uk.gov.hmrc.apiplatform.modules.developers.domain.models.{Developer, Session, SessionId}
 import uk.gov.hmrc.thirdpartyorchestrator.config.AppConfig
-import uk.gov.hmrc.apiplatform.modules.developers.domain.models.{Developer, SessionId, Session}
 
 @Singleton
 class ThirdPartyDeveloperConnector @Inject() (

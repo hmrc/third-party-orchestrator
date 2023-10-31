@@ -36,11 +36,11 @@ trait DeveloperBuilder {
       lastName: String
     ): Developer = {
     Developer(
-      emailAddress,
-      firstName,
-      lastName,
-      true,
-      userId
+      email = emailAddress,
+      firstName = firstName,
+      lastName = lastName,
+      verified = true,
+      userId = userId
     )
   }
 }

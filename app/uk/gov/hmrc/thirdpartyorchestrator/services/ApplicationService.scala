@@ -21,11 +21,11 @@ import scala.concurrent.{ExecutionContext, Future}
 
 import uk.gov.hmrc.http.HeaderCarrier
 
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Application
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
-import uk.gov.hmrc.thirdpartyorchestrator.connectors.{ThirdPartyApplicationConnector, ThirdPartyDeveloperConnector}
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Application
 import uk.gov.hmrc.apiplatform.modules.developers.domain.models.Developer
+import uk.gov.hmrc.thirdpartyorchestrator.connectors.{ThirdPartyApplicationConnector, ThirdPartyDeveloperConnector}
 
 object ApplicationService {
   case class GetApplicationResult(application: Application, developers: Set[Developer])
@@ -39,7 +39,7 @@ class ApplicationService @Inject() (
   ) extends EitherTHelper[String] {
 
   import ApplicationService._
-  
+
   def fetchVerifiedCollaboratorsForApplication(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Either[String, GetApplicationResult]] = {
     (
       for {

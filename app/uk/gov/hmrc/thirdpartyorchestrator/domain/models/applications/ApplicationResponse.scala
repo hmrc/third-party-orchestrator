@@ -18,8 +18,8 @@ package uk.gov.hmrc.thirdpartyorchestrator.domain.models.applications
 
 import play.api.libs.json.Json
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Application
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.developers.domain.models.Developer
 import uk.gov.hmrc.thirdpartyorchestrator.domain.models.developers.DeveloperResponse
 

@@ -23,19 +23,19 @@ trait ApplicationBuilder {
 
   def buildApplication(applicationId: ApplicationId, clientId: ClientId, userId: UserId): Application = {
     Application(
-      applicationId,
-      clientId,
-      "Petes test application",
-      "PRODUCTION",
-      Set(buildCollaborator(userId))
+      id = applicationId,
+      clientId = clientId,
+      name = "Petes test application",
+      deployedTo = "PRODUCTION",
+      collaborators = Set(buildCollaborator(userId))
     )
   }
 
   def buildCollaborator(userId: UserId) = {
     Collaborator(
-      LaxEmailAddress("bob@example.com"),
-      Collaborator.Roles.ADMINISTRATOR,
-      userId
+      emailAddress = LaxEmailAddress("bob@example.com"),
+      role = Collaborator.Roles.ADMINISTRATOR,
+      userId = userId
     )
   }
 }
