@@ -17,8 +17,16 @@
 package uk.gov.hmrc.thirdpartyorchestrator.config
 
 import com.google.inject.AbstractModule
+import com.google.inject.name.Names.named
 
-import uk.gov.hmrc.thirdpartyorchestrator.connectors.{ConnectorMetrics, ConnectorMetricsImpl}
+import uk.gov.hmrc.thirdpartyorchestrator.connectors.{
+  AbstractThirdPartyApplicationConnector,
+  ConnectorMetrics,
+  ConnectorMetricsImpl,
+  PrincipalThirdPartyApplicationConnector,
+  SubordinateThirdPartyApplicationConnector,
+  ThirdPartyApplicationConnector
+}
 
 class Module extends AbstractModule {
 
@@ -26,5 +34,11 @@ class Module extends AbstractModule {
 
     bind(classOf[AppConfig]).asEagerSingleton()
     bind(classOf[ConnectorMetrics]).to(classOf[ConnectorMetricsImpl])
+
+    bind(classOf[AbstractThirdPartyApplicationConnector.Config]).annotatedWith(named("principal")).toProvider(classOf[PrincipalThirdPartyApplicationConnectorConfigProvider])
+    bind(classOf[AbstractThirdPartyApplicationConnector.Config]).annotatedWith(named("subordinate")).toProvider(classOf[SubordinateThirdPartyApplicationConnectorConfigProvider])
+
+    bind(classOf[ThirdPartyApplicationConnector]).annotatedWith(named("subordinate")).to(classOf[SubordinateThirdPartyApplicationConnector])
+    bind(classOf[ThirdPartyApplicationConnector]).annotatedWith(named("principal")).to(classOf[PrincipalThirdPartyApplicationConnector])
   }
 }

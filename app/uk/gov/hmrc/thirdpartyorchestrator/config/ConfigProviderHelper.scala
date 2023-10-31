@@ -16,14 +16,19 @@
 
 package uk.gov.hmrc.thirdpartyorchestrator.config
 
-import javax.inject.{Inject, Singleton}
-
-import play.api.Configuration
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
-@Singleton
-class AppConfig @Inject() (config: Configuration) extends ServicesConfig(config) {
+trait ConfigProviderHelper {
+  protected val sc: ServicesConfig
 
-  val appName: String        = config.get[String]("appName")
-  val thirdPartyDeveloperUrl = baseUrl("third-party-developer")
+  def serviceUrl(defaultContext: String)(serviceName: String): String = {
+    if (useProxy(serviceName)) s"${sc.baseUrl(serviceName)}/${sc.getConfString(s"$serviceName.context", defaultContext)}"
+    else sc.baseUrl(serviceName)
+  }
+
+  def useProxy(serviceName: String) = sc.getConfBool(s"$serviceName.use-proxy", false)
+
+  def bearerToken(serviceName: String) = sc.getConfString(s"$serviceName.bearer-token", "")
+
+  def apiKey(serviceName: String) = sc.getConfString(s"$serviceName.api-key", "")
 }

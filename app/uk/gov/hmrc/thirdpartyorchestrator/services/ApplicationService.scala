@@ -25,7 +25,7 @@ import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Application
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
 import uk.gov.hmrc.apiplatform.modules.developers.domain.models.Developer
-import uk.gov.hmrc.thirdpartyorchestrator.connectors.{ThirdPartyApplicationConnector, ThirdPartyDeveloperConnector}
+import uk.gov.hmrc.thirdpartyorchestrator.connectors.ThirdPartyDeveloperConnector
 
 object ApplicationService {
   case class GetApplicationResult(application: Application, developers: Set[Developer])
@@ -34,7 +34,7 @@ object ApplicationService {
 @Singleton
 class ApplicationService @Inject() (
     val thirdPartyDeveloperConnector: ThirdPartyDeveloperConnector,
-    val thirdPartyApplicationConnector: ThirdPartyApplicationConnector
+    val applicationByIdFetcher: ApplicationByIdFetcher
   )(implicit val ec: ExecutionContext
   ) extends EitherTHelper[String] {
 
@@ -43,7 +43,7 @@ class ApplicationService @Inject() (
   def fetchVerifiedCollaboratorsForApplication(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Either[String, GetApplicationResult]] = {
     (
       for {
-        application       <- fromOptionF(thirdPartyApplicationConnector.fetchApplicationById(applicationId), "Application not found")
+        application       <- fromOptionF(applicationByIdFetcher.fetchApplication(applicationId), "Application not found")
         allDevelopers     <- liftF(Future.sequence(application.collaborators.map(collaborator => thirdPartyDeveloperConnector.fetchDeveloper(collaborator.userId))))
         verifiedDevelopers = allDevelopers.flatten.filter(developer => developer.verified)
       } yield GetApplicationResult(application, verifiedDevelopers)

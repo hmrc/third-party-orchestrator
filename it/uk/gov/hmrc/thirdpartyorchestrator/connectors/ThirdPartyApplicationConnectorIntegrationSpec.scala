@@ -31,7 +31,7 @@ class ThirdPartyApplicationConnectorIntegrationSpec extends BaseConnectorIntegra
     with GuiceOneAppPerSuite with WireMockExtensions {
 
   private val stubConfig = Configuration(
-    "microservice.services.third-party-application.port" -> stubPort
+    "microservice.services.third-party-application-principal.port" -> stubPort
   )
 
   override def fakeApplication(): Application =
@@ -48,7 +48,7 @@ class ThirdPartyApplicationConnectorIntegrationSpec extends BaseConnectorIntegra
     val userId              = UserId.random
     val expectedApplication = buildApplication(applicationId, clientId, userId)
 
-    val underTest: ThirdPartyApplicationConnector = app.injector.instanceOf[ThirdPartyApplicationConnector]
+    val underTest: ThirdPartyApplicationConnector = app.injector.instanceOf[PrincipalThirdPartyApplicationConnector]
   }
 
   "fetchApplication" should {
@@ -130,7 +130,7 @@ class ThirdPartyApplicationConnectorIntegrationSpec extends BaseConnectorIntegra
           )
       )
 
-      private val result = await(underTest.fetchApplicationById(applicationId))
+      private val result = await(underTest.fetchApplication(applicationId))
 
       result shouldBe Some(expectedApplication)
     }

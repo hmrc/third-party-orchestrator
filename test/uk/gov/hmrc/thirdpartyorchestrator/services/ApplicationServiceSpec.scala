@@ -22,16 +22,17 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, UserId}
-import uk.gov.hmrc.thirdpartyorchestrator.mocks.connectors.{ThirdPartyApplicationConnectorMockModule, ThirdPartyDeveloperConnectorMockModule}
+import uk.gov.hmrc.thirdpartyorchestrator.mocks.connectors.ThirdPartyDeveloperConnectorMockModule
+import uk.gov.hmrc.thirdpartyorchestrator.mocks.services.ApplicationByIdFetcherMockModule
 import uk.gov.hmrc.thirdpartyorchestrator.services.ApplicationService.GetApplicationResult
 import uk.gov.hmrc.thirdpartyorchestrator.utils.{ApplicationBuilder, AsyncHmrcSpec, DeveloperBuilder}
 
 class ApplicationServiceSpec extends AsyncHmrcSpec {
 
-  trait Setup extends ThirdPartyDeveloperConnectorMockModule with ThirdPartyApplicationConnectorMockModule with DeveloperBuilder with ApplicationBuilder {
+  trait Setup extends ThirdPartyDeveloperConnectorMockModule with ApplicationByIdFetcherMockModule with DeveloperBuilder with ApplicationBuilder {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    val underTest = new ApplicationService(ThirdPartyDeveloperConnectorMock.aMock, ThirdPartyApplicationConnectorMock.aMock)
+    val underTest = new ApplicationService(ThirdPartyDeveloperConnectorMock.aMock, ApplicationByIdFetcherMock.aMock)
 
     val applicationId = ApplicationId.random
     val email         = "thirdpartydeveloper@example.com".toLaxEmail
@@ -43,14 +44,14 @@ class ApplicationServiceSpec extends AsyncHmrcSpec {
 
   "fetchVerifiedCollaboratorsForApplication" should {
     "return the collaborators when the application exists" in new Setup {
-      ThirdPartyApplicationConnectorMock.FetchApplicationById.thenReturn(applicationId)(Some(application))
+      ApplicationByIdFetcherMock.FetchApplication.thenReturn(applicationId)(Some(application))
       ThirdPartyDeveloperConnectorMock.FetchDeveloper.thenReturn(userId)(Some(developer))
       val result = await(underTest.fetchVerifiedCollaboratorsForApplication(applicationId))
       result shouldBe Right(GetApplicationResult(application, Set(developer)))
     }
 
     "return None when application does not exist" in new Setup {
-      ThirdPartyApplicationConnectorMock.FetchApplicationById.thenReturn(applicationId)(None)
+      ApplicationByIdFetcherMock.FetchApplication.thenReturn(applicationId)(None)
       val result = await(underTest.fetchVerifiedCollaboratorsForApplication(applicationId))
       result.left.value shouldBe "Application not found"
     }

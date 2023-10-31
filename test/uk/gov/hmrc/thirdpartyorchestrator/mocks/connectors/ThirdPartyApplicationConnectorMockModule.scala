@@ -16,27 +16,58 @@
 
 package uk.gov.hmrc.thirdpartyorchestrator.mocks.connectors
 
-import scala.concurrent.Future.successful
+import scala.concurrent.Future.{failed, successful}
 
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
 import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Application
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
-import uk.gov.hmrc.thirdpartyorchestrator.connectors.ThirdPartyApplicationConnector
+import uk.gov.hmrc.thirdpartyorchestrator.connectors.{
+  EnvironmentAwareThirdPartyApplicationConnector,
+  PrincipalThirdPartyApplicationConnector,
+  SubordinateThirdPartyApplicationConnector,
+  ThirdPartyApplicationConnector
+}
 
 trait ThirdPartyApplicationConnectorMockModule extends MockitoSugar with ArgumentMatchersSugar {
 
   trait AbstractThirdPartyApplicationMock {
     def aMock: ThirdPartyApplicationConnector
 
-    object FetchApplicationById {
+    object FetchApplication {
 
       def thenReturn(applicationId: ApplicationId)(application: Option[Application]) =
-        when(aMock.fetchApplicationById(eqTo(applicationId))(*)).thenReturn(successful(application))
+        when(aMock.fetchApplication(eqTo(applicationId))(*)).thenReturn(successful(application))
+
+      def thenReturnNone(applicationId: ApplicationId) =
+        when(aMock.fetchApplication(eqTo(applicationId))(*)).thenReturn(successful(None))
+
+      def thenThrowException(applicationId: ApplicationId)(exception: Exception) =
+        when(aMock.fetchApplication(eqTo(applicationId))(*)).thenReturn(failed(exception))
     }
   }
 
   object ThirdPartyApplicationConnectorMock extends AbstractThirdPartyApplicationMock {
     val aMock = mock[ThirdPartyApplicationConnector]
+  }
+
+  object SubordinateThirdPartyApplicationConnectorMock extends AbstractThirdPartyApplicationMock {
+    override val aMock: ThirdPartyApplicationConnector = mock[SubordinateThirdPartyApplicationConnector]
+  }
+
+  object PrincipalThirdPartyApplicationConnectorMock extends AbstractThirdPartyApplicationMock {
+    override val aMock: PrincipalThirdPartyApplicationConnector = mock[PrincipalThirdPartyApplicationConnector]
+  }
+
+  object EnvironmentAwareThirdPartyApplicationConnectorMock {
+    private val subordinateConnector = SubordinateThirdPartyApplicationConnectorMock
+    private val principalConnector   = PrincipalThirdPartyApplicationConnectorMock
+
+    lazy val instance = {
+      new EnvironmentAwareThirdPartyApplicationConnector(subordinateConnector.aMock, principalConnector.aMock)
+    }
+
+    lazy val Principal   = principalConnector
+    lazy val Subordinate = subordinateConnector
   }
 }

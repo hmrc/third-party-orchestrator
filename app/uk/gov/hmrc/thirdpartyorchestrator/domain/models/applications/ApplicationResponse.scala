@@ -24,7 +24,7 @@ import uk.gov.hmrc.apiplatform.modules.developers.domain.models.Developer
 import uk.gov.hmrc.thirdpartyorchestrator.domain.models.developers.DeveloperResponse
 
 case class ApplicationResponse(
-    applictionId: ApplicationId,
+    applicationId: ApplicationId,
     name: String,
     environment: String,
     users: Set[DeveloperResponse]
