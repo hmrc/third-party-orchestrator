@@ -45,8 +45,9 @@ class ThirdPartyApplicationConnectorIntegrationSpec extends BaseConnectorIntegra
 
     val applicationId       = ApplicationId.random
     val clientId            = ClientId.random
-    val userId              = UserId.random
-    val expectedApplication = buildApplication(applicationId, clientId, userId)
+    val userId1             = UserId.random
+    val userId2             = UserId.random
+    val expectedApplication = buildApplication(applicationId, clientId, userId1, userId2)
 
     val underTest: ThirdPartyApplicationConnector = app.injector.instanceOf[PrincipalThirdPartyApplicationConnector]
   }
@@ -69,7 +70,12 @@ class ThirdPartyApplicationConnectorIntegrationSpec extends BaseConnectorIntegra
                            |  "description": "app description",
                            |  "collaborators": [
                            |    {
-                           |      "userId": "$userId",
+                           |      "userId": "$userId1",
+                           |      "emailAddress": "bob@example.com",
+                           |      "role": "ADMINISTRATOR"
+                           |    },
+                           |    {
+                           |      "userId": "$userId2",
                            |      "emailAddress": "bob@example.com",
                            |      "role": "ADMINISTRATOR"
                            |    }

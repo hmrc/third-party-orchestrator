@@ -51,7 +51,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
     val userId            = UserId.random
     val sessionId         = SessionId.random
     val expectedSession   = buildSession(sessionId, userId, "John", "Doe", userEmail)
-    val expectedDeveloper = buildDeveloper(userId, userEmail, "John", "Doe")
+    val expectedDeveloper = buildDeveloper(userId, userEmail, "John", "Doe", true)
 
     val underTest: ThirdPartyDeveloperConnector = app.injector.instanceOf[ThirdPartyDeveloperConnector]
   }

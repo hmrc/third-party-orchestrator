@@ -39,10 +39,11 @@ class ApplicationControllerSpec extends BaseControllerSpec with Matchers {
 
     val applicationId = ApplicationId.random
     val clientId      = ClientId.random
-    val userId        = UserId.random
+    val userId1       = UserId.random
+    val userId2       = UserId.random
     val email         = LaxEmailAddress("bob@example.com")
-    val application   = buildApplication(applicationId, clientId, userId)
-    val developer     = buildDeveloper(userId, email, "Bob", "Fleming")
+    val application   = buildApplication(applicationId, clientId, userId1, userId2)
+    val developer     = buildDeveloper(userId1, email, "Bob", "Fleming", true)
     val request       = FakeRequest("GET", s"/applications/${applicationId}?developers=verified")
     val controller    = new ApplicationController(applicationServiceMock, Helpers.stubControllerComponents())
   }

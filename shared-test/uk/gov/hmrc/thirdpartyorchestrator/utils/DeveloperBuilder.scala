@@ -25,7 +25,7 @@ trait DeveloperBuilder {
     Session(
       sessionId,
       LoggedInState.LOGGED_IN,
-      buildDeveloper(userId, userEmail, firstName, lastName)
+      buildDeveloper(userId, userEmail, firstName, lastName, true)
     )
   }
 
@@ -33,13 +33,14 @@ trait DeveloperBuilder {
       userId: UserId,
       emailAddress: LaxEmailAddress,
       firstName: String,
-      lastName: String
+      lastName: String,
+      verified: Boolean
     ): Developer = {
     Developer(
       email = emailAddress,
       firstName = firstName,
       lastName = lastName,
-      verified = true,
+      verified = verified,
       userId = userId
     )
   }

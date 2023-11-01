@@ -36,8 +36,9 @@ class ApplicationByIdFetcherSpec extends AsyncHmrcSpec {
 
     val applicationId: ApplicationId = ApplicationId.random
     val clientId: ClientId           = ClientId.random
-    val userId: UserId               = UserId.random
-    val application: Application     = buildApplication(applicationId, clientId, userId)
+    val userId1: UserId              = UserId.random
+    val userId2: UserId              = UserId.random
+    val application: Application     = buildApplication(applicationId, clientId, userId1, userId2)
     val exception                    = new RuntimeException("error")
 
     val fetcher = new ApplicationByIdFetcher(

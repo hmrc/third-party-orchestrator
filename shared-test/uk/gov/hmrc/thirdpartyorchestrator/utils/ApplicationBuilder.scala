@@ -21,13 +21,13 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 
 trait ApplicationBuilder {
 
-  def buildApplication(applicationId: ApplicationId, clientId: ClientId, userId: UserId): Application = {
+  def buildApplication(applicationId: ApplicationId, clientId: ClientId, userId1: UserId, userId2: UserId): Application = {
     Application(
       id = applicationId,
       clientId = clientId,
       name = "Petes test application",
       deployedTo = "PRODUCTION",
-      collaborators = Set(buildCollaborator(userId))
+      collaborators = Set(buildCollaborator(userId1), buildCollaborator(userId2))
     )
   }
 

@@ -36,18 +36,21 @@ class ApplicationServiceSpec extends AsyncHmrcSpec {
 
     val applicationId = ApplicationId.random
     val email         = "thirdpartydeveloper@example.com".toLaxEmail
-    val userId        = UserId.random
+    val userId1       = UserId.random
+    val userId2       = UserId.random
     val clientId      = ClientId.random
-    val developer     = buildDeveloper(userId, email, "Bob", "Fleming")
-    val application   = buildApplication(applicationId, clientId, userId)
+    val developer1    = buildDeveloper(userId1, email, "Bob", "Fleming", true)
+    val developer2    = buildDeveloper(userId2, email, "Bob", "Fleming", false)
+    val application   = buildApplication(applicationId, clientId, userId1, userId2)
   }
 
   "fetchVerifiedCollaboratorsForApplication" should {
     "return the collaborators when the application exists" in new Setup {
       ApplicationByIdFetcherMock.FetchApplication.thenReturn(applicationId)(Some(application))
-      ThirdPartyDeveloperConnectorMock.FetchDeveloper.thenReturn(userId)(Some(developer))
+      ThirdPartyDeveloperConnectorMock.FetchDeveloper.thenReturn(userId1)(Some(developer1))
+      ThirdPartyDeveloperConnectorMock.FetchDeveloper.thenReturn(userId2)(Some(developer2))
       val result = await(underTest.fetchVerifiedCollaboratorsForApplication(applicationId))
-      result shouldBe Right(GetApplicationResult(application, Set(developer)))
+      result shouldBe Right(GetApplicationResult(application, Set(developer1)))
     }
 
     "return None when application does not exist" in new Setup {
