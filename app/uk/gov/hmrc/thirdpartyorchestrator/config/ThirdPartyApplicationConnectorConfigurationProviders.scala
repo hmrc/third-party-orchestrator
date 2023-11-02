@@ -20,32 +20,29 @@ import com.google.inject.{Inject, Provider, Singleton}
 
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
-import uk.gov.hmrc.thirdpartyorchestrator.connectors.AbstractThirdPartyApplicationConnector
+import uk.gov.hmrc.thirdpartyorchestrator.connectors.{PrincipalThirdPartyApplicationConnector, SubordinateThirdPartyApplicationConnector}
 
 @Singleton
 class PrincipalThirdPartyApplicationConnectorConfigProvider @Inject() (override val sc: ServicesConfig)
-    extends Provider[AbstractThirdPartyApplicationConnector.Config]
+    extends Provider[PrincipalThirdPartyApplicationConnector.Config]
     with ConfigProviderHelper {
 
-  override def get(): AbstractThirdPartyApplicationConnector.Config = {
+  override def get(): PrincipalThirdPartyApplicationConnector.Config = {
     val serviceName = "third-party-application-principal"
-    AbstractThirdPartyApplicationConnector.Config(
-      serviceUrl("third-party-application")(serviceName),
-      useProxy(serviceName),
-      bearerToken(serviceName),
-      apiKey(serviceName)
+    PrincipalThirdPartyApplicationConnector.Config(
+      serviceUrl("third-party-application")(serviceName)
     )
   }
 }
 
 @Singleton
 class SubordinateThirdPartyApplicationConnectorConfigProvider @Inject() (override val sc: ServicesConfig)
-    extends Provider[AbstractThirdPartyApplicationConnector.Config]
+    extends Provider[SubordinateThirdPartyApplicationConnector.Config]
     with ConfigProviderHelper {
 
-  override def get(): AbstractThirdPartyApplicationConnector.Config = {
+  override def get(): SubordinateThirdPartyApplicationConnector.Config = {
     val serviceName = "third-party-application-subordinate"
-    AbstractThirdPartyApplicationConnector.Config(
+    SubordinateThirdPartyApplicationConnector.Config(
       serviceUrl("third-party-application")(serviceName),
       useProxy(serviceName),
       bearerToken(serviceName),

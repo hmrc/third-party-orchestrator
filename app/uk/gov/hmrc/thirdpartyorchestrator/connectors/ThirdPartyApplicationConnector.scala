@@ -27,16 +27,6 @@ import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Application
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.thirdpartyorchestrator.utils.ProxiedHttpClient
 
-object AbstractThirdPartyApplicationConnector {
-
-  case class Config(
-      applicationBaseUrl: String,
-      applicationUseProxy: Boolean,
-      applicationBearerToken: String,
-      applicationApiKey: String
-    )
-}
-
 trait ThirdPartyApplicationConnector {
   def fetchApplication(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[Application]]
 }
@@ -44,16 +34,12 @@ trait ThirdPartyApplicationConnector {
 abstract class AbstractThirdPartyApplicationConnector(implicit val ec: ExecutionContext) extends ThirdPartyApplicationConnector {
 
   protected val httpClient: HttpClient
-  protected val proxiedHttpClient: ProxiedHttpClient
-  protected val config: AbstractThirdPartyApplicationConnector.Config
+  protected val serviceBaseUrl: String
   protected val metrics: ConnectorMetrics
-  lazy val serviceBaseUrl: String = config.applicationBaseUrl
-  lazy val useProxy: Boolean      = config.applicationUseProxy
-  lazy val bearerToken: String    = config.applicationBearerToken
-  lazy val apiKey: String         = config.applicationApiKey
 
-  val api              = API("third-party-application")
-  def http: HttpClient = if (useProxy) proxiedHttpClient.withHeaders(bearerToken, apiKey) else httpClient
+  def http: HttpClient
+
+  val api = API("third-party-application")
 
   def fetchApplication(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[Application]] =
     metrics.record(api) {
@@ -61,25 +47,49 @@ abstract class AbstractThirdPartyApplicationConnector(implicit val ec: Execution
     }
 }
 
+object PrincipalThirdPartyApplicationConnector {
+
+  case class Config(
+      serviceBaseUrl: String
+    )
+}
+
 @Singleton
 @Named("principal")
 class PrincipalThirdPartyApplicationConnector @Inject() (
-    @Named("principal") override val config: AbstractThirdPartyApplicationConnector.Config,
-    override val httpClient: HttpClient,
-    override val proxiedHttpClient: ProxiedHttpClient,
-    override val metrics: ConnectorMetrics
+    val config: PrincipalThirdPartyApplicationConnector.Config,
+    val httpClient: HttpClient,
+    val metrics: ConnectorMetrics
   )(implicit override val ec: ExecutionContext
-  ) extends AbstractThirdPartyApplicationConnector
+  ) extends AbstractThirdPartyApplicationConnector {
+
+  val http: HttpClient = httpClient
+  val serviceBaseUrl   = config.serviceBaseUrl
+}
+
+object SubordinateThirdPartyApplicationConnector {
+
+  case class Config(
+      serviceBaseUrl: String,
+      useProxy: Boolean,
+      bearerToken: String,
+      apiKey: String
+    )
+}
 
 @Singleton
 @Named("subordinate")
 class SubordinateThirdPartyApplicationConnector @Inject() (
-    @Named("subordinate") override val config: AbstractThirdPartyApplicationConnector.Config,
-    override val httpClient: HttpClient,
-    override val proxiedHttpClient: ProxiedHttpClient,
-    override val metrics: ConnectorMetrics
+    val config: SubordinateThirdPartyApplicationConnector.Config,
+    val httpClient: HttpClient,
+    val proxiedHttpClient: ProxiedHttpClient,
+    val metrics: ConnectorMetrics
   )(implicit override val ec: ExecutionContext
-  ) extends AbstractThirdPartyApplicationConnector
+  ) extends AbstractThirdPartyApplicationConnector {
+
+  val serviceBaseUrl: String = config.serviceBaseUrl
+  val http: HttpClient       = if (config.useProxy) proxiedHttpClient.withHeaders(config.bearerToken, config.apiKey) else httpClient
+}
 
 @Singleton
 class EnvironmentAwareThirdPartyApplicationConnector @Inject() (
