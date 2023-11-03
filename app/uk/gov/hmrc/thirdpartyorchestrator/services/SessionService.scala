@@ -14,16 +14,22 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.thirdpartyorchestrator.config
+package uk.gov.hmrc.thirdpartyorchestrator.services
 
 import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
 
-import play.api.Configuration
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+import uk.gov.hmrc.http.HeaderCarrier
+
+import uk.gov.hmrc.apiplatform.modules.developers.domain.models.{Session, SessionId}
+import uk.gov.hmrc.thirdpartyorchestrator.connectors.ThirdPartyDeveloperConnector
 
 @Singleton
-class AppConfig @Inject() (config: Configuration) extends ServicesConfig(config) {
+class SessionService @Inject() (
+    val thirdPartyDeveloperConnector: ThirdPartyDeveloperConnector
+  )(implicit val ec: ExecutionContext
+  ) {
 
-  val appName: String        = config.get[String]("appName")
-  val thirdPartyDeveloperUrl = baseUrl("third-party-developer")
+  def fetch(sessionId: SessionId)(implicit hc: HeaderCarrier): Future[Option[Session]] =
+    thirdPartyDeveloperConnector.fetchSession(sessionId)
 }

@@ -1,3 +1,4 @@
 # microservice specific routes
 
-GET        /hello-world             uk.gov.hmrc.thirdpartyorchestrator.controllers.MicroserviceHelloWorldController.hello
+POST        /session/validate                   uk.gov.hmrc.thirdpartyorchestrator.controllers.SessionController.getDeveloperForSession()
+GET         /applications/:id                   uk.gov.hmrc.thirdpartyorchestrator.controllers.ApplicationController.getApplication(id: uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId)

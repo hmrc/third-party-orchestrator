@@ -14,16 +14,21 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.thirdpartyorchestrator.config
+package uk.gov.hmrc.apiplatform.modules.developers.domain.models
 
-import javax.inject.{Inject, Singleton}
+import enumeratum.{EnumEntry, PlayEnum}
 
-import play.api.Configuration
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+sealed trait LoggedInState extends EnumEntry {
+  def isLoggedIn: Boolean                = this == LoggedInState.LOGGED_IN
+  def isPartLoggedInEnablingMFA: Boolean = this == LoggedInState.PART_LOGGED_IN_ENABLING_MFA
+}
 
-@Singleton
-class AppConfig @Inject() (config: Configuration) extends ServicesConfig(config) {
+object LoggedInState extends PlayEnum[LoggedInState] {
 
-  val appName: String        = config.get[String]("appName")
-  val thirdPartyDeveloperUrl = baseUrl("third-party-developer")
+  val values = findValues
+
+  final case object LOGGED_IN extends LoggedInState
+
+  final case object PART_LOGGED_IN_ENABLING_MFA extends LoggedInState
+
 }
