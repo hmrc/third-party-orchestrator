@@ -27,7 +27,7 @@ case class ApplicationResponse(
     applicationId: ApplicationId,
     name: String,
     environment: String,
-    users: Set[DeveloperResponse]
+    developers: Set[DeveloperResponse]
   )
 
 object ApplicationResponse {

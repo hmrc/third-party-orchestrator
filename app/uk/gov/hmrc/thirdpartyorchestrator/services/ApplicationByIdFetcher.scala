@@ -45,7 +45,7 @@ class ApplicationByIdFetcher @Inject() (
 
   def recoverWithDefault[T](default: T): PartialFunction[Throwable, T] = {
     case NonFatal(e) =>
-      logger.error(s"Error occurred fetching application: ${e.getMessage}", e)
+      logger.warn(s"Error occurred fetching application: ${e.getMessage}", e)
       default
   }
 }
