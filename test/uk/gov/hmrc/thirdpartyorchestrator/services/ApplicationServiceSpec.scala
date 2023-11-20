@@ -24,7 +24,6 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.Stri
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, UserId}
 import uk.gov.hmrc.thirdpartyorchestrator.mocks.connectors.ThirdPartyDeveloperConnectorMockModule
 import uk.gov.hmrc.thirdpartyorchestrator.mocks.services.ApplicationByIdFetcherMockModule
-import uk.gov.hmrc.thirdpartyorchestrator.services.ApplicationService.GetApplicationResult
 import uk.gov.hmrc.thirdpartyorchestrator.utils.{ApplicationBuilder, AsyncHmrcSpec, DeveloperBuilder}
 
 class ApplicationServiceSpec extends AsyncHmrcSpec {
@@ -50,7 +49,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec {
       ThirdPartyDeveloperConnectorMock.FetchDeveloper.thenReturn(userId1)(Some(developer1))
       ThirdPartyDeveloperConnectorMock.FetchDeveloper.thenReturn(userId2)(Some(developer2))
       val result = await(underTest.fetchVerifiedCollaboratorsForApplication(applicationId))
-      result shouldBe Right(GetApplicationResult(application, Set(developer1)))
+      result shouldBe Right(Set(developer1))
     }
 
     "return None when application does not exist" in new Setup {

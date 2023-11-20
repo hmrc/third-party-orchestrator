@@ -21,13 +21,13 @@ import scala.concurrent.Future.successful
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.developers.domain.models.Developer
 import uk.gov.hmrc.thirdpartyorchestrator.services.ApplicationService
-import uk.gov.hmrc.thirdpartyorchestrator.services.ApplicationService.GetApplicationResult
 
 trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar {
   val applicationServiceMock = mock[ApplicationService]
 
-  def fetchVerifiedCollaboratorsForApplicationReturns(applicationId: ApplicationId, returns: GetApplicationResult) =
+  def fetchVerifiedCollaboratorsForApplicationReturns(applicationId: ApplicationId, returns: Set[Developer]) =
     when(applicationServiceMock.fetchVerifiedCollaboratorsForApplication(eqTo(applicationId))(*)).thenReturn(successful(Right(returns)))
 
   def fetchVerifiedCollaboratorsForApplicationNotFound(applicationId: ApplicationId) =

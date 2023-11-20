@@ -21,15 +21,10 @@ import scala.concurrent.{ExecutionContext, Future}
 
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Application
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
 import uk.gov.hmrc.apiplatform.modules.developers.domain.models.Developer
 import uk.gov.hmrc.thirdpartyorchestrator.connectors.ThirdPartyDeveloperConnector
-
-object ApplicationService {
-  case class GetApplicationResult(application: Application, developers: Set[Developer])
-}
 
 @Singleton
 class ApplicationService @Inject() (
@@ -38,15 +33,13 @@ class ApplicationService @Inject() (
   )(implicit val ec: ExecutionContext
   ) extends EitherTHelper[String] {
 
-  import ApplicationService._
-
-  def fetchVerifiedCollaboratorsForApplication(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Either[String, GetApplicationResult]] = {
+  def fetchVerifiedCollaboratorsForApplication(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Either[String, Set[Developer]]] = {
     (
       for {
         application       <- fromOptionF(applicationByIdFetcher.fetchApplication(applicationId), "Application not found")
         allDevelopers     <- liftF(Future.sequence(application.collaborators.map(collaborator => thirdPartyDeveloperConnector.fetchDeveloper(collaborator.userId))))
         verifiedDevelopers = allDevelopers.flatten.filter(developer => developer.verified)
-      } yield GetApplicationResult(application, verifiedDevelopers)
+      } yield verifiedDevelopers
     )
       .value
   }

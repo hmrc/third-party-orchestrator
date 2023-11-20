@@ -27,7 +27,6 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartyorchestrator.mocks.services.ApplicationServiceMock
-import uk.gov.hmrc.thirdpartyorchestrator.services.ApplicationService.GetApplicationResult
 import uk.gov.hmrc.thirdpartyorchestrator.utils.{ApplicationBuilder, DeveloperBuilder}
 
 class ApplicationControllerSpec extends BaseControllerSpec with Matchers {
@@ -42,7 +41,6 @@ class ApplicationControllerSpec extends BaseControllerSpec with Matchers {
     val userId1       = UserId.random
     val userId2       = UserId.random
     val email         = LaxEmailAddress("bob@example.com")
-    val application   = buildApplication(applicationId, clientId, userId1, userId2)
     val developer     = buildDeveloper(userId1, email, "Bob", "Fleming", true)
     val request       = FakeRequest("GET", s"/applications/${applicationId}?developers=verified")
     val controller    = new ApplicationController(applicationServiceMock, Helpers.stubControllerComponents())
@@ -50,13 +48,13 @@ class ApplicationControllerSpec extends BaseControllerSpec with Matchers {
 
   "getVerifiedCollaboratorsForApplication" should {
     "return 200 if successful" in new Setup {
-      fetchVerifiedCollaboratorsForApplicationReturns(applicationId, GetApplicationResult(application, Set(developer)))
+      fetchVerifiedCollaboratorsForApplicationReturns(applicationId, Set(developer))
       val result = controller.getApplication(applicationId)(request)
       status(result) shouldBe Status.OK
     }
 
     "return 200 if application found but no verified developers" in new Setup {
-      fetchVerifiedCollaboratorsForApplicationReturns(applicationId, GetApplicationResult(application, Set.empty))
+      fetchVerifiedCollaboratorsForApplicationReturns(applicationId, Set.empty)
       val result = controller.getApplication(applicationId)(request)
       status(result) shouldBe Status.OK
     }

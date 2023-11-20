@@ -16,8 +16,9 @@
 
 package uk.gov.hmrc.thirdpartyorchestrator.utils
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Application
 
 trait ApplicationBuilder {
 

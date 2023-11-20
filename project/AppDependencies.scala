@@ -16,8 +16,8 @@ object AppDependencies {
     "uk.gov.hmrc"             %% "http-metrics"                    % "2.7.0",
     "com.beachape"            %% "enumeratum"                      % enumeratumVersion,
     "com.beachape"            %% "enumeratum-play"                 % enumeratumVersion,
-    "uk.gov.hmrc"             %% "api-platform-api-domain"         % "0.6.0",
-    "uk.gov.hmrc"             %% "api-platform-application-domain" % "0.21.0"
+    "uk.gov.hmrc"             %% "api-platform-api-domain"         % "0.9.0",
+    "uk.gov.hmrc"             %% "api-platform-application-domain" % "0.25.0"
   )
 
   val testDeps = Seq(
