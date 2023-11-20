@@ -19,32 +19,29 @@ package uk.gov.hmrc.thirdpartyorchestrator.utils
 import java.time.LocalDateTime
 import java.util.UUID
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.common.domain.models.FullName
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationResponse
-import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{ImportantSubmissionData, PrivacyPolicyLocations, ResponsibleIndividual, ServerLocation, SubmissionId, TermsAndConditionsLocations, TermsOfUseAcceptance}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationResponse, _}
+import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 
 trait ApplicationBuilder {
 
   def buildApplication(applicationId: ApplicationId, clientId: ClientId, userId1: UserId, userId2: UserId): ApplicationResponse = {
     val standardAccess = Access.Standard(
       importantSubmissionData = Some(ImportantSubmissionData(
-          organisationUrl = Some("https://www.example.com"), 
+        organisationUrl = Some("https://www.example.com"),
+        responsibleIndividual = ResponsibleIndividual(FullName("Bob Fleming"), LaxEmailAddress("bob@example.com")),
+        serverLocations = Set(ServerLocation.InUK),
+        termsAndConditionsLocation = TermsAndConditionsLocations.InDesktopSoftware,
+        privacyPolicyLocation = PrivacyPolicyLocations.InDesktopSoftware,
+        termsOfUseAcceptances = List(TermsOfUseAcceptance(
           responsibleIndividual = ResponsibleIndividual(FullName("Bob Fleming"), LaxEmailAddress("bob@example.com")),
-          serverLocations = Set(ServerLocation.InUK),
-          termsAndConditionsLocation = TermsAndConditionsLocations.InDesktopSoftware,
-          privacyPolicyLocation = PrivacyPolicyLocations.InDesktopSoftware,
-          termsOfUseAcceptances = List(TermsOfUseAcceptance(
-            responsibleIndividual = ResponsibleIndividual(FullName("Bob Fleming"), LaxEmailAddress("bob@example.com")),
-            dateTime = LocalDateTime.parse("2022-10-08T12:24:31.123"),
-            submissionId = SubmissionId(UUID.fromString("4e62811a-7ab3-4421-a89e-65a8bad9b6ae")),
-            submissionInstance = 0
-            )
-          )
-        )
-      )
+          dateTime = LocalDateTime.parse("2022-10-08T12:24:31.123"),
+          submissionId = SubmissionId(UUID.fromString("4e62811a-7ab3-4421-a89e-65a8bad9b6ae")),
+          submissionInstance = 0
+        ))
+      ))
     )
 
     ApplicationResponse(
