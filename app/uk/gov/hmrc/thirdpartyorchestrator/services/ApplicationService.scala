@@ -21,6 +21,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 import uk.gov.hmrc.http.HeaderCarrier
 
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationResponse
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
 import uk.gov.hmrc.apiplatform.modules.developers.domain.models.Developer
@@ -42,5 +43,9 @@ class ApplicationService @Inject() (
       } yield verifiedDevelopers
     )
       .value
+  }
+
+  def fetchApplication(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationResponse]] = {
+    applicationByIdFetcher.fetchApplication(applicationId)
   }
 }

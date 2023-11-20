@@ -43,6 +43,20 @@ class ApplicationServiceSpec extends AsyncHmrcSpec {
     val application   = buildApplication(applicationId, clientId, userId1, userId2)
   }
 
+  "fetchApplication" should {
+    "return the application" in new Setup {
+      ApplicationByIdFetcherMock.FetchApplication.thenReturn(applicationId)(Some(application))
+      val result = await(underTest.fetchApplication(applicationId))
+      result shouldBe Some(application)
+    }
+
+    "return None when application does not exist" in new Setup {
+      ApplicationByIdFetcherMock.FetchApplication.thenReturn(applicationId)(None)
+      val result = await(underTest.fetchApplication(applicationId))
+      result shouldBe None
+    }
+  }
+
   "fetchVerifiedCollaboratorsForApplication" should {
     "return the collaborators when the application exists" in new Setup {
       ApplicationByIdFetcherMock.FetchApplication.thenReturn(applicationId)(Some(application))
