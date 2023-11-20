@@ -23,7 +23,7 @@ import scala.util.control.NonFatal
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Application
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationResponse
 import uk.gov.hmrc.thirdpartyorchestrator.connectors.EnvironmentAwareThirdPartyApplicationConnector
 import uk.gov.hmrc.thirdpartyorchestrator.utils.ApplicationLogger
 
@@ -33,9 +33,9 @@ class ApplicationByIdFetcher @Inject() (
   )(implicit ec: ExecutionContext
   ) extends ApplicationLogger {
 
-  def fetchApplication(id: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[Application]] = {
-    val subordinateApp: Future[Option[Application]] = thirdPartyApplicationConnector.subordinate.fetchApplication(id) recover recoverWithDefault(None)
-    val principalApp: Future[Option[Application]]   = thirdPartyApplicationConnector.principal.fetchApplication(id)
+  def fetchApplication(id: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationResponse]] = {
+    val subordinateApp: Future[Option[ApplicationResponse]] = thirdPartyApplicationConnector.subordinate.fetchApplication(id) recover recoverWithDefault(None)
+    val principalApp: Future[Option[ApplicationResponse]]   = thirdPartyApplicationConnector.principal.fetchApplication(id)
 
     for {
       subordinate <- subordinateApp

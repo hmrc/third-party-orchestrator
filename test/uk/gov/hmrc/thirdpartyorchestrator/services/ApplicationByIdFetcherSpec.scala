@@ -23,7 +23,7 @@ import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, UserId}
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Application
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationResponse
 import uk.gov.hmrc.thirdpartyorchestrator.utils.{ApplicationBuilder, AsyncHmrcSpec}
 import uk.gov.hmrc.thirdpartyorchestrator.mocks.connectors._
 
@@ -34,12 +34,12 @@ class ApplicationByIdFetcherSpec extends AsyncHmrcSpec {
   trait Setup extends ThirdPartyApplicationConnectorMockModule with MockitoSugar
       with ArgumentMatchersSugar with ApplicationBuilder {
 
-    val applicationId: ApplicationId = ApplicationId.random
-    val clientId: ClientId           = ClientId.random
-    val userId1: UserId              = UserId.random
-    val userId2: UserId              = UserId.random
-    val application: Application     = buildApplication(applicationId, clientId, userId1, userId2)
-    val exception                    = new RuntimeException("error")
+    val applicationId: ApplicationId     = ApplicationId.random
+    val clientId: ClientId               = ClientId.random
+    val userId1: UserId                  = UserId.random
+    val userId2: UserId                  = UserId.random
+    val application: ApplicationResponse = buildApplication(applicationId, clientId, userId1, userId2)
+    val exception                        = new RuntimeException("error")
 
     val fetcher = new ApplicationByIdFetcher(
       EnvironmentAwareThirdPartyApplicationConnectorMock.instance
