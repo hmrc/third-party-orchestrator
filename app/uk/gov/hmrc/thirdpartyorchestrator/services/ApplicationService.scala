@@ -22,7 +22,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationResponse
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId}
 import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
 import uk.gov.hmrc.apiplatform.modules.developers.domain.models.Developer
 import uk.gov.hmrc.thirdpartyorchestrator.connectors.ThirdPartyDeveloperConnector
@@ -30,23 +30,27 @@ import uk.gov.hmrc.thirdpartyorchestrator.connectors.ThirdPartyDeveloperConnecto
 @Singleton
 class ApplicationService @Inject() (
     val thirdPartyDeveloperConnector: ThirdPartyDeveloperConnector,
-    val applicationByIdFetcher: ApplicationByIdFetcher
+    val applicationFetcher: ApplicationFetcher
   )(implicit val ec: ExecutionContext
   ) {
+
+  def fetchApplication(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationResponse]] = {
+    applicationFetcher.fetchApplication(applicationId)
+  }
+
+  def fetchApplicationByClientId(clientId: ClientId)(implicit hc: HeaderCarrier): Future[Option[ApplicationResponse]] = {
+    applicationFetcher.fetchApplicationByClientId(clientId)
+  }
 
   def fetchVerifiedCollaboratorsForApplication(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Either[String, Set[Developer]]] = {
     val E = EitherTHelper.make[String]
     (
       for {
-        application       <- E.fromOptionF(applicationByIdFetcher.fetchApplication(applicationId), "Application not found")
+        application       <- E.fromOptionF(applicationFetcher.fetchApplication(applicationId), "Application not found")
         allDevelopers     <- E.liftF(Future.sequence(application.collaborators.map(collaborator => thirdPartyDeveloperConnector.fetchDeveloper(collaborator.userId))))
         verifiedDevelopers = allDevelopers.flatten.filter(developer => developer.verified)
       } yield verifiedDevelopers
     )
       .value
-  }
-
-  def fetchApplication(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationResponse]] = {
-    applicationByIdFetcher.fetchApplication(applicationId)
   }
 }

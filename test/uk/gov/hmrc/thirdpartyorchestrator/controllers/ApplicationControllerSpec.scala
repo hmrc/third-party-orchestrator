@@ -43,39 +43,64 @@ class ApplicationControllerSpec extends BaseControllerSpec with Matchers {
     val email         = LaxEmailAddress("bob@example.com")
     val developer     = buildDeveloper(userId1, email, "Bob", "Fleming", true)
     val application   = buildApplication(applicationId, clientId, userId1, userId2)
-    val appRequest    = FakeRequest("GET", s"/applications/${applicationId}")
-    val devsRequest   = FakeRequest("GET", s"/applications/${applicationId}/developers")
     val controller    = new ApplicationController(applicationServiceMock, Helpers.stubControllerComponents())
   }
 
   "getApplication" should {
     "return 200 if successful" in new Setup {
+      val appRequest = FakeRequest("GET", s"/applications/${applicationId}")
       fetchApplicationReturns(applicationId, application)
       val result = controller.getApplication(applicationId)(appRequest)
       status(result) shouldBe Status.OK
     }
 
     "return 404 if application not found" in new Setup {
+      val appRequest = FakeRequest("GET", s"/applications/${applicationId}")
       fetchApplicationNotFound(applicationId)
       val result = controller.getApplication(applicationId)(appRequest)
       status(result) shouldBe Status.NOT_FOUND
     }
   }
 
+  "queryDispatcher" should {
+    "return 200 if get application by client id is successful" in new Setup {
+      val appRequest = FakeRequest("GET", s"/applications?clientId=${clientId}")
+      fetchApplicationByClientIdReturns(clientId, application)
+      val result = controller.queryDispatcher()(appRequest)
+      status(result) shouldBe Status.OK
+    }
+
+    "return 404 if get application by client id is not found" in new Setup {
+      val appRequest = FakeRequest("GET", s"/applications?clientId=${clientId}")
+      fetchApplicationByClientIdNotFound(clientId)
+      val result = controller.queryDispatcher()(appRequest)
+      status(result) shouldBe Status.NOT_FOUND
+    }
+
+    "return 400 if query params not found" in new Setup {
+      val appRequest = FakeRequest("GET", s"/applications")
+      val result = controller.queryDispatcher()(appRequest)
+      status(result) shouldBe Status.BAD_REQUEST
+    }    
+  }
+
   "getVerifiedCollaboratorsForApplication" should {
     "return 200 if successful" in new Setup {
+      val devsRequest = FakeRequest("GET", s"/applications/${applicationId}/developers")
       fetchVerifiedCollaboratorsForApplicationReturns(applicationId, Set(developer))
       val result = controller.getVerifiedDevelopersForApplication(applicationId)(devsRequest)
       status(result) shouldBe Status.OK
     }
 
     "return 200 if application found but no verified developers" in new Setup {
+      val devsRequest = FakeRequest("GET", s"/applications/${applicationId}/developers")
       fetchVerifiedCollaboratorsForApplicationReturns(applicationId, Set.empty)
       val result = controller.getVerifiedDevelopersForApplication(applicationId)(devsRequest)
       status(result) shouldBe Status.OK
     }
 
     "return 404 if application not found" in new Setup {
+      val devsRequest = FakeRequest("GET", s"/applications/${applicationId}/developers")
       fetchVerifiedCollaboratorsForApplicationNotFound(applicationId)
       val result = controller.getVerifiedDevelopersForApplication(applicationId)(devsRequest)
       status(result) shouldBe Status.NOT_FOUND

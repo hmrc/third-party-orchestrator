@@ -24,11 +24,12 @@ import uk.gov.hmrc.http.{HttpClient, _}
 import uk.gov.hmrc.play.http.metrics.common.API
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationResponse
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId}
 import uk.gov.hmrc.thirdpartyorchestrator.utils.ProxiedHttpClient
 
 trait ThirdPartyApplicationConnector {
   def fetchApplication(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationResponse]]
+  def fetchApplicationByClientId(clientId: ClientId)(implicit hc: HeaderCarrier): Future[Option[ApplicationResponse]]
 }
 
 abstract class AbstractThirdPartyApplicationConnector(implicit val ec: ExecutionContext) extends ThirdPartyApplicationConnector {
@@ -45,6 +46,11 @@ abstract class AbstractThirdPartyApplicationConnector(implicit val ec: Execution
     metrics.record(api) {
       http.GET[Option[ApplicationResponse]](s"$serviceBaseUrl/application/$applicationId")
     }
+
+  def fetchApplicationByClientId(clientId: ClientId)(implicit hc: HeaderCarrier): Future[Option[ApplicationResponse]] =
+    metrics.record(api) {
+      http.GET[Option[ApplicationResponse]](s"$serviceBaseUrl/applications", Seq("clientId" -> clientId.value))
+    }   
 }
 
 object PrincipalThirdPartyApplicationConnector {
