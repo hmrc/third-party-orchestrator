@@ -67,7 +67,7 @@ class ThirdPartyApplicationConnectorIntegrationSpec extends BaseConnectorIntegra
                            |  "gatewayId": "gateway-id",
                            |  "name": "Petes test application",
                            |  "deployedTo": "PRODUCTION",
-                           |  "description": "app description",
+                           |  "description": "Petes test application description",
                            |  "collaborators": [
                            |    {
                            |      "userId": "$userId1",
