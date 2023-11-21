@@ -32,13 +32,14 @@ class ApplicationService @Inject() (
     val thirdPartyDeveloperConnector: ThirdPartyDeveloperConnector,
     val applicationByIdFetcher: ApplicationByIdFetcher
   )(implicit val ec: ExecutionContext
-  ) extends EitherTHelper[String] {
+  ) {
 
   def fetchVerifiedCollaboratorsForApplication(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Either[String, Set[Developer]]] = {
+    val E = EitherTHelper.make[String]
     (
       for {
-        application       <- fromOptionF(applicationByIdFetcher.fetchApplication(applicationId), "Application not found")
-        allDevelopers     <- liftF(Future.sequence(application.collaborators.map(collaborator => thirdPartyDeveloperConnector.fetchDeveloper(collaborator.userId))))
+        application       <- E.fromOptionF(applicationByIdFetcher.fetchApplication(applicationId), "Application not found")
+        allDevelopers     <- E.liftF(Future.sequence(application.collaborators.map(collaborator => thirdPartyDeveloperConnector.fetchDeveloper(collaborator.userId))))
         verifiedDevelopers = allDevelopers.flatten.filter(developer => developer.verified)
       } yield verifiedDevelopers
     )
