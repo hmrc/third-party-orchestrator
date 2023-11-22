@@ -38,8 +38,8 @@ class ApplicationService @Inject() (
     applicationFetcher.fetchApplication(applicationId)
   }
 
-  def fetchApplicationByClientId(clientId: ClientId)(implicit hc: HeaderCarrier): Future[Option[ApplicationResponse]] = {
-    applicationFetcher.fetchApplicationByClientId(clientId)
+  def fetchApplication(clientId: ClientId)(implicit hc: HeaderCarrier): Future[Option[ApplicationResponse]] = {
+    applicationFetcher.fetchApplication(clientId)
   }
 
   def fetchVerifiedCollaboratorsForApplication(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Either[String, Set[Developer]]] = {

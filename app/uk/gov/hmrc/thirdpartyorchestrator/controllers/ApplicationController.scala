@@ -48,7 +48,7 @@ class ApplicationController @Inject() (
     queryBy match {
       case ("clientId" :: _) =>
         val clientId = ClientId(request.queryString("clientId").head)
-        applicationService.fetchApplicationByClientId(clientId).map {
+        applicationService.fetchApplication(clientId).map {
           case Some(response) => Ok(Json.toJson(response))
           case None           => NotFound
         }

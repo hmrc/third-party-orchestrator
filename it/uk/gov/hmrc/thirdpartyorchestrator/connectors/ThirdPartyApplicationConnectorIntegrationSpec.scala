@@ -85,7 +85,7 @@ class ThirdPartyApplicationConnectorIntegrationSpec extends BaseConnectorIntegra
           )
       )
 
-      private val result = await(underTest.fetchApplicationByClientId(clientId))
+      private val result = await(underTest.fetchApplication(clientId))
 
       result shouldBe Some(expectedApplication)
     }

@@ -43,9 +43,9 @@ class ApplicationFetcher @Inject() (
     } yield principal.orElse(subordinate)
   }
 
-  def fetchApplicationByClientId(clientId: ClientId)(implicit hc: HeaderCarrier): Future[Option[ApplicationResponse]] = {
-    val subordinateApp: Future[Option[ApplicationResponse]] = thirdPartyApplicationConnector.subordinate.fetchApplicationByClientId(clientId) recover recoverWithDefault(None)
-    val principalApp: Future[Option[ApplicationResponse]]   = thirdPartyApplicationConnector.principal.fetchApplicationByClientId(clientId)
+  def fetchApplication(clientId: ClientId)(implicit hc: HeaderCarrier): Future[Option[ApplicationResponse]] = {
+    val subordinateApp: Future[Option[ApplicationResponse]] = thirdPartyApplicationConnector.subordinate.fetchApplication(clientId) recover recoverWithDefault(None)
+    val principalApp: Future[Option[ApplicationResponse]]   = thirdPartyApplicationConnector.principal.fetchApplication(clientId)
 
     for {
       subordinate <- subordinateApp

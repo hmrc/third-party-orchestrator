@@ -49,34 +49,34 @@ class ApplicationByIdFetcherSpec extends AsyncHmrcSpec {
   "ApplicationByIdFetcher" when {
     "fetchApplication is called" should {
       "return None if absent from principal and subordinate" in new Setup {
-        EnvironmentAwareThirdPartyApplicationConnectorMock.Subordinate.FetchApplication.thenReturnNone(applicationId)
-        EnvironmentAwareThirdPartyApplicationConnectorMock.Principal.FetchApplication.thenReturnNone(applicationId)
+        EnvironmentAwareThirdPartyApplicationConnectorMock.Subordinate.FetchApplicationById.thenReturnNone(applicationId)
+        EnvironmentAwareThirdPartyApplicationConnectorMock.Principal.FetchApplicationById.thenReturnNone(applicationId)
 
         await(fetcher.fetchApplication(applicationId)) shouldBe None
       }
 
       "return an application from subordinate if present" in new Setup {
-        EnvironmentAwareThirdPartyApplicationConnectorMock.Subordinate.FetchApplication.thenReturn(applicationId)(Some(application))
-        EnvironmentAwareThirdPartyApplicationConnectorMock.Principal.FetchApplication.thenReturnNone(applicationId)
+        EnvironmentAwareThirdPartyApplicationConnectorMock.Subordinate.FetchApplicationById.thenReturn(applicationId)(Some(application))
+        EnvironmentAwareThirdPartyApplicationConnectorMock.Principal.FetchApplicationById.thenReturnNone(applicationId)
 
         await(fetcher.fetchApplication(applicationId)) shouldBe Some(application)
       }
 
       "return an application from principal if present" in new Setup {
-        EnvironmentAwareThirdPartyApplicationConnectorMock.Subordinate.FetchApplication.thenReturnNone(applicationId)
-        EnvironmentAwareThirdPartyApplicationConnectorMock.Principal.FetchApplication.thenReturn(applicationId)(Some(application))
+        EnvironmentAwareThirdPartyApplicationConnectorMock.Subordinate.FetchApplicationById.thenReturnNone(applicationId)
+        EnvironmentAwareThirdPartyApplicationConnectorMock.Principal.FetchApplicationById.thenReturn(applicationId)(Some(application))
         await(fetcher.fetchApplication(applicationId)) shouldBe Some(application)
       }
 
       "return an application from principal if present even when subordinate throws" in new Setup {
-        EnvironmentAwareThirdPartyApplicationConnectorMock.Subordinate.FetchApplication.thenThrowException(applicationId)(exception)
-        EnvironmentAwareThirdPartyApplicationConnectorMock.Principal.FetchApplication.thenReturn(applicationId)(Some(application))
+        EnvironmentAwareThirdPartyApplicationConnectorMock.Subordinate.FetchApplicationById.thenThrowException(applicationId)(exception)
+        EnvironmentAwareThirdPartyApplicationConnectorMock.Principal.FetchApplicationById.thenReturn(applicationId)(Some(application))
         await(fetcher.fetchApplication(applicationId)) shouldBe Some(application)
       }
 
       "return an exception if principal throws even if subordinate has the application" in new Setup {
-        EnvironmentAwareThirdPartyApplicationConnectorMock.Subordinate.FetchApplication.thenReturn(applicationId)(Some(application))
-        EnvironmentAwareThirdPartyApplicationConnectorMock.Principal.FetchApplication.thenThrowException(applicationId)(exception)
+        EnvironmentAwareThirdPartyApplicationConnectorMock.Subordinate.FetchApplicationById.thenReturn(applicationId)(Some(application))
+        EnvironmentAwareThirdPartyApplicationConnectorMock.Principal.FetchApplicationById.thenThrowException(applicationId)(exception)
         intercept[Exception] {
           await(fetcher.fetchApplication(applicationId)) shouldBe Some(application)
         }.shouldBe(exception)
@@ -88,33 +88,33 @@ class ApplicationByIdFetcherSpec extends AsyncHmrcSpec {
         EnvironmentAwareThirdPartyApplicationConnectorMock.Subordinate.FetchApplicationByClientId.thenReturnNone(clientId)
         EnvironmentAwareThirdPartyApplicationConnectorMock.Principal.FetchApplicationByClientId.thenReturnNone(clientId)
 
-        await(fetcher.fetchApplicationByClientId(clientId)) shouldBe None
+        await(fetcher.fetchApplication(clientId)) shouldBe None
       }
 
       "return an application from subordinate if present" in new Setup {
         EnvironmentAwareThirdPartyApplicationConnectorMock.Subordinate.FetchApplicationByClientId.thenReturn(clientId)(Some(application))
         EnvironmentAwareThirdPartyApplicationConnectorMock.Principal.FetchApplicationByClientId.thenReturnNone(clientId)
 
-        await(fetcher.fetchApplicationByClientId(clientId)) shouldBe Some(application)
+        await(fetcher.fetchApplication(clientId)) shouldBe Some(application)
       }
 
       "return an application from principal if present" in new Setup {
         EnvironmentAwareThirdPartyApplicationConnectorMock.Subordinate.FetchApplicationByClientId.thenReturnNone(clientId)
         EnvironmentAwareThirdPartyApplicationConnectorMock.Principal.FetchApplicationByClientId.thenReturn(clientId)(Some(application))
-        await(fetcher.fetchApplicationByClientId(clientId)) shouldBe Some(application)
+        await(fetcher.fetchApplication(clientId)) shouldBe Some(application)
       }
 
       "return an application from principal if present even when subordinate throws" in new Setup {
         EnvironmentAwareThirdPartyApplicationConnectorMock.Subordinate.FetchApplicationByClientId.thenThrowException(clientId)(exception)
         EnvironmentAwareThirdPartyApplicationConnectorMock.Principal.FetchApplicationByClientId.thenReturn(clientId)(Some(application))
-        await(fetcher.fetchApplicationByClientId(clientId)) shouldBe Some(application)
+        await(fetcher.fetchApplication(clientId)) shouldBe Some(application)
       }
 
       "return an exception if principal throws even if subordinate has the application" in new Setup {
         EnvironmentAwareThirdPartyApplicationConnectorMock.Subordinate.FetchApplicationByClientId.thenReturn(clientId)(Some(application))
         EnvironmentAwareThirdPartyApplicationConnectorMock.Principal.FetchApplicationByClientId.thenThrowException(clientId)(exception)
         intercept[Exception] {
-          await(fetcher.fetchApplicationByClientId(clientId)) shouldBe Some(application)
+          await(fetcher.fetchApplication(clientId)) shouldBe Some(application)
         }.shouldBe(exception)
       }
     }

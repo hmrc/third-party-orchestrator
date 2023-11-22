@@ -34,7 +34,7 @@ trait ThirdPartyApplicationConnectorMockModule extends MockitoSugar with Argumen
   trait AbstractThirdPartyApplicationMock {
     def aMock: ThirdPartyApplicationConnector
 
-    object FetchApplication {
+    object FetchApplicationById {
 
       def thenReturn(applicationId: ApplicationId)(application: Option[ApplicationResponse]) =
         when(aMock.fetchApplication(eqTo(applicationId))(*)).thenReturn(successful(application))
@@ -49,13 +49,13 @@ trait ThirdPartyApplicationConnectorMockModule extends MockitoSugar with Argumen
     object FetchApplicationByClientId {
 
       def thenReturn(clientId: ClientId)(application: Option[ApplicationResponse]) =
-        when(aMock.fetchApplicationByClientId(eqTo(clientId))(*)).thenReturn(successful(application))
+        when(aMock.fetchApplication(eqTo(clientId))(*)).thenReturn(successful(application))
 
       def thenReturnNone(clientId: ClientId) =
-        when(aMock.fetchApplicationByClientId(eqTo(clientId))(*)).thenReturn(successful(None))
+        when(aMock.fetchApplication(eqTo(clientId))(*)).thenReturn(successful(None))
 
       def thenThrowException(clientId: ClientId)(exception: Exception) =
-        when(aMock.fetchApplicationByClientId(eqTo(clientId))(*)).thenReturn(failed(exception))
+        when(aMock.fetchApplication(eqTo(clientId))(*)).thenReturn(failed(exception))
     }    
   }
 

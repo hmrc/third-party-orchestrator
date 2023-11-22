@@ -49,14 +49,14 @@ class ApplicationControllerSpec extends BaseControllerSpec with Matchers {
   "getApplication" should {
     "return 200 if successful" in new Setup {
       val appRequest = FakeRequest("GET", s"/applications/${applicationId}")
-      fetchApplicationReturns(applicationId, application)
+      fetchApplicationByIdReturns(applicationId, application)
       val result = controller.getApplication(applicationId)(appRequest)
       status(result) shouldBe Status.OK
     }
 
     "return 404 if application not found" in new Setup {
       val appRequest = FakeRequest("GET", s"/applications/${applicationId}")
-      fetchApplicationNotFound(applicationId)
+      fetchApplicationByIdNotFound(applicationId)
       val result = controller.getApplication(applicationId)(appRequest)
       status(result) shouldBe Status.NOT_FOUND
     }

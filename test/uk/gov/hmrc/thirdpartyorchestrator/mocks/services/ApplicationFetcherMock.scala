@@ -38,7 +38,7 @@ trait ApplicationFetcherMockModule extends MockitoSugar with ArgumentMatchersSug
     object FetchApplicationByClientId {
 
       def thenReturn(clientId: ClientId)(application: Option[ApplicationResponse]) =
-        when(aMock.fetchApplicationByClientId(eqTo(clientId))(*)).thenReturn(successful(application))
+        when(aMock.fetchApplication(eqTo(clientId))(*)).thenReturn(successful(application))
     }
   }
 

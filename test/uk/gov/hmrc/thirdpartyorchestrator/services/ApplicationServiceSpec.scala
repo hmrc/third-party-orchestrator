@@ -60,13 +60,13 @@ class ApplicationServiceSpec extends AsyncHmrcSpec {
   "fetchApplicationByClientId" should {
     "return the application" in new Setup {
       ApplicationFetcherMock.FetchApplicationByClientId.thenReturn(clientId)(Some(application))
-      val result = await(underTest.fetchApplicationByClientId(clientId))
+      val result = await(underTest.fetchApplication(clientId))
       result shouldBe Some(application)
     }
 
     "return None when application does not exist" in new Setup {
       ApplicationFetcherMock.FetchApplicationByClientId.thenReturn(clientId)(None)
-      val result = await(underTest.fetchApplicationByClientId(clientId))
+      val result = await(underTest.fetchApplication(clientId))
       result shouldBe None
     }
   }
