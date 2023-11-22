@@ -23,15 +23,15 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, UserId}
 import uk.gov.hmrc.thirdpartyorchestrator.mocks.connectors.ThirdPartyDeveloperConnectorMockModule
-import uk.gov.hmrc.thirdpartyorchestrator.mocks.services.ApplicationByIdFetcherMockModule
+import uk.gov.hmrc.thirdpartyorchestrator.mocks.services.ApplicationFetcherMockModule
 import uk.gov.hmrc.thirdpartyorchestrator.utils.{ApplicationBuilder, AsyncHmrcSpec, DeveloperBuilder}
 
 class ApplicationServiceSpec extends AsyncHmrcSpec {
 
-  trait Setup extends ThirdPartyDeveloperConnectorMockModule with ApplicationByIdFetcherMockModule with DeveloperBuilder with ApplicationBuilder {
+  trait Setup extends ThirdPartyDeveloperConnectorMockModule with ApplicationFetcherMockModule with DeveloperBuilder with ApplicationBuilder {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    val underTest = new ApplicationService(ThirdPartyDeveloperConnectorMock.aMock, ApplicationByIdFetcherMock.aMock)
+    val underTest = new ApplicationService(ThirdPartyDeveloperConnectorMock.aMock, ApplicationFetcherMock.aMock)
 
     val applicationId = ApplicationId.random
     val email         = "thirdpartydeveloper@example.com".toLaxEmail
@@ -45,21 +45,35 @@ class ApplicationServiceSpec extends AsyncHmrcSpec {
 
   "fetchApplication" should {
     "return the application" in new Setup {
-      ApplicationByIdFetcherMock.FetchApplication.thenReturn(applicationId)(Some(application))
+      ApplicationFetcherMock.FetchApplication.thenReturn(applicationId)(Some(application))
       val result = await(underTest.fetchApplication(applicationId))
       result shouldBe Some(application)
     }
 
     "return None when application does not exist" in new Setup {
-      ApplicationByIdFetcherMock.FetchApplication.thenReturn(applicationId)(None)
+      ApplicationFetcherMock.FetchApplication.thenReturn(applicationId)(None)
       val result = await(underTest.fetchApplication(applicationId))
+      result shouldBe None
+    }
+  }
+
+  "fetchApplicationByClientId" should {
+    "return the application" in new Setup {
+      ApplicationFetcherMock.FetchApplicationByClientId.thenReturn(clientId)(Some(application))
+      val result = await(underTest.fetchApplication(clientId))
+      result shouldBe Some(application)
+    }
+
+    "return None when application does not exist" in new Setup {
+      ApplicationFetcherMock.FetchApplicationByClientId.thenReturn(clientId)(None)
+      val result = await(underTest.fetchApplication(clientId))
       result shouldBe None
     }
   }
 
   "fetchVerifiedCollaboratorsForApplication" should {
     "return the collaborators when the application exists" in new Setup {
-      ApplicationByIdFetcherMock.FetchApplication.thenReturn(applicationId)(Some(application))
+      ApplicationFetcherMock.FetchApplication.thenReturn(applicationId)(Some(application))
       ThirdPartyDeveloperConnectorMock.FetchDeveloper.thenReturn(userId1)(Some(developer1))
       ThirdPartyDeveloperConnectorMock.FetchDeveloper.thenReturn(userId2)(Some(developer2))
       val result = await(underTest.fetchVerifiedCollaboratorsForApplication(applicationId))
@@ -67,7 +81,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec {
     }
 
     "return None when application does not exist" in new Setup {
-      ApplicationByIdFetcherMock.FetchApplication.thenReturn(applicationId)(None)
+      ApplicationFetcherMock.FetchApplication.thenReturn(applicationId)(None)
       val result = await(underTest.fetchVerifiedCollaboratorsForApplication(applicationId))
       result.left.value shouldBe "Application not found"
     }

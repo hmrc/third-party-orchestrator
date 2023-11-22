@@ -23,19 +23,19 @@ import scala.util.control.NonFatal
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationResponse
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId}
 import uk.gov.hmrc.thirdpartyorchestrator.connectors.EnvironmentAwareThirdPartyApplicationConnector
 import uk.gov.hmrc.thirdpartyorchestrator.utils.ApplicationLogger
 
 @Singleton
-class ApplicationByIdFetcher @Inject() (
+class ApplicationFetcher @Inject() (
     thirdPartyApplicationConnector: EnvironmentAwareThirdPartyApplicationConnector
   )(implicit ec: ExecutionContext
   ) extends ApplicationLogger {
 
-  def fetchApplication(id: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationResponse]] = {
-    val subordinateApp: Future[Option[ApplicationResponse]] = thirdPartyApplicationConnector.subordinate.fetchApplication(id) recover recoverWithDefault(None)
-    val principalApp: Future[Option[ApplicationResponse]]   = thirdPartyApplicationConnector.principal.fetchApplication(id)
+  def fetchApplication(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationResponse]] = {
+    val subordinateApp: Future[Option[ApplicationResponse]] = thirdPartyApplicationConnector.subordinate.fetchApplication(applicationId) recover recoverWithDefault(None)
+    val principalApp: Future[Option[ApplicationResponse]]   = thirdPartyApplicationConnector.principal.fetchApplication(applicationId)
 
     for {
       subordinate <- subordinateApp
@@ -43,7 +43,17 @@ class ApplicationByIdFetcher @Inject() (
     } yield principal.orElse(subordinate)
   }
 
-  def recoverWithDefault[T](default: T): PartialFunction[Throwable, T] = {
+  def fetchApplication(clientId: ClientId)(implicit hc: HeaderCarrier): Future[Option[ApplicationResponse]] = {
+    val subordinateApp: Future[Option[ApplicationResponse]] = thirdPartyApplicationConnector.subordinate.fetchApplication(clientId) recover recoverWithDefault(None)
+    val principalApp: Future[Option[ApplicationResponse]]   = thirdPartyApplicationConnector.principal.fetchApplication(clientId)
+
+    for {
+      subordinate <- subordinateApp
+      principal   <- principalApp
+    } yield principal.orElse(subordinate)
+  }
+
+  private def recoverWithDefault[T](default: T): PartialFunction[Throwable, T] = {
     case NonFatal(e) =>
       logger.warn(s"Error occurred fetching application: ${e.getMessage}", e)
       default

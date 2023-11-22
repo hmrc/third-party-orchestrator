@@ -61,78 +61,7 @@ class ThirdPartyApplicationConnectorIntegrationSpec extends BaseConnectorIntegra
             aResponse()
               .withStatus(OK)
               .withHeader("Content-Type", "application/json")
-              .withBody(s"""{
-                           |  "id": "$applicationId",
-                           |  "clientId": "$clientId",
-                           |  "gatewayId": "gateway-id",
-                           |  "name": "Petes test application",
-                           |  "deployedTo": "PRODUCTION",
-                           |  "description": "Petes test application description",
-                           |  "collaborators": [
-                           |    {
-                           |      "userId": "$userId1",
-                           |      "emailAddress": "bob@example.com",
-                           |      "role": "ADMINISTRATOR"
-                           |    },
-                           |    {
-                           |      "userId": "$userId2",
-                           |      "emailAddress": "bob@example.com",
-                           |      "role": "ADMINISTRATOR"
-                           |    }
-                           |  ],
-                           |  "createdOn": "2022-12-23T12:24:31.123",
-                           |  "lastAccess": "2023-10-02T12:24:31.123",
-                           |  "grantLength": 18,
-                           |  "redirectUris": [],
-                           |  "access": {
-                           |    "redirectUris": [],
-                           |    "overrides": [],
-                           |    "importantSubmissionData": {
-                           |      "organisationUrl": "https://www.example.com",
-                           |      "responsibleIndividual": {
-                           |        "fullName": "Bob Fleming",
-                           |        "emailAddress": "bob@example.com"
-                           |      },
-                           |      "serverLocations": [
-                           |        {
-                           |          "serverLocation": "inUK"
-                           |        }
-                           |      ],
-                           |      "termsAndConditionsLocation": {
-                           |        "termsAndConditionsType": "inDesktop"
-                           |      },
-                           |      "privacyPolicyLocation": {
-                           |        "privacyPolicyType": "inDesktop"
-                           |      },
-                           |      "termsOfUseAcceptances": [
-                           |        {
-                           |          "responsibleIndividual": {
-                           |            "fullName": "Bob Fleming",
-                           |            "emailAddress": "bob@example.com"
-                           |          },
-                           |          "dateTime": "2022-10-08T12:24:31.123",
-                           |          "submissionId": "4e62811a-7ab3-4421-a89e-65a8bad9b6ae",
-                           |          "submissionInstance": 0
-                           |        }
-                           |      ]
-                           |    },
-                           |    "accessType": "STANDARD"
-                           |  },
-                           |  "state": {
-                           |    "name": "TESTING",
-                           |    "updatedOn": "2022-10-08T12:24:31.123"
-                           |  },
-                           |  "rateLimitTier": "BRONZE",
-                           |  "blocked": false,
-                           |  "trusted": false,
-                           |  "ipAllowlist": {
-                           |    "required": false,
-                           |    "allowlist": []
-                           |  },
-                           |  "moreApplication": {
-                           |    "allowAutoDelete": false
-                           |  }
-                           |}""".stripMargin)
+              .withBody(getBody(applicationId, clientId, userId1, userId2))
           )
       )
 
@@ -140,5 +69,100 @@ class ThirdPartyApplicationConnectorIntegrationSpec extends BaseConnectorIntegra
 
       result shouldBe Some(expectedApplication)
     }
+  }
+
+  "fetchApplicationByClientId" should {
+    "return the application" in new Setup {
+
+      stubFor(
+        get(urlPathEqualTo("/application"))
+          .withQueryParam("clientId", equalTo(clientId.value))
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withHeader("Content-Type", "application/json")
+              .withBody(getBody(applicationId, clientId, userId1, userId2))
+          )
+      )
+
+      private val result = await(underTest.fetchApplication(clientId))
+
+      result shouldBe Some(expectedApplication)
+    }
+  }
+
+  private def getBody(applicationId: ApplicationId, clientId: ClientId, userId1: UserId, userId2: UserId) = {
+    s"""{
+       |  "id": "$applicationId",
+       |  "clientId": "$clientId",
+       |  "gatewayId": "gateway-id",
+       |  "name": "Petes test application",
+       |  "deployedTo": "PRODUCTION",
+       |  "description": "Petes test application description",
+       |  "collaborators": [
+       |    {
+       |      "userId": "$userId1",
+       |      "emailAddress": "bob@example.com",
+       |      "role": "ADMINISTRATOR"
+       |    },
+       |    {
+       |      "userId": "$userId2",
+       |      "emailAddress": "bob@example.com",
+       |      "role": "ADMINISTRATOR"
+       |    }
+       |  ],
+       |  "createdOn": "2022-12-23T12:24:31.123",
+       |  "lastAccess": "2023-10-02T12:24:31.123",
+       |  "grantLength": 18,
+       |  "redirectUris": [],
+       |  "access": {
+       |    "redirectUris": [],
+       |    "overrides": [],
+       |    "importantSubmissionData": {
+       |      "organisationUrl": "https://www.example.com",
+       |      "responsibleIndividual": {
+       |        "fullName": "Bob Fleming",
+       |        "emailAddress": "bob@example.com"
+       |      },
+       |      "serverLocations": [
+       |        {
+       |          "serverLocation": "inUK"
+       |        }
+       |      ],
+       |      "termsAndConditionsLocation": {
+       |        "termsAndConditionsType": "inDesktop"
+       |      },
+       |      "privacyPolicyLocation": {
+       |        "privacyPolicyType": "inDesktop"
+       |      },
+       |      "termsOfUseAcceptances": [
+       |        {
+       |          "responsibleIndividual": {
+       |            "fullName": "Bob Fleming",
+       |            "emailAddress": "bob@example.com"
+       |          },
+       |          "dateTime": "2022-10-08T12:24:31.123",
+       |          "submissionId": "4e62811a-7ab3-4421-a89e-65a8bad9b6ae",
+       |          "submissionInstance": 0
+       |        }
+       |      ]
+       |    },
+       |    "accessType": "STANDARD"
+       |  },
+       |  "state": {
+       |    "name": "TESTING",
+       |    "updatedOn": "2022-10-08T12:24:31.123"
+       |  },
+       |  "rateLimitTier": "BRONZE",
+       |  "blocked": false,
+       |  "trusted": false,
+       |  "ipAllowlist": {
+       |    "required": false,
+       |    "allowlist": []
+       |  },
+       |  "moreApplication": {
+       |    "allowAutoDelete": false
+       |  }
+       |}""".stripMargin
   }
 }

@@ -21,22 +21,28 @@ import scala.concurrent.Future.successful
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationResponse
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
-import uk.gov.hmrc.thirdpartyorchestrator.services.ApplicationByIdFetcher
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId}
+import uk.gov.hmrc.thirdpartyorchestrator.services.ApplicationFetcher
 
-trait ApplicationByIdFetcherMockModule extends MockitoSugar with ArgumentMatchersSugar {
+trait ApplicationFetcherMockModule extends MockitoSugar with ArgumentMatchersSugar {
 
-  trait AbstractApplicationByIdFetcherMock {
-    def aMock: ApplicationByIdFetcher
+  trait AbstractApplicationFetcherMock {
+    def aMock: ApplicationFetcher
 
     object FetchApplication {
 
       def thenReturn(applicationId: ApplicationId)(application: Option[ApplicationResponse]) =
         when(aMock.fetchApplication(eqTo(applicationId))(*)).thenReturn(successful(application))
     }
+
+    object FetchApplicationByClientId {
+
+      def thenReturn(clientId: ClientId)(application: Option[ApplicationResponse]) =
+        when(aMock.fetchApplication(eqTo(clientId))(*)).thenReturn(successful(application))
+    }
   }
 
-  object ApplicationByIdFetcherMock extends AbstractApplicationByIdFetcherMock {
-    val aMock = mock[ApplicationByIdFetcher]
+  object ApplicationFetcherMock extends AbstractApplicationFetcherMock {
+    val aMock = mock[ApplicationFetcher]
   }
 }
