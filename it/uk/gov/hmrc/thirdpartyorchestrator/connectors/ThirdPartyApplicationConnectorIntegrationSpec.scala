@@ -75,7 +75,7 @@ class ThirdPartyApplicationConnectorIntegrationSpec extends BaseConnectorIntegra
     "return the application" in new Setup {
 
       stubFor(
-        get(urlPathEqualTo("/applications"))
+        get(urlPathEqualTo("/application"))
           .withQueryParam("clientId", equalTo(clientId.value))
           .willReturn(
             aResponse()

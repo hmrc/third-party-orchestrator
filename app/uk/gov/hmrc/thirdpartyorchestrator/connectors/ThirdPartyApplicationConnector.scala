@@ -49,7 +49,7 @@ abstract class AbstractThirdPartyApplicationConnector(implicit val ec: Execution
 
   def fetchApplicationByClientId(clientId: ClientId)(implicit hc: HeaderCarrier): Future[Option[ApplicationResponse]] =
     metrics.record(api) {
-      http.GET[Option[ApplicationResponse]](s"$serviceBaseUrl/applications", Seq("clientId" -> clientId.value))
+      http.GET[Option[ApplicationResponse]](s"$serviceBaseUrl/application", Seq("clientId" -> clientId.value))
     }   
 }
 
