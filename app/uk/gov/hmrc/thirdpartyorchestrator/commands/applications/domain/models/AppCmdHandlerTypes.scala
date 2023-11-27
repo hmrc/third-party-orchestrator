@@ -14,13 +14,8 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.apiplatform.modules.developers.domain.models
+package uk.gov.hmrc.thirdpartyorchestrator.commands.applications.domain.models
 
-import play.api.libs.json.Json
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.CommandHandlerTypes
 
-
-case class Session(sessionId: SessionId, loggedInState: LoggedInState, developer: Developer)
-
-object Session {
-  implicit val formatSession = Json.format[Session]
-}
+object AppCmdHandlerTypes extends CommandHandlerTypes[DispatchSuccessResult]

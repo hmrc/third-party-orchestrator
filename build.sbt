@@ -30,13 +30,8 @@ lazy val microservice = Project(appName, file("."))
     retrieveManaged := true,
     routesGenerator := InjectedRoutesGenerator,
     majorVersion    := 0,
-//    routesImport ++= Seq(
-//      "uk.gov.hmrc.apiplatform.modules.submissions.controllers._",
-//      "uk.gov.hmrc.apiplatform.modules.submissions.controllers.binders._",
-//      "uk.gov.hmrc.thirdpartyapplication.domain.models._",
-//      "uk.gov.hmrc.apiplatform.modules.applications.domain.models._",
-//      "uk.gov.hmrc.apiplatform.modules.submissions.domain.models._"
-//    )
+    routesImport ++= Seq("uk.gov.hmrc.apiplatform.modules.common.domain.models._",
+      "uk.gov.hmrc.thirdpartyorchestrator.commands.applications.controllers.binders._")
   )
   .settings(
     Test / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-eT"),

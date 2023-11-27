@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.apiplatform.modules.developers.domain.models
+package uk.gov.hmrc.thirdpartyorchestrator.commands.applications.config
 
-import play.api.libs.json.Json
+import com.google.inject.AbstractModule
+import uk.gov.hmrc.thirdpartyorchestrator.commands.applications.connectors._
 
+class ConfigurationModule extends AbstractModule {
 
-case class Session(sessionId: SessionId, loggedInState: LoggedInState, developer: Developer)
-
-object Session {
-  implicit val formatSession = Json.format[Session]
+  override def configure(): Unit = {
+    bind(classOf[PrincipalAppCmdConnector.Config]).toProvider(classOf[PrincipalAppCmdConnectorConfigProvider])
+    bind(classOf[SubordinateAppCmdConnector.Config]).toProvider(classOf[SubordinateAppCmdConnectorConfigProvider])
+  }
 }

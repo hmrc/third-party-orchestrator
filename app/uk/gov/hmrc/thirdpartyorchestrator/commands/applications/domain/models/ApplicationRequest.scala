@@ -14,13 +14,10 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.apiplatform.modules.developers.domain.models
+package uk.gov.hmrc.thirdpartyorchestrator.commands.applications.domain.models
 
-import play.api.libs.json.Json
+import play.api.mvc._
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationResponse
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
 
-
-case class Session(sessionId: SessionId, loggedInState: LoggedInState, developer: Developer)
-
-object Session {
-  implicit val formatSession = Json.format[Session]
-}
+case class ApplicationRequest[A](application: ApplicationResponse, deployedTo: Environment, request: Request[A]) extends WrappedRequest[A](request)

@@ -18,17 +18,12 @@ package uk.gov.hmrc.apiplatform.modules.developers.domain.models
 
 import enumeratum.{EnumEntry, PlayEnum}
 
-sealed trait LoggedInState extends EnumEntry {
-  def isLoggedIn: Boolean                = this == LoggedInState.LOGGED_IN
-  def isPartLoggedInEnablingMFA: Boolean = this == LoggedInState.PART_LOGGED_IN_ENABLING_MFA
-}
+sealed trait LoggedInState extends EnumEntry
 
 object LoggedInState extends PlayEnum[LoggedInState] {
 
   val values = findValues
 
   final case object LOGGED_IN extends LoggedInState
-
-  final case object PART_LOGGED_IN_ENABLING_MFA extends LoggedInState
 
 }
