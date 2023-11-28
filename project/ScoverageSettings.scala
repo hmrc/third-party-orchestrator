@@ -10,7 +10,7 @@ object ScoverageSettings {
       """.*\.RoutesPrefix""" ,
       """.*\.Reverse[^.]*"""
     ).mkString(";"),
-    ScoverageKeys.coverageMinimumStmtTotal := 90.00,
+    ScoverageKeys.coverageMinimumStmtTotal := 94.00,
     ScoverageKeys.coverageFailOnMinimum := true,
     ScoverageKeys.coverageHighlighting := true
   )

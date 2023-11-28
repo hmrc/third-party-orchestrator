@@ -18,13 +18,14 @@ package uk.gov.hmrc.thirdpartyorchestrator.commands.applications.connectors
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
+
 import uk.gov.hmrc.http.{HttpClient, _}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
+
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.thirdpartyorchestrator.commands.applications.domain.models.{AppCmdHandlerTypes, DispatchSuccessResult}
 import uk.gov.hmrc.thirdpartyorchestrator.connectors.EnvironmentAware
 import uk.gov.hmrc.thirdpartyorchestrator.utils.{ApplicationLogger, ProxiedHttpClient}
-
 
 trait AppCmdConnector {
 

@@ -23,7 +23,15 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import com.github.tomakehurst.wiremock.client.WireMock._
 import uk.gov.hmrc.http.HeaderCarrier
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
-import uk.gov.hmrc.thirdpartyorchestrator.utils.{ApplicationBuilder, AsyncHmrcSpec, ConfigBuilder, FixedClock, PrincipalAndSubordinateWireMockSetup, ProxiedHttpClient, WireMockExtensions}
+import uk.gov.hmrc.thirdpartyorchestrator.utils.{
+  ApplicationBuilder,
+  AsyncHmrcSpec,
+  ConfigBuilder,
+  FixedClock,
+  PrincipalAndSubordinateWireMockSetup,
+  ProxiedHttpClient,
+  WireMockExtensions
+}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
@@ -46,7 +54,7 @@ class ApplicationCommandConnectorISpec
     with ConfigBuilder
     with PrincipalAndSubordinateWireMockSetup
     with ApplicationBuilder
-    with FixedClock  {
+    with FixedClock {
 
   trait Setup {
 

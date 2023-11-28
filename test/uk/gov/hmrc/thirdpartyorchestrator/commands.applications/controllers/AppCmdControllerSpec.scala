@@ -17,15 +17,18 @@
 package uk.gov.hmrc.thirdpartyorchestrator.commands.applications.controllers
 
 import scala.concurrent.ExecutionContext.Implicits.global
+
 import cats.data.NonEmptyList
+
 import play.api.libs.json.Json
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborators.Developer
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Actors, ApplicationId, ClientId, Environment, LaxEmailAddress, UserId}
+
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborators.Developer
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartyorchestrator.commands.applications.connectors.EnvironmentAwareAppCmdConnector
 import uk.gov.hmrc.thirdpartyorchestrator.commands.applications.mocks.CommandConnectorMockModule
 import uk.gov.hmrc.thirdpartyorchestrator.mocks.services.ApplicationFetcherMockModule
@@ -38,8 +41,8 @@ class AppCmdControllerSpec extends AsyncHmrcSpec with FixedClock {
       with ApplicationBuilder
       with CommandConnectorMockModule {
 
-    implicit val headerCarrier = HeaderCarrier()
-    val clientId = ClientId("Some ID")
+    implicit val headerCarrier  = HeaderCarrier()
+    val clientId                = ClientId("Some ID")
     val sandboxApplicationId    = ApplicationId.random
     val sandboxApplication      = buildApplication(applicationId = sandboxApplicationId, clientId, UserId.random, UserId.random).copy(deployedTo = Environment.SANDBOX)
     val productionApplicationId = ApplicationId.random
@@ -48,7 +51,6 @@ class AppCmdControllerSpec extends AsyncHmrcSpec with FixedClock {
     val adminEmail              = "admin@example.com".toLaxEmail
     val developerAsCollaborator = Developer(UserId.random, "dev@example.com".toLaxEmail)
     val verifiedEmails          = Set.empty[LaxEmailAddress]
-
 
     val envAwareCmdConnector = new EnvironmentAwareAppCmdConnector(CommandConnectorMocks.Sandbox.aMock, CommandConnectorMocks.Prod.aMock)
 
@@ -71,7 +73,6 @@ class AppCmdControllerSpec extends AsyncHmrcSpec with FixedClock {
       CommandConnectorMocks.Sandbox.IssueCommand.verifyNoCommandsIssued()
       CommandConnectorMocks.Prod.IssueCommand.verifyNoCommandsIssued()
     }
-
 
     "dispatch a command when the app exists in sandbox" in new Setup {
       ApplicationFetcherMock.FetchApplication.thenReturn(sandboxApplicationId)(sandboxApplication.some)

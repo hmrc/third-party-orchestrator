@@ -17,6 +17,7 @@
 package uk.gov.hmrc.thirdpartyorchestrator.commands.applications.controllers
 
 import play.api.mvc.PathBindable
+
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 
 package object binders {

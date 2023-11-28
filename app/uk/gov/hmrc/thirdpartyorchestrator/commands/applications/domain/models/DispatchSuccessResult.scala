@@ -17,13 +17,14 @@
 package uk.gov.hmrc.thirdpartyorchestrator.commands.applications.domain.models
 
 import play.api.libs.json.Json
+
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationResponse
 
 case class DispatchSuccessResult(applicationResponse: ApplicationResponse)
 
 object DispatchSuccessResult {
 
-  //TODO in APM we have the following JSon formatter in scope..... do we need same in TPO???
+  // TODO in APM we have the following JSon formatter in scope..... do we need same in TPO???
   /*
     trait ApplicationJsonFormatters extends EnvReads with EnvWrites {
     import uk.gov.hmrc.apiplatformmicroservice.thirdpartyapplication.domain.models.applications._

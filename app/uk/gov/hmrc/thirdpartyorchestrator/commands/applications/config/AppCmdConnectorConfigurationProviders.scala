@@ -17,7 +17,9 @@
 package uk.gov.hmrc.thirdpartyorchestrator.commands.applications.config
 
 import com.google.inject.{Inject, Provider, Singleton}
+
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+
 import uk.gov.hmrc.thirdpartyorchestrator.commands.applications.connectors.{PrincipalAppCmdConnector, SubordinateAppCmdConnector}
 import uk.gov.hmrc.thirdpartyorchestrator.config.ConfigProviderHelper
 

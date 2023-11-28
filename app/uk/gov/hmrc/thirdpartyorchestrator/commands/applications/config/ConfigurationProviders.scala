@@ -17,6 +17,7 @@
 package uk.gov.hmrc.thirdpartyorchestrator.commands.applications.config
 
 import com.google.inject.AbstractModule
+
 import uk.gov.hmrc.thirdpartyorchestrator.commands.applications.connectors._
 
 class ConfigurationModule extends AbstractModule {
