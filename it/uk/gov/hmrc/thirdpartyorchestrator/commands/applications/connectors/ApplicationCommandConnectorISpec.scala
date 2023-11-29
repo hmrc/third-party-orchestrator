@@ -182,5 +182,22 @@ class ApplicationCommandConnectorISpec
         await(connector.dispatch(applicationId, request))
       }.message shouldBe (s"Failed calling dispatch 418")
     }
+
+    "handle TPA returning something we don't understand" in new CollaboratorSetup with PrincipalSetup {
+
+      stubFor(Environment.PRODUCTION)(
+        patch(urlMatching(s".*/application/${applicationId.value}/dispatch"))
+          .withJsonRequestBody(request)
+          .willReturn(
+            aResponse()
+              .withBody("""{ "bobbins": "true" }""")
+              .withStatus(OK)
+          )
+      )
+
+      intercept[InternalServerException] {
+        await(connector.dispatch(applicationId, request))
+      }.message shouldBe (s"Failed parsing response to dispatch")
+    }
   }
 }

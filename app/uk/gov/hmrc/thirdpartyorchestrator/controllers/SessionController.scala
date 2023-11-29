@@ -17,19 +17,18 @@
 package uk.gov.hmrc.thirdpartyorchestrator.controllers
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success, Try}
+import scala.concurrent.ExecutionContext
 
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
-import uk.gov.hmrc.apiplatform.modules.developers.domain.models.SessionId
+import uk.gov.hmrc.apiplatform.modules.developers.domain.models.{LoggedInState, Session, SessionId}
 import uk.gov.hmrc.thirdpartyorchestrator.domain.models.developers.DeveloperResponse
 import uk.gov.hmrc.thirdpartyorchestrator.services.SessionService
 
 object SessionController {
-  case class SessionRequest(sessionId: String)
+  case class SessionRequest(sessionId: SessionId)
   implicit val formatSession = Json.format[SessionRequest]
 }
 
@@ -44,14 +43,9 @@ class SessionController @Inject() (
 
   def getDeveloperForSession(): Action[AnyContent] = Action.async { implicit request =>
     withJsonBodyFromAnyContent[SessionRequest] { sessionRequest =>
-      Try(SessionId.unsafeApply(sessionRequest.sessionId)) match {
-        case Failure(_)         => Future.successful(BadRequest("Session id must be a UUID"))
-        case Success(sessionId) => sessionService.fetch(sessionId).map { maybeSession =>
-            maybeSession match {
-              case Some(session) => Ok(Json.toJson(DeveloperResponse.from(session)))
-              case _             => NotFound("Unknown session id")
-            }
-          }
+      sessionService.fetch(sessionRequest.sessionId).map {
+        case Some(session @ Session(_, LoggedInState.LOGGED_IN, _)) => Ok(Json.toJson(DeveloperResponse.from(session)))
+        case _                                                      => NotFound("Unknown session id")
       }
     }
   }

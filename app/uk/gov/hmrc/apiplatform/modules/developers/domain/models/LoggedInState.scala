@@ -16,14 +16,24 @@
 
 package uk.gov.hmrc.apiplatform.modules.developers.domain.models
 
-import enumeratum.{EnumEntry, PlayEnum}
+sealed trait LoggedInState
 
-sealed trait LoggedInState extends EnumEntry
+object LoggedInState {
 
-object LoggedInState extends PlayEnum[LoggedInState] {
+  case object PART_LOGGED_IN_ENABLING_MFA extends LoggedInState
+  case object LOGGED_IN                   extends LoggedInState
+  val values = List(LOGGED_IN, PART_LOGGED_IN_ENABLING_MFA)
 
-  val values = findValues
+  def apply(text: String): Option[LoggedInState] = LoggedInState.values.find(_.toString == text.toUpperCase)
 
-  final case object LOGGED_IN extends LoggedInState
+  // Not yet required but when library exists, we probably will need them.
+  // $COVERAGE-OFF$
+  def unsafeApply(text: String): LoggedInState = apply(text).getOrElse(throw new RuntimeException(s"$text is not a logged in State"))
+  // $COVERAGE-ON$
+
+  import play.api.libs.json.Format
+  import uk.gov.hmrc.apiplatform.modules.common.domain.services.SealedTraitJsonFormatting
+
+  implicit val format: Format[LoggedInState] = SealedTraitJsonFormatting.createFormatFor[LoggedInState]("Logged In State", apply)
 
 }
