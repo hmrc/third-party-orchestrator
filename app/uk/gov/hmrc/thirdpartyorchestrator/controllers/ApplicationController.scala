@@ -17,8 +17,8 @@
 package uk.gov.hmrc.thirdpartyorchestrator.controllers
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.Future.successful
 import scala.concurrent.ExecutionContext
+import scala.concurrent.Future.successful
 
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
@@ -44,7 +44,7 @@ class ApplicationController @Inject() (
   }
 
   def queryDispatcher(): Action[AnyContent] = Action.async { implicit request =>
-    val queryBy     = request.queryString.keys.toList.sorted
+    val queryBy = request.queryString.keys.toList.sorted
     queryBy match {
       case ("clientId" :: _) =>
         val clientId = ClientId(request.queryString("clientId").head)
@@ -52,7 +52,7 @@ class ApplicationController @Inject() (
           case Some(response) => Ok(Json.toJson(response))
           case None           => NotFound
         }
-      case _          =>
+      case _                 =>
         successful(BadRequest("Unknown query parameters"))
     }
   }

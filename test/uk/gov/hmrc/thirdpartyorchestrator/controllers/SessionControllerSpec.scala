@@ -34,9 +34,6 @@ import uk.gov.hmrc.thirdpartyorchestrator.utils.DeveloperBuilder
 
 class SessionControllerSpec extends BaseControllerSpec with Matchers {
 
-  case class DummySessionRequest(dummySessionId: String)
-  implicit val formatDummySession = Json.format[DummySessionRequest]
-
   trait Setup
       extends SessionServiceMock with DeveloperBuilder {
 
@@ -50,7 +47,7 @@ class SessionControllerSpec extends BaseControllerSpec with Matchers {
 
   "getDeveloperForSession" should {
     "return 200 if successful" in new Setup {
-      val request = FakeRequest().withJsonBody(Json.toJson(SessionRequest(sessionId.toString())))
+      val request = FakeRequest().withJsonBody(Json.toJson(SessionRequest(sessionId)))
 
       fetchSessionByIdReturns(sessionId, session)
       val result = controller.getDeveloperForSession()(request)
@@ -58,12 +55,11 @@ class SessionControllerSpec extends BaseControllerSpec with Matchers {
     }
 
     "return 400 if invalid session id" in new Setup {
-      val invalidSessionId = "1234567890"
-      val request          = FakeRequest().withJsonBody(Json.toJson(SessionRequest(invalidSessionId)))
+      val request = FakeRequest().withBody("""{ "sessionId": "1234576547" }""")
 
       val result = controller.getDeveloperForSession()(request)
       status(result) shouldBe Status.BAD_REQUEST
-      contentAsString(result) shouldBe "Session id must be a UUID"
+      contentAsString(result) shouldBe "Invalid payload"
     }
 
     "return 400 if invalid json" in new Setup {
@@ -75,15 +71,15 @@ class SessionControllerSpec extends BaseControllerSpec with Matchers {
     }
 
     "return 400 if incorrect json" in new Setup {
-      val request = FakeRequest().withJsonBody(Json.toJson(DummySessionRequest(sessionId.toString())))
+      val request = FakeRequest().withBody(s"""{ }""")
 
       val result = controller.getDeveloperForSession()(request)
       status(result) shouldBe Status.BAD_REQUEST
-      contentAsString(result) should include("Invalid payload:")
+      contentAsString(result) should include("Invalid payload")
     }
 
     "return 404 if session not found" in new Setup {
-      val request = FakeRequest().withJsonBody(Json.toJson(SessionRequest(sessionId.toString())))
+      val request = FakeRequest().withJsonBody(Json.toJson(SessionRequest(sessionId)))
 
       fetchSessionByIdReturnsNone(sessionId)
       val result = controller.getDeveloperForSession()(request)

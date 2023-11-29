@@ -11,9 +11,9 @@ lazy val appName = "third-party-orchestrator"
 lazy val plugins: Seq[Plugins]         = Seq(PlayScala, SbtDistributablesPlugin)
 lazy val playSettings: Seq[Setting[_]] = Seq.empty
 
-scalaVersion := "2.13.8"
+scalaVersion := "2.13.12"
 
-ThisBuild / scalafixDependencies += "com.github.liancheng" %% "organize-imports" % "0.6.0"
+ThisBuild / libraryDependencySchemes += "org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always
 ThisBuild / semanticdbEnabled := true
 ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
 
@@ -30,13 +30,8 @@ lazy val microservice = Project(appName, file("."))
     retrieveManaged := true,
     routesGenerator := InjectedRoutesGenerator,
     majorVersion    := 0,
-//    routesImport ++= Seq(
-//      "uk.gov.hmrc.apiplatform.modules.submissions.controllers._",
-//      "uk.gov.hmrc.apiplatform.modules.submissions.controllers.binders._",
-//      "uk.gov.hmrc.thirdpartyapplication.domain.models._",
-//      "uk.gov.hmrc.apiplatform.modules.applications.domain.models._",
-//      "uk.gov.hmrc.apiplatform.modules.submissions.domain.models._"
-//    )
+    routesImport ++= Seq("uk.gov.hmrc.apiplatform.modules.common.domain.models._",
+      "uk.gov.hmrc.thirdpartyorchestrator.commands.applications.controllers.binders._")
   )
   .settings(
     Test / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-eT"),
@@ -63,10 +58,14 @@ lazy val microservice = Project(appName, file("."))
     )
   )
 
-commands += Command.command("testAll") { state =>
-  "test" :: "it:test" :: state
-}
+commands ++= Seq(
+  Command.command("run-all-tests") { state => "test" :: "it:test" :: state },
 
+  Command.command("clean-and-test") { state => "clean" :: "compile" :: "run-all-tests" :: state },
+
+  // Coverage does not need compile !
+  Command.command("pre-commit") { state => "clean" :: "scalafmtAll" :: "scalafixAll" :: "coverage" :: "run-all-tests" :: "coverageReport" :: "coverageOff" :: state }
+)
 def oneForkedJvmPerTest(tests: Seq[TestDefinition]): Seq[Group] =
   tests map { test =>
     Group(

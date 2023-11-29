@@ -28,9 +28,12 @@ object SessionId {
 
   implicit val format: Format[SessionId] = Json.valueFormat[SessionId]
 
+  // Not yet required but when library exists, we probably will need them.
+// $COVERAGE-OFF$
   def apply(raw: String): Option[SessionId] = allCatch.opt(SessionId(ju.UUID.fromString(raw)))
 
   def unsafeApply(raw: String): SessionId = apply(raw).getOrElse(throw new RuntimeException(s"$raw is not a valid SessionId"))
+// $COVERAGE-ON$
 
 // $COVERAGE-OFF$
   def random: SessionId = SessionId(ju.UUID.randomUUID())

@@ -56,7 +56,7 @@ trait ThirdPartyApplicationConnectorMockModule extends MockitoSugar with Argumen
 
       def thenThrowException(clientId: ClientId)(exception: Exception) =
         when(aMock.fetchApplication(eqTo(clientId))(*)).thenReturn(failed(exception))
-    }    
+    }
   }
 
   object ThirdPartyApplicationConnectorMock extends AbstractThirdPartyApplicationMock {
