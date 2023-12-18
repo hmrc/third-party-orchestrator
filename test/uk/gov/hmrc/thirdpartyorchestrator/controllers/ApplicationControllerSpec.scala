@@ -34,7 +34,7 @@ class ApplicationControllerSpec extends BaseControllerSpec with Matchers {
   trait Setup
       extends ApplicationServiceMock with DeveloperBuilder with ApplicationBuilder {
 
-    implicit val hc = HeaderCarrier()
+    implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val applicationId = ApplicationId.random
     val clientId      = ClientId.random

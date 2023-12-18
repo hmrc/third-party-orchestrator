@@ -29,7 +29,7 @@ import uk.gov.hmrc.thirdpartyorchestrator.utils.{ApplicationBuilder, AsyncHmrcSp
 
 class ApplicationByIdFetcherSpec extends AsyncHmrcSpec {
 
-  implicit val hc = HeaderCarrier()
+  implicit val hc: HeaderCarrier = HeaderCarrier()
 
   trait Setup extends ThirdPartyApplicationConnectorMockModule with MockitoSugar
       with ArgumentMatchersSugar with ApplicationBuilder {

@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartyorchestrator.domain.models.developers
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId}
 import uk.gov.hmrc.apiplatform.modules.developers.domain.models.{Developer, Session}
@@ -34,7 +34,7 @@ object DeveloperResponse {
     from(session.developer)
 
   def from(developers: Set[Developer]): Set[DeveloperResponse] =
-    developers.map(from(_))
+    developers.map(from)
 
   def from(developer: Developer): DeveloperResponse =
     DeveloperResponse(
@@ -44,5 +44,5 @@ object DeveloperResponse {
       developer.lastName
     )
 
-  implicit val format = Json.format[DeveloperResponse]
+  implicit val format: OFormat[DeveloperResponse] = Json.format[DeveloperResponse]
 }

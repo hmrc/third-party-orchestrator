@@ -16,10 +16,10 @@
 
 package uk.gov.hmrc.apiplatform.modules.developers.domain.models
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 case class Session(sessionId: SessionId, loggedInState: LoggedInState, developer: Developer)
 
 object Session {
-  implicit val formatSession = Json.format[Session]
+  implicit val formatSession: OFormat[Session] = Json.format[Session]
 }

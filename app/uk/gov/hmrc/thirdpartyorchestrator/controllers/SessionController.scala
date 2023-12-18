@@ -19,7 +19,7 @@ package uk.gov.hmrc.thirdpartyorchestrator.controllers
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
@@ -29,7 +29,7 @@ import uk.gov.hmrc.thirdpartyorchestrator.services.SessionService
 
 object SessionController {
   case class SessionRequest(sessionId: SessionId)
-  implicit val formatSession = Json.format[SessionRequest]
+  implicit val formatSession: OFormat[SessionRequest] = Json.format[SessionRequest]
 }
 
 @Singleton()
