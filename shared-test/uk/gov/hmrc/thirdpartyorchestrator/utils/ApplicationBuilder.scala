@@ -56,7 +56,6 @@ trait ApplicationBuilder {
       lastAccess = Some(LocalDateTime.parse("2023-10-02T12:24:31.123")),
       grantLength = 18,
       lastAccessTokenUsage = None,
-      redirectUris = List.empty,
       termsAndConditionsUrl = None,
       privacyPolicyUrl = None,
       access = standardAccess,

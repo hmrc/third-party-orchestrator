@@ -80,7 +80,6 @@ class ApplicationCommandConnectorISpec
         lastAccess = Some(lastAccess),
         grantLength = 547,
         lastAccessTokenUsage = None,
-        redirectUris = List.empty,
         termsAndConditionsUrl = None,
         privacyPolicyUrl = None,
         access = Access.Standard(),

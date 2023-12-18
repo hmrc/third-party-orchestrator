@@ -15,7 +15,7 @@ object AppDependencies {
   val compileDeps = Seq(
     "uk.gov.hmrc"             %% "bootstrap-backend-play-28"       % bootstrapVersion,
     "uk.gov.hmrc"             %% "http-metrics"                    % "2.7.0",
-    "uk.gov.hmrc"             %% "api-platform-application-domain" % "0.25.0"
+    "uk.gov.hmrc"             %% "api-platform-application-domain" % "0.32.0"
   )
 
    lazy val testScopes = Seq(Test.name, IntegrationTest.name).mkString(",")
