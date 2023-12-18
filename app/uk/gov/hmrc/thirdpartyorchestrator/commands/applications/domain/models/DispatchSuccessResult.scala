@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartyorchestrator.commands.applications.domain.models
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationResponse
 
@@ -49,5 +49,5 @@ object DispatchSuccessResult {
   object ApplicationJsonFormatters extends ApplicationJsonFormatters
    */
 
-  implicit val format = Json.format[DispatchSuccessResult]
+  implicit val format: OFormat[DispatchSuccessResult] = Json.format[DispatchSuccessResult]
 }

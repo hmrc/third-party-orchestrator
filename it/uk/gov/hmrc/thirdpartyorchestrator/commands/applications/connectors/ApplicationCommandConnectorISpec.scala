@@ -23,21 +23,14 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import com.github.tomakehurst.wiremock.client.WireMock._
 import uk.gov.hmrc.http.HeaderCarrier
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
-import uk.gov.hmrc.thirdpartyorchestrator.utils.{
-  ApplicationBuilder,
-  AsyncHmrcSpec,
-  ConfigBuilder,
-  FixedClock,
-  PrincipalAndSubordinateWireMockSetup,
-  ProxiedHttpClient,
-  WireMockExtensions
-}
+import uk.gov.hmrc.thirdpartyorchestrator.utils.{ApplicationBuilder, AsyncHmrcSpec, ConfigBuilder, PrincipalAndSubordinateWireMockSetup, ProxiedHttpClient, WireMockExtensions}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Actors
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ClientId
+import uk.gov.hmrc.apiplatform.modules.common.utils
 
 import java.time.LocalDateTime
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationResponse, ApplicationState, Collaborators, IpAllowlist, MoreApplication, RateLimitTier, State}
@@ -54,11 +47,11 @@ class ApplicationCommandConnectorISpec
     with ConfigBuilder
     with PrincipalAndSubordinateWireMockSetup
     with ApplicationBuilder
-    with FixedClock {
+    with utils.FixedClock {
 
   trait Setup {
 
-    implicit val hc                     = HeaderCarrier()
+    implicit val hc: HeaderCarrier      = HeaderCarrier()
     val httpClient                      = app.injector.instanceOf[HttpClient]
     protected val mockProxiedHttpClient = mock[ProxiedHttpClient]
     val apiKeyTest                      = "5bb51bca-8f97-4f2b-aee4-81a4a70a42d3"
