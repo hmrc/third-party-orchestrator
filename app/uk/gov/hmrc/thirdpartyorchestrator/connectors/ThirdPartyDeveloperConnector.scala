@@ -21,7 +21,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HttpClient, _}
-import uk.gov.hmrc.play.http.metrics.common.API
+import uk.gov.hmrc.play.http.metrics.common._
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
 import uk.gov.hmrc.apiplatform.modules.developers.domain.models.{Developer, Session, SessionId}
@@ -31,20 +31,20 @@ import uk.gov.hmrc.thirdpartyorchestrator.config.AppConfig
 class ThirdPartyDeveloperConnector @Inject() (
     http: HttpClient,
     config: AppConfig,
-    metrics: ConnectorMetrics
+    val apiMetrics: ApiMetrics
   )(implicit val ec: ExecutionContext
-  ) {
+  ) extends RecordMetrics {
 
   lazy val serviceBaseUrl: String = config.thirdPartyDeveloperUrl
   val api                         = API("third-party-developer")
 
   def fetchSession(sessionId: SessionId)(implicit hc: HeaderCarrier): Future[Option[Session]] =
-    metrics.record(api) {
+    record {
       http.GET[Option[Session]](s"$serviceBaseUrl/session/$sessionId")
     }
 
   def fetchDeveloper(userId: UserId)(implicit hc: HeaderCarrier): Future[Option[Developer]] = {
-    metrics.record(api) {
+    record {
       http.GET[Option[Developer]](s"$serviceBaseUrl/developer", Seq("developerId" -> userId.toString()))
     }
   }

@@ -32,13 +32,13 @@ import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collabora
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
-import uk.gov.hmrc.apiplatform.modules.common.utils
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartyorchestrator.commands.applications.connectors.EnvironmentAwareAppCmdConnector
 import uk.gov.hmrc.thirdpartyorchestrator.commands.applications.mocks.CommandConnectorMockModule
 import uk.gov.hmrc.thirdpartyorchestrator.mocks.services.ApplicationFetcherMockModule
 import uk.gov.hmrc.thirdpartyorchestrator.utils.{ApplicationBuilder, AsyncHmrcSpec}
 
-class AppCmdControllerSpec extends AsyncHmrcSpec with utils.FixedClock {
+class AppCmdControllerSpec extends AsyncHmrcSpec with FixedClock {
 
   trait Setup
       extends ApplicationFetcherMockModule
@@ -73,7 +73,7 @@ class AppCmdControllerSpec extends AsyncHmrcSpec with utils.FixedClock {
 
       ApplicationFetcherMock.FetchApplication.thenReturn(productionApplicationId)(None)
 
-      val cmd: ApplicationCommands.AddCollaborator = ApplicationCommands.AddCollaborator(Actors.AppCollaborator(adminEmail), developerAsCollaborator, now)
+      val cmd: ApplicationCommands.AddCollaborator = ApplicationCommands.AddCollaborator(Actors.AppCollaborator(adminEmail), developerAsCollaborator, instant)
       val request: FakeRequest[JsValue]            =
         FakeRequest("PATCH", s"/applications/${productionApplicationId.value}/dispatch").withBody(Json.toJson(DispatchRequest(cmd, verifiedEmails)))
 
@@ -88,7 +88,7 @@ class AppCmdControllerSpec extends AsyncHmrcSpec with utils.FixedClock {
 
       CommandConnectorMocks.Sandbox.IssueCommand.Dispatch.succeedsWith(sandboxApplication)
 
-      val cmd: ApplicationCommands.AddCollaborator = ApplicationCommands.AddCollaborator(Actors.AppCollaborator(adminEmail), developerAsCollaborator, now)
+      val cmd: ApplicationCommands.AddCollaborator = ApplicationCommands.AddCollaborator(Actors.AppCollaborator(adminEmail), developerAsCollaborator, instant)
       val inboundDispatchRequest: DispatchRequest  = DispatchRequest(cmd, verifiedEmails)
       val request: FakeRequest[JsValue]            = FakeRequest("PATCH", s"/applications/${sandboxApplicationId.value}/dispatch").withBody(Json.toJson(inboundDispatchRequest))
 
@@ -103,7 +103,7 @@ class AppCmdControllerSpec extends AsyncHmrcSpec with utils.FixedClock {
 
       CommandConnectorMocks.Prod.IssueCommand.Dispatch.succeedsWith(productionApplication)
 
-      val cmd: ApplicationCommands.AddCollaborator = ApplicationCommands.AddCollaborator(Actors.AppCollaborator(adminEmail), developerAsCollaborator, now)
+      val cmd: ApplicationCommands.AddCollaborator = ApplicationCommands.AddCollaborator(Actors.AppCollaborator(adminEmail), developerAsCollaborator, instant)
       val request: FakeRequest[JsValue]            =
         FakeRequest("PATCH", s"/applications/${productionApplicationId.value}/dispatch").withBody(Json.toJson(DispatchRequest(cmd, verifiedEmails)))
 
@@ -118,7 +118,7 @@ class AppCmdControllerSpec extends AsyncHmrcSpec with utils.FixedClock {
 
       CommandConnectorMocks.Prod.IssueCommand.Dispatch.failsWith(CommandFailures.ActorIsNotACollaboratorOnApp)
 
-      val cmd: ApplicationCommands.AddCollaborator = ApplicationCommands.AddCollaborator(Actors.AppCollaborator(adminEmail), developerAsCollaborator, now)
+      val cmd: ApplicationCommands.AddCollaborator = ApplicationCommands.AddCollaborator(Actors.AppCollaborator(adminEmail), developerAsCollaborator, instant)
       val request: FakeRequest[JsValue]            =
         FakeRequest("PATCH", s"/applications/${productionApplicationId.value}/dispatch").withBody(Json.toJson(DispatchRequest(cmd, verifiedEmails)))
 

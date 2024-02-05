@@ -18,7 +18,7 @@ package uk.gov.hmrc.thirdpartyorchestrator.utils
 
 import javax.inject.{Inject, Singleton}
 
-import akka.actor.ActorSystem
+import org.apache.pekko.actor.ActorSystem
 
 import play.api.Configuration
 import play.api.http.HeaderNames
