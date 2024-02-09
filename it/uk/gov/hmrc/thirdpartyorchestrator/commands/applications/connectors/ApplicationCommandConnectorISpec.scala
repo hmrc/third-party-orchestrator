@@ -32,7 +32,7 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.Actors
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ClientId
 import uk.gov.hmrc.apiplatform.modules.common.utils
 
-import java.time.LocalDateTime
+import java.time.Instant
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationResponse, ApplicationState, Collaborators, IpAllowlist, MoreApplication, RateLimitTier, State}
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models._
 import cats.data.NonEmptyList
@@ -60,7 +60,7 @@ class ApplicationCommandConnectorISpec
     val applicationId = ApplicationId.random
     val clientId      = ClientId.random
 
-    def anApplicationResponse(createdOn: LocalDateTime = now, lastAccess: LocalDateTime = now): ApplicationResponse = {
+    def anApplicationResponse(createdOn: Instant = instant, lastAccess: Instant = instant): ApplicationResponse = {
       ApplicationResponse(
         id = applicationId,
         clientId = clientId,
@@ -76,7 +76,7 @@ class ApplicationCommandConnectorISpec
         termsAndConditionsUrl = None,
         privacyPolicyUrl = None,
         access = Access.Standard(),
-        state = ApplicationState(State.TESTING, None, None, None, updatedOn = now),
+        state = ApplicationState(State.TESTING, None, None, None, updatedOn = instant),
         rateLimitTier = RateLimitTier.BRONZE,
         checkInformation = None,
         blocked = false,
@@ -117,7 +117,7 @@ class ApplicationCommandConnectorISpec
     val adminsToEmail      = Set("bobby@example.com".toLaxEmail, "daisy@example.com".toLaxEmail)
 
     val newCollaborator = Collaborators.Administrator(UserId.random, newTeamMemberEmail)
-    val cmd             = ApplicationCommands.AddCollaborator(Actors.AppCollaborator(requestorEmail), newCollaborator, now)
+    val cmd             = ApplicationCommands.AddCollaborator(Actors.AppCollaborator(requestorEmail), newCollaborator, instant)
     val request         = DispatchRequest(cmd, adminsToEmail)
   }
 

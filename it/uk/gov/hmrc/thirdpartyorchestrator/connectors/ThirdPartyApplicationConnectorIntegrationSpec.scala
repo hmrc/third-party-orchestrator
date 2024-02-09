@@ -18,17 +18,16 @@ package uk.gov.hmrc.thirdpartyorchestrator.connectors
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-
 import play.api.http.Status._
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.{Application, Configuration, Mode}
-
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.thirdpartyorchestrator.utils.{ApplicationBuilder, WireMockExtensions}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, UserId}
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 
 class ThirdPartyApplicationConnectorIntegrationSpec extends BaseConnectorIntegrationSpec
-    with GuiceOneAppPerSuite with WireMockExtensions {
+    with GuiceOneAppPerSuite with WireMockExtensions with FixedClock {
 
   private val stubConfig = Configuration(
     "microservice.services.third-party-application-principal.port" -> stubPort
@@ -111,8 +110,8 @@ class ThirdPartyApplicationConnectorIntegrationSpec extends BaseConnectorIntegra
        |      "role": "ADMINISTRATOR"
        |    }
        |  ],
-       |  "createdOn": "2022-12-23T12:24:31.123",
-       |  "lastAccess": "2023-10-02T12:24:31.123",
+       |  "createdOn": "$nowAsText",
+       |  "lastAccess": "$nowAsText",
        |  "grantLength": 18,
        |  "redirectUris": [],
        |  "access": {
@@ -141,7 +140,7 @@ class ThirdPartyApplicationConnectorIntegrationSpec extends BaseConnectorIntegra
        |            "fullName": "Bob Fleming",
        |            "emailAddress": "bob@example.com"
        |          },
-       |          "dateTime": "2022-10-08T12:24:31.123",
+       |          "dateTime": "$nowAsText",
        |          "submissionId": "4e62811a-7ab3-4421-a89e-65a8bad9b6ae",
        |          "submissionInstance": 0
        |        }
@@ -151,7 +150,7 @@ class ThirdPartyApplicationConnectorIntegrationSpec extends BaseConnectorIntegra
        |  },
        |  "state": {
        |    "name": "TESTING",
-       |    "updatedOn": "2022-10-08T12:24:31.123"
+       |    "updatedOn": "$nowAsText"
        |  },
        |  "rateLimitTier": "BRONZE",
        |  "blocked": false,

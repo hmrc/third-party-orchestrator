@@ -21,7 +21,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HttpClient, _}
-import uk.gov.hmrc.play.http.metrics.common.API
+import uk.gov.hmrc.play.http.metrics.common._
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationResponse
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId}
@@ -32,23 +32,23 @@ trait ThirdPartyApplicationConnector {
   def fetchApplication(clientId: ClientId)(implicit hc: HeaderCarrier): Future[Option[ApplicationResponse]]
 }
 
-abstract class AbstractThirdPartyApplicationConnector(implicit val ec: ExecutionContext) extends ThirdPartyApplicationConnector {
+abstract class AbstractThirdPartyApplicationConnector(implicit val ec: ExecutionContext) extends ThirdPartyApplicationConnector with RecordMetrics {
 
   protected val httpClient: HttpClient
   protected val serviceBaseUrl: String
-  protected val metrics: ConnectorMetrics
+  val apiMetrics: ApiMetrics
 
   def http: HttpClient
 
   val api = API("third-party-application")
 
   def fetchApplication(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationResponse]] =
-    metrics.record(api) {
+    record {
       http.GET[Option[ApplicationResponse]](s"$serviceBaseUrl/application/$applicationId")
     }
 
   def fetchApplication(clientId: ClientId)(implicit hc: HeaderCarrier): Future[Option[ApplicationResponse]] =
-    metrics.record(api) {
+    record {
       http.GET[Option[ApplicationResponse]](s"$serviceBaseUrl/application", Seq("clientId" -> clientId.value))
     }
 }
@@ -65,7 +65,7 @@ object PrincipalThirdPartyApplicationConnector {
 class PrincipalThirdPartyApplicationConnector @Inject() (
     val config: PrincipalThirdPartyApplicationConnector.Config,
     val httpClient: HttpClient,
-    val metrics: ConnectorMetrics
+    val apiMetrics: ApiMetrics
   )(implicit override val ec: ExecutionContext
   ) extends AbstractThirdPartyApplicationConnector {
 
@@ -89,7 +89,7 @@ class SubordinateThirdPartyApplicationConnector @Inject() (
     val config: SubordinateThirdPartyApplicationConnector.Config,
     val httpClient: HttpClient,
     val proxiedHttpClient: ProxiedHttpClient,
-    val metrics: ConnectorMetrics
+    val apiMetrics: ApiMetrics
   )(implicit override val ec: ExecutionContext
   ) extends AbstractThirdPartyApplicationConnector {
 

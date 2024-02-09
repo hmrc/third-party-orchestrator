@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.thirdpartyorchestrator.utils
 
-import java.time.LocalDateTime
 import java.util.UUID
 
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
@@ -24,8 +23,9 @@ import uk.gov.hmrc.apiplatform.modules.applications.common.domain.models.FullNam
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationResponse, _}
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 
-trait ApplicationBuilder {
+trait ApplicationBuilder extends FixedClock {
 
   def buildApplication(applicationId: ApplicationId, clientId: ClientId, userId1: UserId, userId2: UserId): ApplicationResponse = {
     val standardAccess = Access.Standard(
@@ -37,7 +37,7 @@ trait ApplicationBuilder {
         privacyPolicyLocation = PrivacyPolicyLocations.InDesktopSoftware,
         termsOfUseAcceptances = List(TermsOfUseAcceptance(
           responsibleIndividual = ResponsibleIndividual(FullName("Bob Fleming"), LaxEmailAddress("bob@example.com")),
-          dateTime = LocalDateTime.parse("2022-10-08T12:24:31.123"),
+          dateTime = instant,
           submissionId = SubmissionId(UUID.fromString("4e62811a-7ab3-4421-a89e-65a8bad9b6ae")),
           submissionInstance = 0
         ))
@@ -52,14 +52,14 @@ trait ApplicationBuilder {
       deployedTo = Environment.PRODUCTION,
       description = Some("Petes test application description"),
       collaborators = Set(buildCollaborator(userId1), buildCollaborator(userId2)),
-      createdOn = LocalDateTime.parse("2022-12-23T12:24:31.123"),
-      lastAccess = Some(LocalDateTime.parse("2023-10-02T12:24:31.123")),
+      createdOn = instant,
+      lastAccess = Some(instant),
       grantLength = 18,
       lastAccessTokenUsage = None,
       termsAndConditionsUrl = None,
       privacyPolicyUrl = None,
       access = standardAccess,
-      state = ApplicationState(name = State.TESTING, updatedOn = LocalDateTime.parse("2022-10-08T12:24:31.123")),
+      state = ApplicationState(name = State.TESTING, updatedOn = instant),
       rateLimitTier = RateLimitTier.BRONZE,
       checkInformation = None,
       blocked = false,

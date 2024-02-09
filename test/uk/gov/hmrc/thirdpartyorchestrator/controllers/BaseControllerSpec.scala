@@ -18,7 +18,7 @@ package uk.gov.hmrc.thirdpartyorchestrator.controllers
 
 import java.time.Period
 
-import akka.stream.Materializer
+import org.apache.pekko.stream.Materializer
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 
 import play.api.Application
