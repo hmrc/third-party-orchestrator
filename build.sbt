@@ -1,81 +1,64 @@
-import bloop.integrations.sbt.BloopDefaults
-import sbt.Keys._
-import sbt.Tests.{Group, SubProcess}
-import sbt._
+import play.sbt.PlayScala
 import uk.gov.hmrc.DefaultBuildSettings
-import uk.gov.hmrc.DefaultBuildSettings._
-import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
+import uk.gov.hmrc.DefaultBuildSettings.*
+import bloop.integrations.sbt.BloopDefaults
 
 lazy val appName = "third-party-orchestrator"
 
-lazy val plugins: Seq[Plugins]         = Seq(PlayScala, SbtDistributablesPlugin)
-lazy val playSettings: Seq[Setting[_]] = Seq.empty
+Global / bloopAggregateSourceDependencies := true
+Global / bloopExportJarClassifiers := Some(Set("sources"))
 
-scalaVersion := "2.13.12"
-
+ThisBuild / scalaVersion := "2.13.12"
+ThisBuild / majorVersion := 0
 ThisBuild / libraryDependencySchemes += "org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always
 ThisBuild / semanticdbEnabled := true
 ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
 
 lazy val microservice = Project(appName, file("."))
-  .enablePlugins(plugins: _*)
+  .enablePlugins(PlayScala, SbtDistributablesPlugin)
   .disablePlugins(JUnitXmlReportPlugin)
-  .settings(playSettings: _*)
-  .settings(scalaSettings: _*)
-  .settings(defaultSettings(): _*)
-  .settings(ScoverageSettings())
   .settings(
-    name            := appName,
     libraryDependencies ++= AppDependencies(),
     retrieveManaged := true,
-    routesGenerator := InjectedRoutesGenerator,
-    majorVersion    := 0,
-    routesImport ++= Seq("uk.gov.hmrc.apiplatform.modules.common.domain.models._",
-      "uk.gov.hmrc.thirdpartyorchestrator.commands.applications.controllers.binders._")
+    // https://www.scala-lang.org/2021/01/12/configuring-and-suppressing-warnings.html
+    // suppress warnings in generated routes files
+    scalacOptions += "-Wconf:src=routes/.*:s"
   )
   .settings(
-    Test / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-eT"),
-    Test / fork              := false,
-    Test / unmanagedSourceDirectories ++= Seq(baseDirectory.value / "test", baseDirectory.value / "shared-test"),
-    Test / parallelExecution := false
+    Test / unmanagedSourceDirectories += baseDirectory.value / "shared-test"
   )
-  .configs(IntegrationTest)
-  .settings(DefaultBuildSettings.integrationTestSettings())
+  .settings(ScoverageSettings())
   .settings(
-    IntegrationTest / fork              := false,
-    IntegrationTest / unmanagedSourceDirectories ++= Seq(baseDirectory.value / "it", baseDirectory.value / "shared-test"),
-    addTestReportOption(IntegrationTest, "int-test-reports"),
-    IntegrationTest / testGrouping      := oneForkedJvmPerTest((IntegrationTest / definedTests).value),
-    IntegrationTest / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-eT"),
-    IntegrationTest / parallelExecution := false
+    routesImport ++= Seq(
+      "uk.gov.hmrc.thirdpartyorchestrator.commands.applications.controllers.binders._",
+      "uk.gov.hmrc.apiplatform.modules.common.domain.models._"
+    )
   )
   .settings(
     scalacOptions ++= Seq(
-      "-Wconf:cat=unused&src=views/.*\\.scala:s",
-      "-Wconf:cat=unused&src=.*RoutesPrefix\\.scala:s",
-      "-Wconf:cat=unused&src=.*Routes\\.scala:s",
-      "-Wconf:cat=unused&src=.*ReverseRoutes\\.scala:s"
+      "-Wconf:cat=unused&src=views/.*\\.scala:s"
     )
   )
 
+lazy val it = (project in file("it"))
+  .enablePlugins(PlayScala)
+  .dependsOn(microservice % "test->test")
+  .settings(DefaultBuildSettings.itSettings())
+  .settings(
+    name := "integration-tests",
+    Test / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-eT"),
+    headerSettings(Test) ++ automateHeaderSettings(Test),
+    inConfig(Test)(BloopDefaults.configSettings),
+    addTestReportOption(Test, "int-test-reports")
+  )
+
 commands ++= Seq(
-  Command.command("run-all-tests") { state => "test" :: "it:test" :: state },
+  Command.command("cleanAll") { state => "clean" :: "it/clean" :: state },
+  Command.command("fmtAll") { state => "scalafmtAll" :: "it/scalafmtAll" :: state },
+  Command.command("fixAll") { state => "scalafixAll" :: "it/scalafixAll" :: state },
+  Command.command("testAll") { state => "test" :: "it/test" :: state },
 
-  Command.command("clean-and-test") { state => "clean" :: "compile" :: "run-all-tests" :: state },
-
-  // Coverage does not need compile !
-  Command.command("pre-commit") { state => "clean" :: "scalafmtAll" :: "scalafixAll" :: "coverage" :: "run-all-tests" :: "coverageReport" :: "coverageOff" :: state }
+  Command.command("run-all-tests") { state => "testAll" :: state },
+  Command.command("clean-and-test") { state => "cleanAll" :: "compile" :: "run-all-tests" :: state },
+  Command.command("pre-commit") { state => "cleanAll" :: "fmtAll" :: "fixAll" :: "coverage" :: "testAll" :: "coverageOff" :: "coverageAggregate" :: state }
 )
-def oneForkedJvmPerTest(tests: Seq[TestDefinition]): Seq[Group] =
-  tests map { test =>
-    Group(
-      test.name,
-      Seq(test),
-      SubProcess(
-        ForkOptions().withRunJVMOptions(Vector(s"-Dtest.name=${test.name}"))
-      )
-    )
-  }
-
-Global / bloopAggregateSourceDependencies := true
-
