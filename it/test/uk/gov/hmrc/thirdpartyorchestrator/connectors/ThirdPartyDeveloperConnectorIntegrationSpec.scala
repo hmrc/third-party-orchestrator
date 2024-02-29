@@ -22,13 +22,12 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status._
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.{Application, Configuration, Mode}
-
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.thirdpartyorchestrator.utils.WireMockExtensions
-import uk.gov.hmrc.thirdpartyorchestrator.utils.DeveloperBuilder
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, UserId}
+
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, UserId}
 import uk.gov.hmrc.apiplatform.modules.developers.domain.models.SessionId
+import uk.gov.hmrc.thirdpartyorchestrator.utils.{DeveloperBuilder, WireMockExtensions}
 
 class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrationSpec
     with GuiceOneAppPerSuite with WireMockExtensions {

@@ -16,29 +16,24 @@
 
 package uk.gov.hmrc.thirdpartyorchestrator.commands.applications.connectors
 
-import uk.gov.hmrc.http.HttpClient
-import play.api.http.Status._
-
-import scala.concurrent.ExecutionContext.Implicits.global
-import com.github.tomakehurst.wiremock.client.WireMock._
-import uk.gov.hmrc.http.HeaderCarrier
-import org.scalatestplus.play.guice.GuiceOneServerPerSuite
-import uk.gov.hmrc.thirdpartyorchestrator.utils.{ApplicationBuilder, AsyncHmrcSpec, ConfigBuilder, PrincipalAndSubordinateWireMockSetup, ProxiedHttpClient, WireMockExtensions}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.Actors
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.ClientId
-import uk.gov.hmrc.apiplatform.modules.common.utils
-
 import java.time.Instant
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationResponse, ApplicationState, Collaborators, IpAllowlist, MoreApplication, RateLimitTier, State}
-import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models._
+import scala.concurrent.ExecutionContext.Implicits.global
+
 import cats.data.NonEmptyList
-import uk.gov.hmrc.http.InternalServerException
+import com.github.tomakehurst.wiremock.client.WireMock._
+import org.scalatestplus.play.guice.GuiceOneServerPerSuite
+
+import play.api.http.Status._
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, InternalServerException}
+
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Actors, ApplicationId, ClientId, Environment, UserId}
+import uk.gov.hmrc.apiplatform.modules.common.utils
 import uk.gov.hmrc.thirdpartyorchestrator.commands.applications.domain.models.{AppCmdHandlerTypes, DispatchSuccessResult}
+import uk.gov.hmrc.thirdpartyorchestrator.utils._
 
 class ApplicationCommandConnectorISpec
     extends AsyncHmrcSpec

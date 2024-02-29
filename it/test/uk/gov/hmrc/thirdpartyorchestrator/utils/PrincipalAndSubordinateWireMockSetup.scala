@@ -20,13 +20,14 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.{MappingBuilder, WireMock}
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration._
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
-import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
+import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, Suite}
 import org.scalatestplus.play.FakeApplicationFactory
-import play.api.{Application, Mode}
+
 import play.api.inject.guice.GuiceApplicationBuilder
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
+import play.api.{Application, Mode}
 import uk.gov.hmrc.http.HeaderCarrier
-import org.scalatest.Suite
+
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
 
 trait PrincipalAndSubordinateWireMockSetup extends BeforeAndAfterEach with BeforeAndAfterAll {
   self: Suite with ConfigBuilder with FakeApplicationFactory =>
