@@ -66,7 +66,7 @@ class ApplicationCommandConnectorISpec
         collaborators = Set.empty,
         createdOn = createdOn,
         lastAccess = Some(lastAccess),
-        grantLength = 547,
+        grantLength = GrantLength.EIGHTEEN_MONTHS,
         lastAccessTokenUsage = None,
         termsAndConditionsUrl = None,
         privacyPolicyUrl = None,

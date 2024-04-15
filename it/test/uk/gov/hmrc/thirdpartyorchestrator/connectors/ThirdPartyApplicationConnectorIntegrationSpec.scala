@@ -114,7 +114,7 @@ class ThirdPartyApplicationConnectorIntegrationSpec extends BaseConnectorIntegra
        |  ],
        |  "createdOn": "$nowAsText",
        |  "lastAccess": "$nowAsText",
-       |  "grantLength": 18,
+       |  "grantLength": 547,
        |  "redirectUris": [],
        |  "access": {
        |    "redirectUris": [],

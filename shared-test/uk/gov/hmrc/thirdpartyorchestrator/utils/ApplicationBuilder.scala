@@ -54,7 +54,7 @@ trait ApplicationBuilder extends FixedClock {
       collaborators = Set(buildCollaborator(userId1), buildCollaborator(userId2)),
       createdOn = instant,
       lastAccess = Some(instant),
-      grantLength = 18,
+      grantLength = GrantLength.EIGHTEEN_MONTHS,
       lastAccessTokenUsage = None,
       termsAndConditionsUrl = None,
       privacyPolicyUrl = None,
