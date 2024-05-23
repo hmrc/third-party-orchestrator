@@ -131,5 +131,18 @@ class AppCmdControllerSpec extends AsyncHmrcSpec with FixedClock {
       CommandConnectorMocks.Prod.IssueCommand.verifyCalledWith(cmd, verifiedEmails)
       CommandConnectorMocks.Sandbox.IssueCommand.verifyNoCommandsIssued()
     }
+
+    "dispatch a command and handle unauthorised command" in new Setup {
+      ApplicationFetcherMock.FetchApplication.thenReturn(productionApplicationId)(productionApplication.some)
+
+      CommandConnectorMocks.Prod.IssueCommand.Dispatch.throwsUnauthorised()
+
+      val cmd: ApplicationCommands.AddCollaborator = ApplicationCommands.AddCollaborator(Actors.AppCollaborator(adminEmail), developerAsCollaborator, instant)
+      val request: FakeRequest[JsValue]            =
+        FakeRequest("PATCH", s"/applications/${productionApplicationId.value}/dispatch").withBody(Json.toJson(DispatchRequest(cmd, verifiedEmails)))
+
+      val result: Future[Result] = controller.dispatch(productionApplicationId)(request)
+      status(result) shouldBe UNAUTHORIZED
+    }
   }
 }
