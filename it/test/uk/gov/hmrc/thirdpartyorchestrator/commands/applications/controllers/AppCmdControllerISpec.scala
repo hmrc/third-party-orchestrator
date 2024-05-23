@@ -16,34 +16,22 @@
 
 package uk.gov.hmrc.thirdpartyorchestrator.commands.applications.controllers
 
-import java.time.Instant
-import scala.concurrent.ExecutionContext.Implicits.global
-
-import cats.data.NonEmptyList
 import com.github.tomakehurst.wiremock.client.WireMock._
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 
 import play.api.http.Status._
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, InternalServerException, UnauthorizedException}
+import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.libs.json.Json
+import play.api.libs.ws.{WSClient, WSResponse}
+import play.api.{Application, Configuration, Mode}
+import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Actors, ApplicationId, ClientId, Environment, UserId}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.utils
-import uk.gov.hmrc.thirdpartyorchestrator.commands.applications.domain.models.{AppCmdHandlerTypes, DispatchSuccessResult}
 import uk.gov.hmrc.thirdpartyorchestrator.utils._
-import play.api.libs.ws.WSClient
-import uk.gov.hmrc.thirdpartyorchestrator.commands.applications.connectors.PrincipalAppCmdConnector
-import uk.gov.hmrc.thirdpartyorchestrator.commands.applications.connectors.AppCmdConnector
-import play.api.Configuration
-import play.api.Application
-import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.Mode
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
-import play.api.libs.json.Json
-import play.api.libs.ws.WSResponse
 
 class AppCmdControllerISpec
     extends AsyncHmrcSpec
@@ -54,12 +42,14 @@ class AppCmdControllerISpec
     with ApplicationBuilder
     with utils.FixedClock {
 
-  val stubPort       = sys.env.getOrElse("WIREMOCK", "22222").toInt
-  val stubHost       = "localhost"
+  val stubPort = sys.env.getOrElse("WIREMOCK", "22222").toInt
+  val stubHost = "localhost"
 
   private val stubConfig = Configuration(
-    "microservice.services.third-party-application-principal.host" -> stubHost,
-    "microservice.services.third-party-application-principal.port" -> stubPort
+    "microservice.services.third-party-application-principal.host"   -> stubHost,
+    "microservice.services.third-party-application-principal.port"   -> stubPort,
+    "microservice.services.third-party-application-subordinate.host" -> stubHost,
+    "microservice.services.third-party-application-subordinate.port" -> stubPort
   )
 
   override def fakeApplication(): Application =
@@ -69,34 +59,128 @@ class AppCmdControllerISpec
       .build()
 
   trait Setup {
-    val applicationId = ApplicationId.random
-    implicit val hc: HeaderCarrier      = HeaderCarrier()
-    lazy val baseUrl = s"http://localhost:$port"
+    val applicationId              = ApplicationId.random
+    implicit val hc: HeaderCarrier = HeaderCarrier()
+    lazy val baseUrl               = s"http://localhost:$port"
 
-    val wsClient = app.injector.instanceOf[WSClient]
+    val wsClient           = app.injector.instanceOf[WSClient]
     val requestorEmail     = "requestor@example.com".toLaxEmail
     val newTeamMemberEmail = "newTeamMember@example.com".toLaxEmail
-    val newCollaborator = Collaborators.Administrator(UserId.random, newTeamMemberEmail)
-    val cmd             = ApplicationCommands.AddCollaborator(Actors.AppCollaborator(requestorEmail), newCollaborator, instant)
-    val request         = DispatchRequest(cmd, Set.empty[LaxEmailAddress])
+    val newCollaborator    = Collaborators.Administrator(UserId.random, newTeamMemberEmail)
+    val cmd                = ApplicationCommands.AddCollaborator(Actors.AppCollaborator(requestorEmail), newCollaborator, instant)
+    val request            = DispatchRequest(cmd, Set.empty[LaxEmailAddress])
   }
 
-
- 
   "AppCmdController" should {
     "return 401 when Unauthorised is returned from connector" in new Setup {
-       
-      stubFor(Environment.PRODUCTION)(
+
+      stubForApplication(applicationId, ClientId.random, UserId.random, UserId.random)
+
+      stubFor(Environment.SANDBOX)(
         patch(urlMatching(s"/application/${applicationId.value}/dispatch"))
           .willReturn(
             aResponse()
               .withStatus(UNAUTHORIZED)
           )
       )
-     val body = Json.toJson(request).toString()
-     println(s"**** $body ****")
-      val response: WSResponse = await(wsClient.url(s"${baseUrl}/applications/${applicationId.value}/dispatch").withHttpHeaders(("content-type", "application/json")).patch(body))  
-      response.status shouldBe UNAUTHORIZED   
+      val body                 = Json.toJson(request).toString()
+      val response: WSResponse = await(wsClient.url(s"${baseUrl}/applications/${applicationId.value}/dispatch").withHttpHeaders(("content-type", "application/json")).patch(body))
+      response.status shouldBe UNAUTHORIZED
     }
+  }
+
+  private def stubForApplication(applicationId: ApplicationId, clientId: ClientId, userId1: UserId, userId2: UserId) = {
+    stubFor(Environment.PRODUCTION)(
+      get(urlPathEqualTo(s"/application/$applicationId"))
+        .willReturn(
+          aResponse()
+            .withStatus(NOT_FOUND)
+            .withHeader("Content-Type", "application/json")
+        )
+    )
+    stubFor(Environment.SANDBOX)(
+      get(urlPathEqualTo(s"/application/$applicationId"))
+        .willReturn(
+          aResponse()
+            .withStatus(OK)
+            .withHeader("Content-Type", "application/json")
+            .withBody(getBody(applicationId, clientId, userId1, userId2))
+        )
+    )
+  }
+
+  private def getBody(applicationId: ApplicationId, clientId: ClientId, userId1: UserId, userId2: UserId) = {
+    s"""{
+       |  "id": "$applicationId",
+       |  "clientId": "$clientId",
+       |  "gatewayId": "gateway-id",
+       |  "name": "Petes test application",
+       |  "deployedTo": "PRODUCTION",
+       |  "description": "Petes test application description",
+       |  "collaborators": [
+       |    {
+       |      "userId": "$userId1",
+       |      "emailAddress": "bob@example.com",
+       |      "role": "ADMINISTRATOR"
+       |    },
+       |    {
+       |      "userId": "$userId2",
+       |      "emailAddress": "bob@example.com",
+       |      "role": "ADMINISTRATOR"
+       |    }
+       |  ],
+       |  "createdOn": "$nowAsText",
+       |  "lastAccess": "$nowAsText",
+       |  "grantLength": 547,
+       |  "redirectUris": [],
+       |  "access": {
+       |    "redirectUris": [],
+       |    "overrides": [],
+       |    "importantSubmissionData": {
+       |      "organisationUrl": "https://www.example.com",
+       |      "responsibleIndividual": {
+       |        "fullName": "Bob Fleming",
+       |        "emailAddress": "bob@example.com"
+       |      },
+       |      "serverLocations": [
+       |        {
+       |          "serverLocation": "inUK"
+       |        }
+       |      ],
+       |      "termsAndConditionsLocation": {
+       |        "termsAndConditionsType": "inDesktop"
+       |      },
+       |      "privacyPolicyLocation": {
+       |        "privacyPolicyType": "inDesktop"
+       |      },
+       |      "termsOfUseAcceptances": [
+       |        {
+       |          "responsibleIndividual": {
+       |            "fullName": "Bob Fleming",
+       |            "emailAddress": "bob@example.com"
+       |          },
+       |          "dateTime": "$nowAsText",
+       |          "submissionId": "4e62811a-7ab3-4421-a89e-65a8bad9b6ae",
+       |          "submissionInstance": 0
+       |        }
+       |      ]
+       |    },
+       |    "accessType": "STANDARD"
+       |  },
+       |  "state": {
+       |    "name": "TESTING",
+       |    "updatedOn": "$nowAsText"
+       |  },
+       |  "rateLimitTier": "BRONZE",
+       |  "blocked": false,
+       |  "trusted": false,
+       |  "ipAllowlist": {
+       |    "required": false,
+       |    "allowlist": []
+       |  },
+       |  "moreApplication": {
+       |    "allowAutoDelete": false
+       |  }
+       |}""".stripMargin
   }
 }

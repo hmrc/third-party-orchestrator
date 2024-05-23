@@ -162,7 +162,7 @@ class ApplicationCommandConnectorISpec
               .withStatus(UNAUTHORIZED)
           )
       )
-      
+
       intercept[UnauthorizedException] {
         await(connector.dispatch(applicationId, request))
       }.message shouldBe (s"Command unauthorised")
