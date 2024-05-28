@@ -42,14 +42,11 @@ class AppCmdControllerISpec
     with ApplicationBuilder
     with utils.FixedClock {
 
-  val stubPort = sys.env.getOrElse("WIREMOCK", "22222").toInt
-  val stubHost = "localhost"
-
   private val stubConfig = Configuration(
-    "microservice.services.third-party-application-principal.host"   -> stubHost,
-    "microservice.services.third-party-application-principal.port"   -> stubPort,
-    "microservice.services.third-party-application-subordinate.host" -> stubHost,
-    "microservice.services.third-party-application-subordinate.port" -> stubPort
+    "microservice.services.third-party-application-principal.host"   -> WireMockHost,
+    "microservice.services.third-party-application-principal.port"   -> WireMockPrincipalPort,
+    "microservice.services.third-party-application-subordinate.host" -> WireMockHost,
+    "microservice.services.third-party-application-subordinate.port" -> WireMockSubordinatePort
   )
 
   override def fakeApplication(): Application =
@@ -115,7 +112,7 @@ class AppCmdControllerISpec
        |  "clientId": "$clientId",
        |  "gatewayId": "gateway-id",
        |  "name": "Petes test application",
-       |  "deployedTo": "PRODUCTION",
+       |  "deployedTo": "SANDBOX",
        |  "description": "Petes test application description",
        |  "collaborators": [
        |    {
