@@ -24,7 +24,7 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 
 import play.api.http.Status._
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, InternalServerException}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, InternalServerException, UnauthorizedException}
 
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
@@ -152,6 +152,20 @@ class ApplicationCommandConnectorISpec
       val result = await(connector.dispatch(applicationId, request))
 
       result.left.value shouldBe NonEmptyList.one(CommandFailures.CollaboratorAlreadyExistsOnApp)
+    }
+
+    "return unauthorised" in new CollaboratorSetup with PrincipalSetup {
+      stubFor(Environment.PRODUCTION)(
+        patch(urlMatching(s".*/application/${applicationId.value}/dispatch"))
+          .willReturn(
+            aResponse()
+              .withStatus(UNAUTHORIZED)
+          )
+      )
+
+      intercept[UnauthorizedException] {
+        await(connector.dispatch(applicationId, request))
+      }.message shouldBe (s"Command unauthorised")
     }
 
     "return for generic error" in new CollaboratorSetup with PrincipalSetup {
