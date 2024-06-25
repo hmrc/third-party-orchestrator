@@ -48,7 +48,7 @@ trait ApplicationBuilder extends FixedClock {
       id = applicationId,
       clientId = clientId,
       gatewayId = "gateway-id",
-      name = "Petes test application",
+      name = ApplicationName("Petes test application"),
       deployedTo = Environment.PRODUCTION,
       description = Some("Petes test application description"),
       collaborators = Set(buildCollaborator(userId1), buildCollaborator(userId2)),
