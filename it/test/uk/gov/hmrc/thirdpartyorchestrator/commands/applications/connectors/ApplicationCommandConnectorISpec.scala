@@ -60,7 +60,7 @@ class ApplicationCommandConnectorISpec
         id = applicationId,
         clientId = clientId,
         gatewayId = "gatewayId",
-        name = "appName",
+        name = ApplicationName("appName"),
         deployedTo = Environment.PRODUCTION,
         description = Some("random description"),
         collaborators = Set.empty,
