@@ -22,28 +22,28 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, Us
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 
-case class UserResponse(
+case class LimitedUserResponse(
     userId: UserId,
     email: LaxEmailAddress,
     firstName: String,
     lastName: String
   )
 
-object UserResponse {
+object LimitedUserResponse {
 
-  def from(session: UserSession): UserResponse =
+  def from(session: UserSession): LimitedUserResponse =
     from(session.developer)
 
-  def from(users: Set[User]): Set[UserResponse] =
+  def from(users: Set[User]): Set[LimitedUserResponse] =
     users.map(from)
 
-  def from(user: User): UserResponse =
-    UserResponse(
+  def from(user: User): LimitedUserResponse =
+    LimitedUserResponse(
       user.userId,
       user.email,
       user.firstName,
       user.lastName
     )
 
-  implicit val format: OFormat[UserResponse] = Json.format[UserResponse]
+  implicit val format: OFormat[LimitedUserResponse] = Json.format[LimitedUserResponse]
 }
