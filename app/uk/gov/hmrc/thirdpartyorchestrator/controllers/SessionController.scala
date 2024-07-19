@@ -23,12 +23,12 @@ import play.api.libs.json.{Json, OFormat}
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
-import uk.gov.hmrc.apiplatform.modules.developers.domain.models.{LoggedInState, Session, SessionId}
-import uk.gov.hmrc.thirdpartyorchestrator.domain.models.developers.DeveloperResponse
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession, UserSessionId}
+import uk.gov.hmrc.thirdpartyorchestrator.domain.models.developers.UserResponse
 import uk.gov.hmrc.thirdpartyorchestrator.services.SessionService
 
 object SessionController {
-  case class SessionRequest(sessionId: SessionId)
+  case class SessionRequest(sessionId: UserSessionId)
   implicit val formatSession: OFormat[SessionRequest] = Json.format[SessionRequest]
 }
 
@@ -44,8 +44,8 @@ class SessionController @Inject() (
   def getDeveloperForSession(): Action[AnyContent] = Action.async { implicit request =>
     withJsonBodyFromAnyContent[SessionRequest] { sessionRequest =>
       sessionService.fetch(sessionRequest.sessionId).map {
-        case Some(session @ Session(_, LoggedInState.LOGGED_IN, _)) => Ok(Json.toJson(DeveloperResponse.from(session)))
-        case _                                                      => NotFound("Unknown session id")
+        case Some(session @ UserSession(_, LoggedInState.LOGGED_IN, _)) => Ok(Json.toJson(UserResponse.from(session)))
+        case _                                                          => NotFound("Unknown session id")
       }
     }
   }

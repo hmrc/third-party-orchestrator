@@ -26,8 +26,10 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, UserId}
-import uk.gov.hmrc.apiplatform.modules.developers.domain.models.SessionId
-import uk.gov.hmrc.thirdpartyorchestrator.utils.{DeveloperBuilder, WireMockExtensions}
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession, UserSessionId}
+import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
+import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
+import uk.gov.hmrc.thirdpartyorchestrator.utils.WireMockExtensions
 
 class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrationSpec
     with GuiceOneAppPerSuite with WireMockExtensions {
@@ -42,15 +44,15 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
       .in(Mode.Test)
       .build()
 
-  trait Setup extends DeveloperBuilder {
+  trait Setup extends UserBuilder with LocalUserIdTracker {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val userEmail         = "thirdpartydeveloper@example.com".toLaxEmail
     val applicationId     = ApplicationId.random
     val userId            = UserId.random
-    val sessionId         = SessionId.random
-    val expectedSession   = buildSession(sessionId, userId, "John", "Doe", userEmail)
-    val expectedDeveloper = buildDeveloper(userId, userEmail, "John", "Doe", true)
+    val sessionId         = UserSessionId.random
+    val expectedSession   = UserSession(sessionId, LoggedInState.LOGGED_IN, buildUser(userEmail, "John", "Doe").copy(userId = userId))
+    val expectedDeveloper = buildUser(userEmail, "John", "Doe").copy(userId = userId, verified = true)
 
     val underTest: ThirdPartyDeveloperConnector = app.injector.instanceOf[ThirdPartyDeveloperConnector]
   }
@@ -72,54 +74,14 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
                            |    "email": "${userEmail.text}",
                            |    "firstName": "John",
                            |    "lastName": "Doe",
-                           |    "registrationTime": "2022-12-23T12:24:31.123",
-                           |    "lastModified": "2023-10-23T12:24:32.543",
+                           |    "registrationTime": "$nowAsText",
+                           |    "lastModified": "$nowAsText",
                            |    "verified": true,
-                           |    "organisation": "Example Corp",
-                           |    "accountSetup": {
-                           |      "roles": [
-                           |        "ROLE1"
-                           |      ],
-                           |      "services": [
-                           |        "SERVICE1"
-                           |      ],
-                           |      "targets": [
-                           |        "TARGET1"
-                           |      ],
-                           |      "incomplete": false
-                           |    },
                            |    "mfaEnabled": true,
-                           |    "mfaDetails": [ 
-                           |       {
-                           |         "id": "5e62811a-7ab3-4421-a89e-65a8bad9b6ad",
-                           |         "name": "Petes App",
-                           |         "createdOn": "2022-12-28T11:21:31.123",
-                           |         "verified": true,
-                           |         "mfaType": "AUTHENTICATOR_APP"
-                           |       },
-                           |       {
-                           |         "id": "6e62811a-7ab3-4421-a89e-65a8bad9b6ac",
-                           |         "name": "Petes Phone",
-                           |         "createdOn": "2023-01-21T11:21:31.123",
-                           |         "mobileNumber": "07123456789",
-                           |         "verified": true,
-                           |         "mfaType": "SMS"
-                           |       }
-                           |    ],
-                           |    "nonce": "2435364598347653405635324543645634575",
+                           |    "mfaDetails": [],
                            |    "emailPreferences": { 
-                           |      "interests": [
-                           |        {
-                           |          "regime": "REGIME1",
-                           |          "services": [
-                           |            "SERVICE1",
-                           |            "SERVICE2"
-                           |          ]
-                           |        }
-                           |      ], 
-                           |      "topics": [
-                           |        "TECHNICAL"
-                           |      ] 
+                           |      "interests": [],
+                           |      "topics": []
                            |    }
                            |  }
                            |}""".stripMargin)
@@ -147,54 +109,15 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
                            |  "email": "${userEmail.text}",
                            |  "firstName": "John",
                            |  "lastName": "Doe",
-                           |  "registrationTime": "2022-12-23T12:24:31.123",
-                           |  "lastModified": "2023-10-23T12:24:32.543",
+                           |  "registrationTime": "$nowAsText",
+                           |  "lastModified": "$nowAsText",
                            |  "verified": true,
-                           |  "organisation": "Example Corp",
-                           |  "accountSetup": {
-                           |    "roles": [
-                           |      "ROLE1"
-                           |    ],
-                           |    "services": [
-                           |      "SERVICE1"
-                           |    ],
-                           |    "targets": [
-                           |      "TARGET1"
-                           |    ],
-                           |    "incomplete": false
-                           |  },
-                           |  "mfaEnabled": true,
-                           |  "mfaDetails": [ 
-                           |     {
-                           |       "id": "5e62811a-7ab3-4421-a89e-65a8bad9b6ad",
-                           |       "name": "Petes App",
-                           |       "createdOn": "2022-12-28T11:21:31.123",
-                           |       "verified": true,
-                           |       "mfaType": "AUTHENTICATOR_APP"
-                           |     },
-                           |     {
-                           |       "id": "6e62811a-7ab3-4421-a89e-65a8bad9b6ac",
-                           |       "name": "Petes Phone",
-                           |       "createdOn": "2023-01-21T11:21:31.123",
-                           |       "mobileNumber": "07123456789",
-                           |       "verified": true,
-                           |       "mfaType": "SMS"
-                           |     }
-                           |  ],
-                           |  "nonce": "2435364598347653405635324543645634575",
+                           |  "mfaDetails": [],
                            |  "emailPreferences": { 
-                           |    "interests": [
-                           |      {
-                           |        "regime": "REGIME1",
-                           |        "services": [
-                           |          "SERVICE1",
-                           |          "SERVICE2"
-                           |        ]
-                           |      }
-                           |    ], 
-                           |    "topics": [
-                           |      "TECHNICAL"
-                           |    ] 
+                           |    "interests": [],
+
+                           |    "topics": []
+
                            |  }
                            |}""".stripMargin)
           )

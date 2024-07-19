@@ -25,8 +25,8 @@ import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId}
-import uk.gov.hmrc.apiplatform.modules.developers.domain.models.Developer
-import uk.gov.hmrc.thirdpartyorchestrator.domain.models.developers.DeveloperResponse
+import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
+import uk.gov.hmrc.thirdpartyorchestrator.domain.models.developers.UserResponse
 import uk.gov.hmrc.thirdpartyorchestrator.services.ApplicationService
 
 @Singleton()
@@ -59,7 +59,7 @@ class ApplicationController @Inject() (
 
   def getVerifiedDevelopersForApplication(applicationId: ApplicationId): Action[AnyContent] = Action.async { implicit request =>
     lazy val failed = (msg: String) => NotFound(msg)
-    val success     = (result: Set[Developer]) => Ok(Json.toJson(DeveloperResponse.from(result)))
+    val success     = (result: Set[User]) => Ok(Json.toJson(UserResponse.from(result)))
     applicationService.fetchVerifiedCollaboratorsForApplication(applicationId).map(_.fold(failed, success))
   }
 }

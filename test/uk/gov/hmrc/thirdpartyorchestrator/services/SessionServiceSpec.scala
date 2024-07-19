@@ -16,29 +16,30 @@
 
 package uk.gov.hmrc.thirdpartyorchestrator.services
 
-import java.time.LocalDateTime
 import scala.concurrent.ExecutionContext.Implicits.global
 
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
-import uk.gov.hmrc.apiplatform.modules.developers.domain.models.SessionId
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession, UserSessionId}
+import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
+import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartyorchestrator.mocks.connectors.ThirdPartyDeveloperConnectorMockModule
-import uk.gov.hmrc.thirdpartyorchestrator.utils.{AsyncHmrcSpec, DeveloperBuilder}
+import uk.gov.hmrc.thirdpartyorchestrator.utils.AsyncHmrcSpec
 
 class SessionServiceSpec extends AsyncHmrcSpec {
 
-  trait Setup extends ThirdPartyDeveloperConnectorMockModule with DeveloperBuilder {
+  trait Setup extends ThirdPartyDeveloperConnectorMockModule with UserBuilder
+      with LocalUserIdTracker {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val underTest = new SessionService(ThirdPartyDeveloperConnectorMock.aMock)
 
     val email     = "thirdpartydeveloper@example.com".toLaxEmail
     val userId    = UserId.random
-    val now       = LocalDateTime.now
-    val sessionId = SessionId.random
-    val session   = buildSession(sessionId, userId, "Bob", "Fleming", email)
+    val sessionId = UserSessionId.random
+    val session   = UserSession(sessionId, LoggedInState.LOGGED_IN, buildUser(email, "Bob", "Fleming").copy(userId = userId))
   }
 
   "fetchSession" should {

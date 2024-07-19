@@ -19,30 +19,31 @@ package uk.gov.hmrc.thirdpartyorchestrator.domain.models.developers
 import play.api.libs.json.{Json, OFormat}
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId}
-import uk.gov.hmrc.apiplatform.modules.developers.domain.models.{Developer, Session}
+import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 
-case class DeveloperResponse(
+case class UserResponse(
     userId: UserId,
     email: LaxEmailAddress,
     firstName: String,
     lastName: String
   )
 
-object DeveloperResponse {
+object UserResponse {
 
-  def from(session: Session): DeveloperResponse =
+  def from(session: UserSession): UserResponse =
     from(session.developer)
 
-  def from(developers: Set[Developer]): Set[DeveloperResponse] =
-    developers.map(from)
+  def from(users: Set[User]): Set[UserResponse] =
+    users.map(from)
 
-  def from(developer: Developer): DeveloperResponse =
-    DeveloperResponse(
-      developer.userId,
-      developer.email,
-      developer.firstName,
-      developer.lastName
+  def from(user: User): UserResponse =
+    UserResponse(
+      user.userId,
+      user.email,
+      user.firstName,
+      user.lastName
     )
 
-  implicit val format: OFormat[DeveloperResponse] = Json.format[DeveloperResponse]
+  implicit val format: OFormat[UserResponse] = Json.format[UserResponse]
 }

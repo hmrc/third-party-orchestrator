@@ -24,7 +24,8 @@ import uk.gov.hmrc.http.{HttpClient, _}
 import uk.gov.hmrc.play.http.metrics.common._
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
-import uk.gov.hmrc.apiplatform.modules.developers.domain.models.{Developer, Session, SessionId}
+import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{UserSession, UserSessionId}
 import uk.gov.hmrc.thirdpartyorchestrator.config.AppConfig
 
 @Singleton
@@ -38,14 +39,14 @@ class ThirdPartyDeveloperConnector @Inject() (
   lazy val serviceBaseUrl: String = config.thirdPartyDeveloperUrl
   val api                         = API("third-party-developer")
 
-  def fetchSession(sessionId: SessionId)(implicit hc: HeaderCarrier): Future[Option[Session]] =
+  def fetchSession(userSessionId: UserSessionId)(implicit hc: HeaderCarrier): Future[Option[UserSession]] =
     record {
-      http.GET[Option[Session]](s"$serviceBaseUrl/session/$sessionId")
+      http.GET[Option[UserSession]](s"$serviceBaseUrl/session/$userSessionId")
     }
 
-  def fetchDeveloper(userId: UserId)(implicit hc: HeaderCarrier): Future[Option[Developer]] = {
+  def fetchDeveloper(userId: UserId)(implicit hc: HeaderCarrier): Future[Option[User]] = {
     record {
-      http.GET[Option[Developer]](s"$serviceBaseUrl/developer", Seq("developerId" -> userId.toString()))
+      http.GET[Option[User]](s"$serviceBaseUrl/developer", Seq("developerId" -> userId.toString()))
     }
   }
 }

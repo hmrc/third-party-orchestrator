@@ -22,13 +22,15 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, UserId}
+import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
+import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartyorchestrator.mocks.connectors.ThirdPartyDeveloperConnectorMockModule
 import uk.gov.hmrc.thirdpartyorchestrator.mocks.services.ApplicationFetcherMockModule
-import uk.gov.hmrc.thirdpartyorchestrator.utils.{ApplicationBuilder, AsyncHmrcSpec, DeveloperBuilder}
+import uk.gov.hmrc.thirdpartyorchestrator.utils.{ApplicationBuilder, AsyncHmrcSpec}
 
 class ApplicationServiceSpec extends AsyncHmrcSpec {
 
-  trait Setup extends ThirdPartyDeveloperConnectorMockModule with ApplicationFetcherMockModule with DeveloperBuilder with ApplicationBuilder {
+  trait Setup extends ThirdPartyDeveloperConnectorMockModule with ApplicationFetcherMockModule with UserBuilder with ApplicationBuilder with LocalUserIdTracker {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val underTest = new ApplicationService(ThirdPartyDeveloperConnectorMock.aMock, ApplicationFetcherMock.aMock)
@@ -38,8 +40,8 @@ class ApplicationServiceSpec extends AsyncHmrcSpec {
     val userId1       = UserId.random
     val userId2       = UserId.random
     val clientId      = ClientId.random
-    val developer1    = buildDeveloper(userId1, email, "Bob", "Fleming", true)
-    val developer2    = buildDeveloper(userId2, email, "Bob", "Fleming", false)
+    val developer1    = buildUser(email, "Bob", "Fleming").copy(userId = userId1, verified = true)
+    val developer2    = buildUser(email, "Bob", "Fleming").copy(userId = userId2, verified = false)
     val application   = buildApplication(applicationId, clientId, userId1, userId2)
   }
 
