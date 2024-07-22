@@ -18,7 +18,6 @@ object AppDependencies {
 
   val testDeps = Seq(
     "uk.gov.hmrc" %% "bootstrap-test-play-30"          % bootstrapVersion,
-    "uk.gov.hmrc" %% "api-platform-test-common-domain" % commonDomainVersion,
     "uk.gov.hmrc" %% "api-platform-test-tpd-domain" % tpdDomainVersion
   ).map(_ % "test")
 }
