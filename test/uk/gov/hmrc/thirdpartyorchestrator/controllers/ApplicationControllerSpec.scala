@@ -26,13 +26,15 @@ import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
+import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartyorchestrator.mocks.services.ApplicationServiceMock
-import uk.gov.hmrc.thirdpartyorchestrator.utils.{ApplicationBuilder, DeveloperBuilder}
+import uk.gov.hmrc.thirdpartyorchestrator.utils.ApplicationBuilder
 
 class ApplicationControllerSpec extends BaseControllerSpec with Matchers {
 
   trait Setup
-      extends ApplicationServiceMock with DeveloperBuilder with ApplicationBuilder {
+      extends ApplicationServiceMock with UserBuilder with ApplicationBuilder with LocalUserIdTracker {
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
@@ -41,7 +43,7 @@ class ApplicationControllerSpec extends BaseControllerSpec with Matchers {
     val userId1       = UserId.random
     val userId2       = UserId.random
     val email         = LaxEmailAddress("bob@example.com")
-    val developer     = buildDeveloper(userId1, email, "Bob", "Fleming", true)
+    val developer     = buildUser(email, "Bob", "Fleming").copy(userId = userId1, verified = true)
     val application   = buildApplication(applicationId, clientId, userId1, userId2)
     val controller    = new ApplicationController(applicationServiceMock, Helpers.stubControllerComponents())
   }

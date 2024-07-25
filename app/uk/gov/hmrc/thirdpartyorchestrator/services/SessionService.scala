@@ -21,7 +21,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.developers.domain.models.{Session, SessionId}
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{UserSession, UserSessionId}
 import uk.gov.hmrc.thirdpartyorchestrator.connectors.ThirdPartyDeveloperConnector
 
 @Singleton
@@ -30,6 +30,6 @@ class SessionService @Inject() (
   )(implicit val ec: ExecutionContext
   ) {
 
-  def fetch(sessionId: SessionId)(implicit hc: HeaderCarrier): Future[Option[Session]] =
+  def fetch(sessionId: UserSessionId)(implicit hc: HeaderCarrier): Future[Option[UserSession]] =
     thirdPartyDeveloperConnector.fetchSession(sessionId)
 }

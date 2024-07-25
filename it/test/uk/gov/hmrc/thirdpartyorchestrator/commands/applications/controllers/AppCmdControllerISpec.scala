@@ -69,6 +69,14 @@ class AppCmdControllerISpec
   }
 
   "AppCmdController" should {
+
+    "return 400 when payload is valid json but not valid object" in new Setup {
+      // command: ApplicationCommand, verifiedCollaboratorsToNotify: Set[LaxEmailAddress])
+      val body                 = Json.toJson("""{"command":"somecommand", "verifiedCollaboratorsToNotify":[]  }""").toString()
+      val response: WSResponse = await(wsClient.url(s"${baseUrl}/applications/${applicationId.value}/dispatch").withHttpHeaders(("content-type", "application/json")).patch(body))
+      response.status shouldBe BAD_REQUEST
+    }
+
     "return 401 when Unauthorised is returned from connector" in new Setup {
 
       stubForApplication(applicationId, ClientId.random, UserId.random, UserId.random)

@@ -27,21 +27,22 @@ import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
-import uk.gov.hmrc.apiplatform.modules.developers.domain.models.SessionId
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession, UserSessionId}
+import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
+import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartyorchestrator.controllers.SessionController._
 import uk.gov.hmrc.thirdpartyorchestrator.mocks.services.SessionServiceMock
-import uk.gov.hmrc.thirdpartyorchestrator.utils.DeveloperBuilder
 
 class SessionControllerSpec extends BaseControllerSpec with Matchers {
 
   trait Setup
-      extends SessionServiceMock with DeveloperBuilder {
+      extends SessionServiceMock with UserBuilder with LocalUserIdTracker {
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val userId     = UserId.random
-    val sessionId  = SessionId.random
-    val session    = buildSession(sessionId, userId, "Bob", "Fleming", LaxEmailAddress("bob@example.com"))
+    val sessionId  = UserSessionId.random
+    val session    = UserSession(sessionId, LoggedInState.LOGGED_IN, buildUser(LaxEmailAddress("bob@example.com"), "Bob", "Fleming").copy(userId = userId))
     val controller = new SessionController(sessionServiceMock, Helpers.stubControllerComponents())
   }
 
