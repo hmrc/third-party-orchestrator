@@ -19,13 +19,14 @@ package uk.gov.hmrc.thirdpartyorchestrator.commands.applications.connectors
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
-import uk.gov.hmrc.http.{HttpClient, _}
+import uk.gov.hmrc.http.client.{HttpClientV2, RequestBuilder}
+import uk.gov.hmrc.http.{StringContextOps, _}
 
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.thirdpartyorchestrator.commands.applications.domain.models.{AppCmdHandlerTypes, DispatchSuccessResult}
 import uk.gov.hmrc.thirdpartyorchestrator.connectors.EnvironmentAware
-import uk.gov.hmrc.thirdpartyorchestrator.utils.{ApplicationLogger, ProxiedHttpClient}
+import uk.gov.hmrc.thirdpartyorchestrator.utils.{ApplicationLogger, EbridgeConfigurator}
 
 trait AppCmdConnector {
 
@@ -42,9 +43,11 @@ abstract private[commands] class AbstractAppCmdConnector
 
   implicit def ec: ExecutionContext
   val serviceBaseUrl: String
-  def http: HttpClient
+  def http: HttpClientV2
 
   def baseApplicationUrl(applicationId: ApplicationId) = s"$serviceBaseUrl/application/${applicationId}"
+
+  def configureEbridgeIfRequired(requestBuilder: RequestBuilder): RequestBuilder
 
   def dispatch(
       applicationId: ApplicationId,
@@ -66,11 +69,15 @@ abstract private[commands] class AbstractAppCmdConnector
       }
     }
 
-    val url          = s"${baseApplicationUrl(applicationId)}/dispatch"
-    val extraHeaders = Seq.empty[(String, String)]
+    val url = s"${baseApplicationUrl(applicationId)}/dispatch"
     import cats.syntax.either._
 
-    http.PATCH[DispatchRequest, HttpResponse](url, dispatchRequest, extraHeaders)
+    configureEbridgeIfRequired(
+      http
+        .patch(url"$url")
+        .withBody(Json.toJson(dispatchRequest))
+    )
+      .execute[HttpResponse]
       .map(response =>
         response.status match {
           case OK           => parseWithLogAndThrow[DispatchSuccessResult](response.body).asRight[AppCmdHandlerTypes.Failures]
@@ -87,15 +94,15 @@ abstract private[commands] class AbstractAppCmdConnector
 @Singleton
 class SubordinateAppCmdConnector @Inject() (
     config: SubordinateAppCmdConnector.Config,
-    httpClient: HttpClient,
-    val proxiedHttpClient: ProxiedHttpClient
+    val http: HttpClientV2
   )(implicit override val ec: ExecutionContext
   ) extends AbstractAppCmdConnector {
 
   import config._
   val serviceBaseUrl: String = config.baseUrl
 
-  lazy val http: HttpClient = if (useProxy) proxiedHttpClient.withHeaders(bearerToken, apiKey) else httpClient
+  def configureEbridgeIfRequired(requestBuilder: RequestBuilder): RequestBuilder =
+    EbridgeConfigurator.configure(useProxy, bearerToken, apiKey)(requestBuilder)
 }
 
 object SubordinateAppCmdConnector {
@@ -111,11 +118,13 @@ object SubordinateAppCmdConnector {
 @Singleton
 class PrincipalAppCmdConnector @Inject() (
     config: PrincipalAppCmdConnector.Config,
-    val http: HttpClient
+    val http: HttpClientV2
   )(implicit val ec: ExecutionContext
   ) extends AbstractAppCmdConnector {
 
   val serviceBaseUrl: String = config.baseUrl
+
+  def configureEbridgeIfRequired(requestBuilder: RequestBuilder): RequestBuilder = requestBuilder
 }
 
 object PrincipalAppCmdConnector {
