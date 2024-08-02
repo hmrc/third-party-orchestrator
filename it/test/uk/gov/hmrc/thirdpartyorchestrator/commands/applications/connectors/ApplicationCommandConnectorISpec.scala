@@ -49,7 +49,6 @@ class ApplicationCommandConnectorISpec
   trait Setup {
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
-    // protected val mockProxiedHttpClient = mock[ProxiedHttpClient]
     val apiKeyTest                 = "5bb51bca-8f97-4f2b-aee4-81a4a70a42d3"
     val bearer                     = "TestBearerToken"
 
@@ -103,7 +102,7 @@ class ApplicationCommandConnectorISpec
       bearerToken = bearer,
       apiKey = apiKeyTest
     )
-    val connector = new SubordinateAppCmdConnector(config, httpClientV2) // , mockProxiedHttpClient)
+    val connector = new SubordinateAppCmdConnector(config, httpClientV2)
     val url       = s"${config.baseUrl}/application/${applicationId.value}/dispatch"
   }
 
