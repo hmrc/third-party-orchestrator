@@ -20,7 +20,8 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http.{HttpClient, _}
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{StringContextOps, _}
 import uk.gov.hmrc.play.http.metrics.common._
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
@@ -30,7 +31,7 @@ import uk.gov.hmrc.thirdpartyorchestrator.config.AppConfig
 
 @Singleton
 class ThirdPartyDeveloperConnector @Inject() (
-    http: HttpClient,
+    http: HttpClientV2,
     config: AppConfig,
     val apiMetrics: ApiMetrics
   )(implicit val ec: ExecutionContext
@@ -41,12 +42,17 @@ class ThirdPartyDeveloperConnector @Inject() (
 
   def fetchSession(userSessionId: UserSessionId)(implicit hc: HeaderCarrier): Future[Option[UserSession]] =
     record {
-      http.GET[Option[UserSession]](s"$serviceBaseUrl/session/$userSessionId")
+      http
+        .get(url"$serviceBaseUrl/session/$userSessionId")
+        .execute[Option[UserSession]]
     }
 
   def fetchDeveloper(userId: UserId)(implicit hc: HeaderCarrier): Future[Option[User]] = {
     record {
-      http.GET[Option[User]](s"$serviceBaseUrl/developer", Seq("developerId" -> userId.toString()))
+      val params = Seq("developerId" -> userId.toString())
+      http
+        .get(url"$serviceBaseUrl/developer?$params")
+        .execute[Option[User]]
     }
   }
 }

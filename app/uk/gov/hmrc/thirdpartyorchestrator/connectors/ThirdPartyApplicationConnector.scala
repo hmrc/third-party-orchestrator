@@ -20,12 +20,13 @@ import javax.inject.{Inject, Named, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http.{HttpClient, _}
+import uk.gov.hmrc.http.client.{HttpClientV2, RequestBuilder}
+import uk.gov.hmrc.http.{StringContextOps, _}
 import uk.gov.hmrc.play.http.metrics.common._
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationResponse
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId}
-import uk.gov.hmrc.thirdpartyorchestrator.utils.ProxiedHttpClient
+import uk.gov.hmrc.thirdpartyorchestrator.utils.EbridgeConfigurator
 
 trait ThirdPartyApplicationConnector {
   def fetchApplication(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationResponse]]
@@ -34,22 +35,27 @@ trait ThirdPartyApplicationConnector {
 
 abstract class AbstractThirdPartyApplicationConnector(implicit val ec: ExecutionContext) extends ThirdPartyApplicationConnector with RecordMetrics {
 
-  protected val httpClient: HttpClient
   protected val serviceBaseUrl: String
   val apiMetrics: ApiMetrics
 
-  def http: HttpClient
+  def http: HttpClientV2
 
   val api = API("third-party-application")
 
+  def configureEbridgeIfRequired(requestBuilder: RequestBuilder): RequestBuilder
+
   def fetchApplication(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationResponse]] =
     record {
-      http.GET[Option[ApplicationResponse]](s"$serviceBaseUrl/application/$applicationId")
+      configureEbridgeIfRequired(http.get(url"$serviceBaseUrl/application/$applicationId"))
+        .execute[Option[ApplicationResponse]]
     }
 
   def fetchApplication(clientId: ClientId)(implicit hc: HeaderCarrier): Future[Option[ApplicationResponse]] =
     record {
-      http.GET[Option[ApplicationResponse]](s"$serviceBaseUrl/application", Seq("clientId" -> clientId.value))
+      val params = Seq("clientId" -> clientId.value)
+
+      configureEbridgeIfRequired(http.get(url"$serviceBaseUrl/application?$params"))
+        .execute[Option[ApplicationResponse]]
     }
 }
 
@@ -64,13 +70,14 @@ object PrincipalThirdPartyApplicationConnector {
 @Named("principal")
 class PrincipalThirdPartyApplicationConnector @Inject() (
     val config: PrincipalThirdPartyApplicationConnector.Config,
-    val httpClient: HttpClient,
+    val http: HttpClientV2,
     val apiMetrics: ApiMetrics
   )(implicit override val ec: ExecutionContext
   ) extends AbstractThirdPartyApplicationConnector {
 
-  val http: HttpClient = httpClient
-  val serviceBaseUrl   = config.serviceBaseUrl
+  val serviceBaseUrl = config.serviceBaseUrl
+
+  def configureEbridgeIfRequired(requestBuilder: RequestBuilder): RequestBuilder = requestBuilder
 }
 
 object SubordinateThirdPartyApplicationConnector {
@@ -87,14 +94,15 @@ object SubordinateThirdPartyApplicationConnector {
 @Named("subordinate")
 class SubordinateThirdPartyApplicationConnector @Inject() (
     val config: SubordinateThirdPartyApplicationConnector.Config,
-    val httpClient: HttpClient,
-    val proxiedHttpClient: ProxiedHttpClient,
+    val http: HttpClientV2,
     val apiMetrics: ApiMetrics
   )(implicit override val ec: ExecutionContext
   ) extends AbstractThirdPartyApplicationConnector {
 
   val serviceBaseUrl: String = config.serviceBaseUrl
-  val http: HttpClient       = if (config.useProxy) proxiedHttpClient.withHeaders(config.bearerToken, config.apiKey) else httpClient
+
+  def configureEbridgeIfRequired(requestBuilder: RequestBuilder): RequestBuilder =
+    EbridgeConfigurator.configure(config.useProxy, config.bearerToken, config.apiKey)(requestBuilder)
 }
 
 @Singleton
