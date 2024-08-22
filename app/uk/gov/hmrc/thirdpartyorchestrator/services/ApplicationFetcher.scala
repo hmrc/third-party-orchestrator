@@ -19,11 +19,9 @@ package uk.gov.hmrc.thirdpartyorchestrator.services
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
-
 import uk.gov.hmrc.http.HeaderCarrier
-
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationResponse
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, UserId}
 import uk.gov.hmrc.thirdpartyorchestrator.connectors.EnvironmentAwareThirdPartyApplicationConnector
 import uk.gov.hmrc.thirdpartyorchestrator.utils.ApplicationLogger
 
@@ -51,6 +49,20 @@ class ApplicationFetcher @Inject() (
       subordinate <- subordinateApp
       principal   <- principalApp
     } yield principal.orElse(subordinate)
+  }
+
+  def fetchApplicationsByUserIds(userIds: List[UserId])(implicit hc: HeaderCarrier): Future[List[ApplicationResponse]] = {
+    if(userIds.nonEmpty) {
+      val subordinateApp: Future[List[ApplicationResponse]] = thirdPartyApplicationConnector.subordinate.fetchApplicationsByUserIds(userIds)
+      val principalApp: Future[List[ApplicationResponse]] = thirdPartyApplicationConnector.principal.fetchApplicationsByUserIds(userIds)
+
+      for {
+        subordinate <- subordinateApp
+        principal <- principalApp
+      } yield principal ++ subordinate
+    } else {
+      Future.successful(List.empty)
+    }
   }
 
   private def recoverWithDefault[T](default: T): PartialFunction[Throwable, T] = {

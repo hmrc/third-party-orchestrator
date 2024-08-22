@@ -72,6 +72,26 @@ class ThirdPartyApplicationConnectorIntegrationSpec extends BaseConnectorIntegra
     }
   }
 
+  "fetchApplicationsByUserIds" should {
+    "return the applications" in new Setup {
+
+      stubFor(
+        post(urlPathEqualTo(s"/developer/applications"))
+          .withJsonRequestBody(CollaboratorUserIds(List(userId1,userId2)))
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withHeader("Content-Type", "application/json")
+              .withBody(s"[${getBody(applicationId, clientId, userId1, userId2)}]")
+          )
+      )
+
+      private val result = await(underTest.fetchApplicationsByUserIds(List(userId1,userId2)))
+
+      result shouldBe List(expectedApplication)
+    }
+  }
+
   "fetchApplicationByClientId" should {
     "return the application" in new Setup {
 

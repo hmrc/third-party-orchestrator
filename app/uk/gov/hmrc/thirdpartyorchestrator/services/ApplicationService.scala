@@ -18,11 +18,9 @@ package uk.gov.hmrc.thirdpartyorchestrator.services
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
-
 import uk.gov.hmrc.http.HeaderCarrier
-
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationResponse
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, LaxEmailAddress}
 import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.thirdpartyorchestrator.connectors.ThirdPartyDeveloperConnector
@@ -40,6 +38,14 @@ class ApplicationService @Inject() (
 
   def fetchApplication(clientId: ClientId)(implicit hc: HeaderCarrier): Future[Option[ApplicationResponse]] = {
     applicationFetcher.fetchApplication(clientId)
+  }
+
+  def fetchApplicationsForEmails(emails: List[LaxEmailAddress])(implicit hc: HeaderCarrier): Future[List[ApplicationResponse]] = {
+    for {
+      developers <- thirdPartyDeveloperConnector.fetchDevelopers(emails)
+      verifiedDeveloperUserIds = developers.filter(_.verified).map(_.userId)
+      applications <- applicationFetcher.fetchApplicationsByUserIds(verifiedDeveloperUserIds)
+    } yield applications
   }
 
   def fetchVerifiedCollaboratorsForApplication(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Either[String, Set[User]]] = {

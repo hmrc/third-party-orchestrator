@@ -16,21 +16,27 @@
 
 package uk.gov.hmrc.thirdpartyorchestrator.connectors
 
+import play.api.libs.json.{Json, OFormat}
+
 import javax.inject.{Inject, Named, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
-
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.client.{HttpClientV2, RequestBuilder}
 import uk.gov.hmrc.http.{StringContextOps, _}
 import uk.gov.hmrc.play.http.metrics.common._
-
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationResponse
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, UserId}
 import uk.gov.hmrc.thirdpartyorchestrator.utils.EbridgeConfigurator
 
+case class CollaboratorUserIds(userIds: List[UserId])
+
+object CollaboratorUserIds{
+  implicit val format: OFormat[CollaboratorUserIds] = Json.format[CollaboratorUserIds]
+}
 trait ThirdPartyApplicationConnector {
   def fetchApplication(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationResponse]]
   def fetchApplication(clientId: ClientId)(implicit hc: HeaderCarrier): Future[Option[ApplicationResponse]]
+  def fetchApplicationsByUserIds(userIds: List[UserId])(implicit hc: HeaderCarrier): Future[List[ApplicationResponse]]
 }
 
 abstract class AbstractThirdPartyApplicationConnector(implicit val ec: ExecutionContext) extends ThirdPartyApplicationConnector with RecordMetrics {
@@ -56,6 +62,13 @@ abstract class AbstractThirdPartyApplicationConnector(implicit val ec: Execution
 
       configureEbridgeIfRequired(http.get(url"$serviceBaseUrl/application?$params"))
         .execute[Option[ApplicationResponse]]
+    }
+
+  def fetchApplicationsByUserIds(userIds: List[UserId])(implicit hc: HeaderCarrier): Future[List[ApplicationResponse]] =
+    record {
+      configureEbridgeIfRequired(http.post(url"$serviceBaseUrl/developer/applications"))
+        .withBody(Json.toJson(CollaboratorUserIds(userIds)))
+        .execute[List[ApplicationResponse]]
     }
 }
 

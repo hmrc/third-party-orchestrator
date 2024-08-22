@@ -27,7 +27,7 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, Clie
 import uk.gov.hmrc.thirdpartyorchestrator.mocks.connectors._
 import uk.gov.hmrc.thirdpartyorchestrator.utils.{ApplicationBuilder, AsyncHmrcSpec}
 
-class ApplicationByIdFetcherSpec extends AsyncHmrcSpec {
+class ApplicationFetcherSpec extends AsyncHmrcSpec {
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
@@ -38,7 +38,9 @@ class ApplicationByIdFetcherSpec extends AsyncHmrcSpec {
     val clientId: ClientId               = ClientId.random
     val userId1: UserId                  = UserId.random
     val userId2: UserId                  = UserId.random
+    val userIds: List[UserId] =List(userId1,userId2)
     val application: ApplicationResponse = buildApplication(applicationId, clientId, userId1, userId2)
+    val application2: ApplicationResponse = buildApplication(ApplicationId.random, ClientId.random, userId1, userId2)
     val exception                        = new RuntimeException("error")
 
     val fetcher = new ApplicationFetcher(
@@ -46,7 +48,7 @@ class ApplicationByIdFetcherSpec extends AsyncHmrcSpec {
     )
   }
 
-  "ApplicationByIdFetcher" when {
+  "ApplicationFetcher" when {
     "fetchApplication is called" should {
       "return None if absent from principal and subordinate" in new Setup {
         EnvironmentAwareThirdPartyApplicationConnectorMock.Subordinate.FetchApplicationById.thenReturnNone(applicationId)
@@ -118,5 +120,41 @@ class ApplicationByIdFetcherSpec extends AsyncHmrcSpec {
         }.shouldBe(exception)
       }
     }
+
+    "fetchApplicationsByUserIds is called" should {
+
+      "return Empty List if given an empty list of user ids" in new Setup {
+        await(fetcher.fetchApplicationsByUserIds(List.empty)) shouldBe List.empty
+      }
+
+      "return Empty List if absent from principal and subordinate" in new Setup {
+        EnvironmentAwareThirdPartyApplicationConnectorMock.Subordinate.FetchApplicationsByUserIds.thenReturnEmptyList(userIds)
+        EnvironmentAwareThirdPartyApplicationConnectorMock.Principal.FetchApplicationsByUserIds.thenReturnEmptyList(userIds)
+
+        await(fetcher.fetchApplicationsByUserIds(userIds)) shouldBe List.empty
+      }
+
+      "return an application from subordinate if present" in new Setup {
+        EnvironmentAwareThirdPartyApplicationConnectorMock.Subordinate.FetchApplicationsByUserIds.thenReturn(userIds)(List(application))
+        EnvironmentAwareThirdPartyApplicationConnectorMock.Principal.FetchApplicationsByUserIds.thenReturnEmptyList(userIds)
+
+        await(fetcher.fetchApplicationsByUserIds(userIds)) shouldBe List(application)
+      }
+
+      "return an application from principal if present" in new Setup {
+        EnvironmentAwareThirdPartyApplicationConnectorMock.Subordinate.FetchApplicationsByUserIds.thenReturnEmptyList(userIds)
+        EnvironmentAwareThirdPartyApplicationConnectorMock.Principal.FetchApplicationsByUserIds.thenReturn(userIds)(List(application))
+
+        await(fetcher.fetchApplicationsByUserIds(userIds)) shouldBe List(application)
+      }
+
+      "return a combined list of applications from both envs" in new Setup {
+        EnvironmentAwareThirdPartyApplicationConnectorMock.Subordinate.FetchApplicationsByUserIds.thenReturn(userIds)(List(application2))
+        EnvironmentAwareThirdPartyApplicationConnectorMock.Principal.FetchApplicationsByUserIds.thenReturn(userIds)(List(application))
+
+        await(fetcher.fetchApplicationsByUserIds(userIds)) should contain theSameElementsAs List(application, application2)
+      }
+    }
+
   }
 }
