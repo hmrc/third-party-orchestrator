@@ -77,7 +77,7 @@ class ThirdPartyApplicationConnectorIntegrationSpec extends BaseConnectorIntegra
 
       stubFor(
         post(urlPathEqualTo(s"/developer/applications"))
-          .withJsonRequestBody(CollaboratorUserIds(List(userId1,userId2)))
+          .withJsonRequestBody(CollaboratorUserIds(List(userId1, userId2)))
           .willReturn(
             aResponse()
               .withStatus(OK)
@@ -86,7 +86,7 @@ class ThirdPartyApplicationConnectorIntegrationSpec extends BaseConnectorIntegra
           )
       )
 
-      private val result = await(underTest.fetchApplicationsByUserIds(List(userId1,userId2)))
+      private val result = await(underTest.fetchApplicationsByUserIds(List(userId1, userId2)))
 
       result shouldBe List(expectedApplication)
     }

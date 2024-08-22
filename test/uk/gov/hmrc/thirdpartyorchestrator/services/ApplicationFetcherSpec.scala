@@ -34,14 +34,14 @@ class ApplicationFetcherSpec extends AsyncHmrcSpec {
   trait Setup extends ThirdPartyApplicationConnectorMockModule with MockitoSugar
       with ArgumentMatchersSugar with ApplicationBuilder {
 
-    val applicationId: ApplicationId     = ApplicationId.random
-    val clientId: ClientId               = ClientId.random
-    val userId1: UserId                  = UserId.random
-    val userId2: UserId                  = UserId.random
-    val userIds: List[UserId] =List(userId1,userId2)
-    val application: ApplicationResponse = buildApplication(applicationId, clientId, userId1, userId2)
+    val applicationId: ApplicationId      = ApplicationId.random
+    val clientId: ClientId                = ClientId.random
+    val userId1: UserId                   = UserId.random
+    val userId2: UserId                   = UserId.random
+    val userIds: List[UserId]             = List(userId1, userId2)
+    val application: ApplicationResponse  = buildApplication(applicationId, clientId, userId1, userId2)
     val application2: ApplicationResponse = buildApplication(ApplicationId.random, ClientId.random, userId1, userId2)
-    val exception                        = new RuntimeException("error")
+    val exception                         = new RuntimeException("error")
 
     val fetcher = new ApplicationFetcher(
       EnvironmentAwareThirdPartyApplicationConnectorMock.instance

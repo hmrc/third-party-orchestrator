@@ -17,7 +17,9 @@
 package uk.gov.hmrc.thirdpartyorchestrator.mocks.connectors
 
 import scala.concurrent.Future.successful
+
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
+
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId}
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{UserSession, UserSessionId}
@@ -46,7 +48,6 @@ trait ThirdPartyDeveloperConnectorMockModule extends MockitoSugar with ArgumentM
         when(aMock.fetchDevelopers(eqTo(emails))(*)).thenReturn(successful(developers))
     }
   }
-
 
   object ThirdPartyDeveloperConnectorMock extends AbstractThirdPartyDeveloperMock {
     val aMock = mock[ThirdPartyDeveloperConnector]

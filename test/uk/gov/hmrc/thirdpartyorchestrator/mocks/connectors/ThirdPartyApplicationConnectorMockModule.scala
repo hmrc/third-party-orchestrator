@@ -17,10 +17,17 @@
 package uk.gov.hmrc.thirdpartyorchestrator.mocks.connectors
 
 import scala.concurrent.Future.{failed, successful}
+
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
+
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationResponse
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, UserId}
-import uk.gov.hmrc.thirdpartyorchestrator.connectors.{EnvironmentAwareThirdPartyApplicationConnector, PrincipalThirdPartyApplicationConnector, SubordinateThirdPartyApplicationConnector, ThirdPartyApplicationConnector}
+import uk.gov.hmrc.thirdpartyorchestrator.connectors.{
+  EnvironmentAwareThirdPartyApplicationConnector,
+  PrincipalThirdPartyApplicationConnector,
+  SubordinateThirdPartyApplicationConnector,
+  ThirdPartyApplicationConnector
+}
 
 trait ThirdPartyApplicationConnectorMockModule extends MockitoSugar with ArgumentMatchersSugar {
 
