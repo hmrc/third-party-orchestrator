@@ -21,7 +21,7 @@ import scala.concurrent.Future.successful
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationResponse
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, UserId}
 import uk.gov.hmrc.thirdpartyorchestrator.services.ApplicationFetcher
 
 trait ApplicationFetcherMockModule extends MockitoSugar with ArgumentMatchersSugar {
@@ -33,6 +33,12 @@ trait ApplicationFetcherMockModule extends MockitoSugar with ArgumentMatchersSug
 
       def thenReturn(applicationId: ApplicationId)(application: Option[ApplicationResponse]) =
         when(aMock.fetchApplication(eqTo(applicationId))(*)).thenReturn(successful(application))
+    }
+
+    object FetchApplicationsByUserId {
+
+      def thenReturn(userIds: List[UserId])(applications: List[ApplicationResponse]) =
+        when(aMock.fetchApplicationsByUserIds(eqTo(userIds))(*)).thenReturn(successful(applications))
     }
 
     object FetchApplicationByClientId {

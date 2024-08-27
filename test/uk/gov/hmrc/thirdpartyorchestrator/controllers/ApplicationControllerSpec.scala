@@ -21,10 +21,12 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import org.scalatest.matchers.should.Matchers
 
 import play.api.http.Status
+import play.api.libs.json.Json
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.http.HeaderCarrier
 
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
@@ -42,7 +44,8 @@ class ApplicationControllerSpec extends BaseControllerSpec with Matchers {
     val clientId      = ClientId.random
     val userId1       = UserId.random
     val userId2       = UserId.random
-    val email         = LaxEmailAddress("bob@example.com")
+    val email         = "bob@example.com".toLaxEmail
+    val email2        = "bob2@example.com".toLaxEmail
     val developer     = buildUser(email, "Bob", "Fleming").copy(userId = userId1, verified = true)
     val application   = buildApplication(applicationId, clientId, userId1, userId2)
     val controller    = new ApplicationController(applicationServiceMock, Helpers.stubControllerComponents())
@@ -107,5 +110,31 @@ class ApplicationControllerSpec extends BaseControllerSpec with Matchers {
       val result      = controller.getVerifiedDevelopersForApplication(applicationId)(devsRequest)
       status(result) shouldBe Status.NOT_FOUND
     }
+  }
+
+  "getApplicationsByEmail" should {
+    "return the applications if successful" in new Setup {
+      val appRequest = FakeRequest("POST", "/developer/applications")
+        .withBody(Json.toJson(ApplicationsByRequest(List(email, email2))))
+
+      fetchApplicationsForEmailReturns(List(email, email2), application)
+
+      val result = controller.getApplicationsByEmail()(appRequest)
+
+      status(result) shouldBe Status.OK
+      contentAsJson(result) shouldBe Json.toJson(List(application))
+    }
+
+    "return 500 if service call failed" in new Setup {
+      val appRequest = FakeRequest("POST", "/developer/applications")
+        .withBody(Json.toJson(ApplicationsByRequest(List(email, email2))))
+
+      fetchApplicationsForEmailFails()
+
+      val result = controller.getApplicationsByEmail()(appRequest)
+
+      status(result) shouldBe Status.INTERNAL_SERVER_ERROR
+    }
+
   }
 }

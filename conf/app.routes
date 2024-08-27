@@ -6,3 +6,5 @@ GET         /applications/:id                   uk.gov.hmrc.thirdpartyorchestrat
 GET         /applications/:id/developers        uk.gov.hmrc.thirdpartyorchestrator.controllers.ApplicationController.getVerifiedDevelopersForApplication(id: ApplicationId)
 
 PATCH       /applications/:id/dispatch          uk.gov.hmrc.thirdpartyorchestrator.commands.applications.controllers.AppCmdController.dispatch(id: ApplicationId)
+
+POST        /developer/applications             uk.gov.hmrc.thirdpartyorchestrator.controllers.ApplicationController.getApplicationsByEmail()

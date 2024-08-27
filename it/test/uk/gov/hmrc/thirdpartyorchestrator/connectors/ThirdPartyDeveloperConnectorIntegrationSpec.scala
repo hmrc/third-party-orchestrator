@@ -25,7 +25,7 @@ import play.api.{Application, Configuration, Mode}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, UserId}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, LaxEmailAddress, UserId}
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession, UserSessionId}
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
@@ -47,12 +47,15 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
   trait Setup extends UserBuilder with LocalUserIdTracker {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    val userEmail         = "thirdpartydeveloper@example.com".toLaxEmail
-    val applicationId     = ApplicationId.random
-    val userId            = UserId.random
-    val sessionId         = UserSessionId.random
-    val expectedSession   = UserSession(sessionId, LoggedInState.LOGGED_IN, buildUser(userEmail, "John", "Doe").copy(userId = userId))
-    val expectedDeveloper = buildUser(userEmail, "John", "Doe").copy(userId = userId, verified = true)
+    val userEmail          = "thirdpartydeveloper@example.com".toLaxEmail
+    val userEmail2         = "someone2@somewehere.com".toLaxEmail
+    val applicationId      = ApplicationId.random
+    val userId             = UserId.random
+    val userId2            = UserId.random
+    val sessionId          = UserSessionId.random
+    val expectedSession    = UserSession(sessionId, LoggedInState.LOGGED_IN, buildUser(userEmail, "John", "Doe").copy(userId = userId))
+    val expectedDeveloper  = buildUser(userEmail, "John", "Doe").copy(userId = userId, verified = true)
+    val expectedDeveloper2 = buildUser(userEmail2, "Test", "User").copy(userId = userId2, verified = true)
 
     val underTest: ThirdPartyDeveloperConnector = app.injector.instanceOf[ThirdPartyDeveloperConnector]
   }
@@ -128,4 +131,57 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
       result shouldBe Some(expectedDeveloper)
     }
   }
+
+  "fetchDevelopers" should {
+    "return the developers" in new Setup {
+      val developerEmails: List[LaxEmailAddress] = List(userEmail, userEmail2)
+
+      stubFor(
+        post(urlPathEqualTo(s"/developers/get-by-emails"))
+          .withJsonRequestBody(developerEmails)
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withHeader("Content-Type", "application/json")
+              .withBody(s"""
+                           |[
+                           |  {
+                           |    "userId": "$userId",
+                           |    "email": "${userEmail.text}",
+                           |    "firstName": "John",
+                           |    "lastName": "Doe",
+                           |    "registrationTime": "$nowAsText",
+                           |    "lastModified": "$nowAsText",
+                           |    "verified": true,
+                           |    "mfaDetails": [],
+                           |    "emailPreferences": {
+                           |      "interests": [],
+                           |      "topics": []
+                           |    }
+                           |  },
+                           |  {
+                           |    "userId": "$userId2",
+                           |    "email": "${userEmail2.text}",
+                           |    "firstName": "Test",
+                           |    "lastName": "User",
+                           |    "registrationTime": "$nowAsText",
+                           |    "lastModified": "$nowAsText",
+                           |    "verified": true,
+                           |    "mfaDetails": [],
+                           |    "emailPreferences": {
+                           |      "interests": [],
+                           |      "topics": []
+                           |    }
+                           |  }
+                           |]
+                           |""".stripMargin)
+          )
+      )
+
+      val result = await(underTest.fetchDevelopers(List(userEmail, userEmail2)))
+
+      result shouldBe List(expectedDeveloper, expectedDeveloper2)
+    }
+  }
+
 }
