@@ -184,7 +184,8 @@ class AppCmdControllerISpec
        |    "allowlist": []
        |  },
        |  "moreApplication": {
-       |    "allowAutoDelete": false
+       |    "allowAutoDelete": false,
+       |    "lastActionActor": "UNKNOWN"
        |  }
        |}""".stripMargin
   }

@@ -182,7 +182,9 @@ class ThirdPartyApplicationConnectorIntegrationSpec extends BaseConnectorIntegra
        |    "allowlist": []
        |  },
        |  "moreApplication": {
-       |    "allowAutoDelete": false
+       |    "allowAutoDelete": false,
+       |    "lastActionActor": "UNKNOWN"
+       |
        |  }
        |}""".stripMargin
   }

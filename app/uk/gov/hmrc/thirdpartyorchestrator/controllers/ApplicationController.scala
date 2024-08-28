@@ -19,12 +19,13 @@ package uk.gov.hmrc.thirdpartyorchestrator.controllers
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future.successful
+
 import play.api.libs.json.{JsValue, Json, OFormat}
 import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
+
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, LaxEmailAddress}
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
-import uk.gov.hmrc.http.UpstreamErrorResponse
 import uk.gov.hmrc.thirdpartyorchestrator.domain.models.developers.LimitedUserResponse
 import uk.gov.hmrc.thirdpartyorchestrator.services.ApplicationService
 import uk.gov.hmrc.thirdpartyorchestrator.utils.ApplicationLogger
@@ -45,14 +46,15 @@ class ApplicationController @Inject() (
   def getApplication(applicationId: ApplicationId): Action[AnyContent] = Action.async { implicit request =>
     applicationService.fetchApplication(applicationId).map {
       case Some(response) => Ok(Json.toJson(response))
-      case None => NotFound
+      case None           => NotFound
     }
   }
 
   def getApplicationsByEmail(): Action[JsValue] = Action.async(parse.json) { implicit request =>
     withJsonBody[ApplicationsByRequest] {
-      emailsRequest => applicationService.fetchApplicationsForEmails(emailsRequest.emails)
-        .map(response => Ok(Json.toJson(response))) recover recovery
+      emailsRequest =>
+        applicationService.fetchApplicationsForEmails(emailsRequest.emails)
+          .map(response => Ok(Json.toJson(response))) recover recovery
     }
   }
 
@@ -63,19 +65,18 @@ class ApplicationController @Inject() (
         val clientId = ClientId(request.queryString("clientId").head)
         applicationService.fetchApplication(clientId).map {
           case Some(response) => Ok(Json.toJson(response))
-          case None => NotFound
+          case None           => NotFound
         }
-      case _ =>
+      case _                 =>
         successful(BadRequest("Unknown query parameters"))
     }
   }
 
   def getVerifiedDevelopersForApplication(applicationId: ApplicationId): Action[AnyContent] = Action.async { implicit request =>
     lazy val failed = (msg: String) => NotFound(msg)
-    val success = (result: Set[User]) => Ok(Json.toJson(LimitedUserResponse.from(result)))
+    val success     = (result: Set[User]) => Ok(Json.toJson(LimitedUserResponse.from(result)))
     applicationService.fetchVerifiedCollaboratorsForApplication(applicationId).map(_.fold(failed, success))
   }
-
 
   def recovery: PartialFunction[Throwable, Result] = {
     case e: Throwable =>
@@ -86,7 +87,7 @@ class ApplicationController @Inject() (
   private[controllers] def handleException(e: Throwable) = {
     logger.error(s"An unexpected error occurred: ${e.getMessage}", e)
     InternalServerError(Json.obj(
-      "code" -> "UNKNOWN_ERROR",
+      "code"    -> "UNKNOWN_ERROR",
       "message" -> "Unknown error occurred"
     ))
   }
