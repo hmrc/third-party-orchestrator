@@ -31,7 +31,7 @@ import uk.gov.hmrc.thirdpartyorchestrator.utils.EbridgeConfigurator
 
 case class CollaboratorUserIds(userIds: List[UserId])
 
-object CollaboratorUserIds           {
+object CollaboratorUserIds {
   implicit val format: OFormat[CollaboratorUserIds] = Json.format[CollaboratorUserIds]
 }
 

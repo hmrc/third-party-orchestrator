@@ -17,11 +17,14 @@
 package uk.gov.hmrc.thirdpartyorchestrator.mocks.services
 
 import scala.concurrent.Future._
+
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
+
+import uk.gov.hmrc.http.UpstreamErrorResponse
+
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationResponse
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, LaxEmailAddress}
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
-import uk.gov.hmrc.http.UpstreamErrorResponse
 import uk.gov.hmrc.thirdpartyorchestrator.services.ApplicationService
 
 trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar {
@@ -31,8 +34,7 @@ trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar {
     when(applicationServiceMock.fetchApplicationsForEmails(eqTo(emails))(*)).thenReturn(successful(List(returns)))
 
   def fetchApplicationsForEmailFails() =
-    when(applicationServiceMock.fetchApplicationsForEmails(*)(*)).thenReturn(failed(UpstreamErrorResponse("some problem happened",500)))
-
+    when(applicationServiceMock.fetchApplicationsForEmails(*)(*)).thenReturn(failed(UpstreamErrorResponse("some problem happened", 500)))
 
   def fetchApplicationByIdReturns(applicationId: ApplicationId, returns: ApplicationResponse) =
     when(applicationServiceMock.fetchApplication(eqTo(applicationId))(*)).thenReturn(successful(Some(returns)))
