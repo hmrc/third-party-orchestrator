@@ -24,7 +24,6 @@ import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession, UserSessionId}
-import uk.gov.hmrc.thirdpartyorchestrator.domain.models.developers.LimitedUserResponse
 import uk.gov.hmrc.thirdpartyorchestrator.services.SessionService
 
 object SessionController {
@@ -44,7 +43,7 @@ class SessionController @Inject() (
   def getDeveloperForSession(): Action[AnyContent] = Action.async { implicit request =>
     withJsonBodyFromAnyContent[SessionRequest] { sessionRequest =>
       sessionService.fetch(sessionRequest.sessionId).map {
-        case Some(session @ UserSession(_, LoggedInState.LOGGED_IN, _)) => Ok(Json.toJson(LimitedUserResponse.from(session)))
+        case Some(session @ UserSession(_, LoggedInState.LOGGED_IN, _)) => Ok(Json.toJson(session.developer))
         case _                                                          => NotFound("Unknown session id")
       }
     }
