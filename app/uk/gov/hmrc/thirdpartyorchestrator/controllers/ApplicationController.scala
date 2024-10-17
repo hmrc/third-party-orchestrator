@@ -26,7 +26,6 @@ import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, LaxEmailAddress}
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
-import uk.gov.hmrc.thirdpartyorchestrator.domain.models.developers.LimitedUserResponse
 import uk.gov.hmrc.thirdpartyorchestrator.services.ApplicationService
 import uk.gov.hmrc.thirdpartyorchestrator.utils.ApplicationLogger
 
@@ -74,7 +73,7 @@ class ApplicationController @Inject() (
 
   def getVerifiedDevelopersForApplication(applicationId: ApplicationId): Action[AnyContent] = Action.async { implicit request =>
     lazy val failed = (msg: String) => NotFound(msg)
-    val success     = (result: Set[User]) => Ok(Json.toJson(LimitedUserResponse.from(result)))
+    val success     = (users: Set[User]) => Ok(Json.toJson(users))
     applicationService.fetchVerifiedCollaboratorsForApplication(applicationId).map(_.fold(failed, success))
   }
 
