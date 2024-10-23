@@ -20,31 +20,26 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, UserId}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaboratorsFixtures
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartyorchestrator.mocks.connectors.ThirdPartyDeveloperConnectorMockModule
 import uk.gov.hmrc.thirdpartyorchestrator.mocks.services.ApplicationFetcherMockModule
-import uk.gov.hmrc.thirdpartyorchestrator.utils.{ApplicationBuilder, AsyncHmrcSpec}
+import uk.gov.hmrc.thirdpartyorchestrator.utils.AsyncHmrcSpec
 
 class ApplicationServiceSpec extends AsyncHmrcSpec {
 
-  trait Setup extends ThirdPartyDeveloperConnectorMockModule with ApplicationFetcherMockModule with UserBuilder with ApplicationBuilder with LocalUserIdTracker {
+  trait Setup extends ThirdPartyDeveloperConnectorMockModule with ApplicationFetcherMockModule with UserBuilder with LocalUserIdTracker
+      with ApplicationWithCollaboratorsFixtures {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val underTest = new ApplicationService(ThirdPartyDeveloperConnectorMock.aMock, ApplicationFetcherMock.aMock)
 
-    val applicationId  = ApplicationId.random
-    val applicationId2 = ApplicationId.random
-    val email1         = "thirdpartydeveloper@example.com".toLaxEmail
-    val email2         = "thirdpartydeveloper2@example.com".toLaxEmail
-    val userId1        = UserId.random
-    val userId2        = UserId.random
-    val clientId       = ClientId.random
-    val developer1     = buildUser(email1, "Bob", "Fleming").copy(userId = userId1, verified = true)
-    val developer2     = buildUser(email2, "Bob", "Fleming").copy(userId = userId2, verified = false)
-    val application    = buildApplication(applicationId, clientId, userId1, userId2)
+    val developer1    = buildUser(emailOne, "Bob", "Fleming").copy(userId = userIdOne, verified = true)
+    val developer2    = buildUser(emailTwo, "Bob", "Fleming").copy(userId = userIdTwo, verified = false)
+    val application   = standardApp.withCollaborators(standardApp.collaborators.take(2))
+    val clientId      = application.clientId
+    val applicationId = application.id
   }
 
   "fetchApplication" should {
@@ -78,8 +73,8 @@ class ApplicationServiceSpec extends AsyncHmrcSpec {
   "fetchVerifiedCollaboratorsForApplication" should {
     "return the collaborators when the application exists" in new Setup {
       ApplicationFetcherMock.FetchApplication.thenReturn(applicationId)(Some(application))
-      ThirdPartyDeveloperConnectorMock.FetchDeveloper.thenReturn(userId1)(Some(developer1))
-      ThirdPartyDeveloperConnectorMock.FetchDeveloper.thenReturn(userId2)(Some(developer2))
+      ThirdPartyDeveloperConnectorMock.FetchDeveloper.thenReturn(userIdOne)(Some(developer1))
+      ThirdPartyDeveloperConnectorMock.FetchDeveloper.thenReturn(userIdTwo)(Some(developer2))
       val result = await(underTest.fetchVerifiedCollaboratorsForApplication(applicationId))
       result shouldBe Right(Set(developer1))
     }
@@ -93,37 +88,37 @@ class ApplicationServiceSpec extends AsyncHmrcSpec {
 
   "fetchApplicationsForEmails" should {
     "return the applications" in new Setup {
-      ThirdPartyDeveloperConnectorMock.FetchDevelopers.thenReturn(List(email1, email2))(List(developer1, developer2.copy(verified = true)))
-      ApplicationFetcherMock.FetchApplicationsByUserId.thenReturn(List(userId1, userId2))(List(application))
+      ThirdPartyDeveloperConnectorMock.FetchDevelopers.thenReturn(List(emailOne, emailTwo))(List(developer1, developer2.copy(verified = true)))
+      ApplicationFetcherMock.FetchApplicationsByUserId.thenReturn(List(userIdOne, userIdTwo))(List(application))
 
-      val result = await(underTest.fetchApplicationsForEmails(List(email1, email2)))
+      val result = await(underTest.fetchApplicationsForEmails(List(emailOne, emailTwo)))
 
       result shouldBe List(application)
     }
 
     "return the applications filtering out unverified developers" in new Setup {
-      ThirdPartyDeveloperConnectorMock.FetchDevelopers.thenReturn(List(email1, email2))(List(developer1, developer2))
-      ApplicationFetcherMock.FetchApplicationsByUserId.thenReturn(List(userId1))(List(application))
+      ThirdPartyDeveloperConnectorMock.FetchDevelopers.thenReturn(List(emailOne, emailTwo))(List(developer1, developer2))
+      ApplicationFetcherMock.FetchApplicationsByUserId.thenReturn(List(userIdOne))(List(application))
 
-      val result = await(underTest.fetchApplicationsForEmails(List(email1, email2)))
+      val result = await(underTest.fetchApplicationsForEmails(List(emailOne, emailTwo)))
 
       result shouldBe List(application)
     }
 
     "return empty when no users found" in new Setup {
-      ThirdPartyDeveloperConnectorMock.FetchDevelopers.thenReturn(List(email1, email2))(List.empty)
+      ThirdPartyDeveloperConnectorMock.FetchDevelopers.thenReturn(List(emailOne, emailTwo))(List.empty)
       ApplicationFetcherMock.FetchApplicationsByUserId.thenReturn(List.empty)(List.empty)
 
-      val result = await(underTest.fetchApplicationsForEmails(List(email1, email2)))
+      val result = await(underTest.fetchApplicationsForEmails(List(emailOne, emailTwo)))
 
       result shouldBe List.empty
     }
 
     "return empty when no applications found" in new Setup {
-      ThirdPartyDeveloperConnectorMock.FetchDevelopers.thenReturn(List(email1, email2))(List(developer1, developer2.copy(verified = true)))
-      ApplicationFetcherMock.FetchApplicationsByUserId.thenReturn(List(userId1, userId2))(List.empty)
+      ThirdPartyDeveloperConnectorMock.FetchDevelopers.thenReturn(List(emailOne, emailTwo))(List(developer1, developer2.copy(verified = true)))
+      ApplicationFetcherMock.FetchApplicationsByUserId.thenReturn(List(userIdOne, userIdTwo))(List.empty)
 
-      val result = await(underTest.fetchApplicationsForEmails(List(email1, email2)))
+      val result = await(underTest.fetchApplicationsForEmails(List(emailOne, emailTwo)))
 
       result shouldBe List.empty
     }

@@ -24,12 +24,13 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.{Application, Configuration, Mode}
 import uk.gov.hmrc.http.HeaderCarrier
 
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaboratorsFixtures
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, UserId}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
-import uk.gov.hmrc.thirdpartyorchestrator.utils.{ApplicationBuilder, WireMockExtensions}
+import uk.gov.hmrc.thirdpartyorchestrator.utils.WireMockExtensions
 
 class ThirdPartyApplicationConnectorIntegrationSpec extends BaseConnectorIntegrationSpec
-    with GuiceOneAppPerSuite with WireMockExtensions with FixedClock {
+    with GuiceOneAppPerSuite with WireMockExtensions with FixedClock with ApplicationWithCollaboratorsFixtures {
 
   private val stubConfig = Configuration(
     "microservice.services.third-party-application-principal.port" -> stubPort
@@ -41,14 +42,14 @@ class ThirdPartyApplicationConnectorIntegrationSpec extends BaseConnectorIntegra
       .in(Mode.Test)
       .build()
 
-  trait Setup extends ApplicationBuilder {
+  trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    val applicationId       = ApplicationId.random
-    val clientId            = ClientId.random
-    val userId1             = UserId.random
-    val userId2             = UserId.random
-    val expectedApplication = buildApplication(applicationId, clientId, userId1, userId2)
+    val userId1                      = userIdOne
+    val userId2                      = userIdTwo
+    val expectedApplication          = standardApp
+    val clientId: ClientId           = expectedApplication.clientId
+    val applicationId: ApplicationId = expectedApplication.id
 
     val underTest: ThirdPartyApplicationConnector = app.injector.instanceOf[PrincipalThirdPartyApplicationConnector]
   }

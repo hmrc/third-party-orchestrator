@@ -22,7 +22,7 @@ import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
 import uk.gov.hmrc.http.UpstreamErrorResponse
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationResponse
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, LaxEmailAddress}
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.thirdpartyorchestrator.services.ApplicationService
@@ -30,19 +30,19 @@ import uk.gov.hmrc.thirdpartyorchestrator.services.ApplicationService
 trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar {
   val applicationServiceMock = mock[ApplicationService]
 
-  def fetchApplicationsForEmailReturns(emails: List[LaxEmailAddress], returns: ApplicationResponse) =
+  def fetchApplicationsForEmailReturns(emails: List[LaxEmailAddress], returns: ApplicationWithCollaborators) =
     when(applicationServiceMock.fetchApplicationsForEmails(eqTo(emails))(*)).thenReturn(successful(List(returns)))
 
   def fetchApplicationsForEmailFails() =
     when(applicationServiceMock.fetchApplicationsForEmails(*)(*)).thenReturn(failed(UpstreamErrorResponse("some problem happened", 500)))
 
-  def fetchApplicationByIdReturns(applicationId: ApplicationId, returns: ApplicationResponse) =
+  def fetchApplicationByIdReturns(applicationId: ApplicationId, returns: ApplicationWithCollaborators) =
     when(applicationServiceMock.fetchApplication(eqTo(applicationId))(*)).thenReturn(successful(Some(returns)))
 
   def fetchApplicationByIdNotFound(applicationId: ApplicationId) =
     when(applicationServiceMock.fetchApplication(eqTo(applicationId))(*)).thenReturn(successful(None))
 
-  def fetchApplicationByClientIdReturns(clientId: ClientId, returns: ApplicationResponse) =
+  def fetchApplicationByClientIdReturns(clientId: ClientId, returns: ApplicationWithCollaborators) =
     when(applicationServiceMock.fetchApplication(eqTo(clientId))(*)).thenReturn(successful(Some(returns)))
 
   def fetchApplicationByClientIdNotFound(clientId: ClientId) =

@@ -20,7 +20,7 @@ import scala.concurrent.Future.{failed, successful}
 
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationResponse
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, UserId}
 import uk.gov.hmrc.thirdpartyorchestrator.connectors.{
   EnvironmentAwareThirdPartyApplicationConnector,
@@ -36,7 +36,7 @@ trait ThirdPartyApplicationConnectorMockModule extends MockitoSugar with Argumen
 
     object FetchApplicationById {
 
-      def thenReturn(applicationId: ApplicationId)(application: Option[ApplicationResponse]) =
+      def thenReturn(applicationId: ApplicationId)(application: Option[ApplicationWithCollaborators]) =
         when(aMock.fetchApplication(eqTo(applicationId))(*)).thenReturn(successful(application))
 
       def thenReturnNone(applicationId: ApplicationId) =
@@ -48,7 +48,7 @@ trait ThirdPartyApplicationConnectorMockModule extends MockitoSugar with Argumen
 
     object FetchApplicationByClientId {
 
-      def thenReturn(clientId: ClientId)(application: Option[ApplicationResponse]) =
+      def thenReturn(clientId: ClientId)(application: Option[ApplicationWithCollaborators]) =
         when(aMock.fetchApplication(eqTo(clientId))(*)).thenReturn(successful(application))
 
       def thenReturnNone(clientId: ClientId) =
@@ -60,7 +60,7 @@ trait ThirdPartyApplicationConnectorMockModule extends MockitoSugar with Argumen
 
     object FetchApplicationsByUserIds {
 
-      def thenReturn(userIds: List[UserId])(applications: List[ApplicationResponse]) =
+      def thenReturn(userIds: List[UserId])(applications: List[ApplicationWithCollaborators]) =
         when(aMock.fetchApplicationsByUserIds(eqTo(userIds))(*)).thenReturn(successful(applications))
 
       def thenReturnEmptyList(userIds: List[UserId]) =

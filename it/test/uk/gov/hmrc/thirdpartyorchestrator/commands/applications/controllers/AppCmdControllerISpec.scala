@@ -39,7 +39,6 @@ class AppCmdControllerISpec
     with GuiceOneServerPerSuite
     with ConfigBuilder
     with PrincipalAndSubordinateWireMockSetup
-    with ApplicationBuilder
     with utils.FixedClock {
 
   private val stubConfig = Configuration(

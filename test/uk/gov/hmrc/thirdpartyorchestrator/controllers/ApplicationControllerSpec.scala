@@ -26,28 +26,23 @@ import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaboratorsFixtures, Collaborators}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartyorchestrator.mocks.services.ApplicationServiceMock
-import uk.gov.hmrc.thirdpartyorchestrator.utils.ApplicationBuilder
 
 class ApplicationControllerSpec extends BaseControllerSpec with Matchers {
 
   trait Setup
-      extends ApplicationServiceMock with UserBuilder with ApplicationBuilder with LocalUserIdTracker {
+      extends ApplicationServiceMock with UserBuilder with LocalUserIdTracker with ApplicationWithCollaboratorsFixtures {
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val applicationId = ApplicationId.random
     val clientId      = ClientId.random
-    val userId1       = UserId.random
-    val userId2       = UserId.random
-    val email         = "bob@example.com".toLaxEmail
-    val email2        = "bob2@example.com".toLaxEmail
-    val developer     = buildUser(email, "Bob", "Fleming").copy(userId = userId1, verified = true)
-    val application   = buildApplication(applicationId, clientId, userId1, userId2)
+    val developer     = buildUser(emailOne, "Bob", "Fleming").copy(verified = true)
+    val application   = standardApp.withCollaborators(Collaborators.Administrator(userIdOne, emailOne))
     val controller    = new ApplicationController(applicationServiceMock, Helpers.stubControllerComponents())
   }
 
@@ -115,9 +110,9 @@ class ApplicationControllerSpec extends BaseControllerSpec with Matchers {
   "getApplicationsByEmail" should {
     "return the applications if successful" in new Setup {
       val appRequest = FakeRequest("POST", "/developer/applications")
-        .withBody(Json.toJson(ApplicationsByRequest(List(email, email2))))
+        .withBody(Json.toJson(ApplicationsByRequest(List(emailOne, emailTwo))))
 
-      fetchApplicationsForEmailReturns(List(email, email2), application)
+      fetchApplicationsForEmailReturns(List(emailOne, emailTwo), application)
 
       val result = controller.getApplicationsByEmail()(appRequest)
 
@@ -127,7 +122,7 @@ class ApplicationControllerSpec extends BaseControllerSpec with Matchers {
 
     "return 500 if service call failed" in new Setup {
       val appRequest = FakeRequest("POST", "/developer/applications")
-        .withBody(Json.toJson(ApplicationsByRequest(List(email, email2))))
+        .withBody(Json.toJson(ApplicationsByRequest(List(emailOne, emailTwo))))
 
       fetchApplicationsForEmailFails()
 

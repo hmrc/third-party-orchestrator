@@ -22,26 +22,24 @@ import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationResponse
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, ApplicationWithCollaboratorsFixtures}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, UserId}
 import uk.gov.hmrc.thirdpartyorchestrator.mocks.connectors._
-import uk.gov.hmrc.thirdpartyorchestrator.utils.{ApplicationBuilder, AsyncHmrcSpec}
+import uk.gov.hmrc.thirdpartyorchestrator.utils.AsyncHmrcSpec
 
-class ApplicationFetcherSpec extends AsyncHmrcSpec {
+class ApplicationFetcherSpec extends AsyncHmrcSpec with ApplicationWithCollaboratorsFixtures {
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
   trait Setup extends ThirdPartyApplicationConnectorMockModule with MockitoSugar
-      with ArgumentMatchersSugar with ApplicationBuilder {
+      with ArgumentMatchersSugar {
 
-    val applicationId: ApplicationId      = ApplicationId.random
-    val clientId: ClientId                = ClientId.random
-    val userId1: UserId                   = UserId.random
-    val userId2: UserId                   = UserId.random
-    val userIds: List[UserId]             = List(userId1, userId2)
-    val application: ApplicationResponse  = buildApplication(applicationId, clientId, userId1, userId2)
-    val application2: ApplicationResponse = buildApplication(ApplicationId.random, ClientId.random, userId1, userId2)
-    val exception                         = new RuntimeException("error")
+    val userIds: List[UserId]                      = List(userIdOne, userIdTwo)
+    val application: ApplicationWithCollaborators  = standardApp
+    val clientId: ClientId                         = application.clientId
+    val applicationId: ApplicationId               = application.id
+    val application2: ApplicationWithCollaborators = standardApp.withId(applicationIdTwo)
+    val exception                                  = new RuntimeException("error")
 
     val fetcher = new ApplicationFetcher(
       EnvironmentAwareThirdPartyApplicationConnectorMock.instance

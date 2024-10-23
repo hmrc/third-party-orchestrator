@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.thirdpartyorchestrator.commands.applications.connectors
 
-import java.time.Instant
 import scala.concurrent.ExecutionContext.Implicits.global
 
 import cats.data.NonEmptyList
@@ -31,7 +30,7 @@ import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Actors, ApplicationId, ClientId, Environment, UserId}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.utils
 import uk.gov.hmrc.thirdpartyorchestrator.commands.applications.domain.models.{AppCmdHandlerTypes, DispatchSuccessResult}
 import uk.gov.hmrc.thirdpartyorchestrator.utils._
@@ -42,7 +41,6 @@ class ApplicationCommandConnectorISpec
     with GuiceOneServerPerSuite
     with ConfigBuilder
     with PrincipalAndSubordinateWireMockSetup
-    with ApplicationBuilder
     with utils.FixedClock
     with HttpClientV2Support {
 
@@ -55,29 +53,29 @@ class ApplicationCommandConnectorISpec
     val applicationId = ApplicationId.random
     val clientId      = ClientId.random
 
-    def anApplicationResponse(createdOn: Instant = instant, lastAccess: Instant = instant): ApplicationResponse = {
-      ApplicationResponse(
-        id = applicationId,
-        clientId = clientId,
-        gatewayId = "gatewayId",
-        name = ApplicationName("appName"),
-        deployedTo = Environment.PRODUCTION,
-        description = Some("random description"),
-        collaborators = Set.empty,
-        createdOn = createdOn,
-        lastAccess = Some(lastAccess),
-        grantLength = GrantLength.EIGHTEEN_MONTHS,
-        lastAccessTokenUsage = None,
-        termsAndConditionsUrl = None,
-        privacyPolicyUrl = None,
-        access = Access.Standard(),
-        state = ApplicationState(State.TESTING, None, None, None, updatedOn = instant),
-        rateLimitTier = RateLimitTier.BRONZE,
-        checkInformation = None,
-        blocked = false,
-        trusted = false,
-        ipAllowlist = IpAllowlist(),
-        moreApplication = MoreApplication(true)
+    def anApplicationResponse(): ApplicationWithCollaborators = {
+      ApplicationWithCollaborators(
+        CoreApplication(
+          id = applicationId,
+          clientId = clientId,
+          gatewayId = "gatewayId",
+          name = ApplicationName("appName"),
+          deployedTo = Environment.PRODUCTION,
+          description = Some("random description"),
+          createdOn = instant,
+          lastAccess = Some(instant),
+          grantLength = GrantLength.EIGHTEEN_MONTHS,
+          lastAccessTokenUsage = None,
+          access = Access.Standard(),
+          state = ApplicationState(State.TESTING, None, None, None, updatedOn = instant),
+          rateLimitTier = RateLimitTier.BRONZE,
+          checkInformation = None,
+          blocked = false,
+          ipAllowlist = IpAllowlist(),
+          allowAutoDelete = true,
+          lastActionActor = ActorType.UNKNOWN
+        ),
+        collaborators = Set.empty
       )
     }
   }
