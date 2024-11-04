@@ -21,6 +21,7 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 
 import play.api.http.Status._
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.libs.json.Json
 import play.api.{Application, Configuration, Mode}
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -114,79 +115,6 @@ class ThirdPartyApplicationConnectorIntegrationSpec extends BaseConnectorIntegra
   }
 
   private def getBody(applicationId: ApplicationId, clientId: ClientId, userId1: UserId, userId2: UserId) = {
-    s"""{
-       |  "id": "$applicationId",
-       |  "clientId": "$clientId",
-       |  "gatewayId": "gateway-id",
-       |  "name": "Petes test application",
-       |  "deployedTo": "PRODUCTION",
-       |  "description": "Petes test application description",
-       |  "collaborators": [
-       |    {
-       |      "userId": "$userId1",
-       |      "emailAddress": "bob@example.com",
-       |      "role": "ADMINISTRATOR"
-       |    },
-       |    {
-       |      "userId": "$userId2",
-       |      "emailAddress": "bob@example.com",
-       |      "role": "ADMINISTRATOR"
-       |    }
-       |  ],
-       |  "createdOn": "$nowAsText",
-       |  "lastAccess": "$nowAsText",
-       |  "grantLength": 547,
-       |  "redirectUris": [],
-       |  "access": {
-       |    "redirectUris": [],
-       |    "overrides": [],
-       |    "importantSubmissionData": {
-       |      "organisationUrl": "https://www.example.com",
-       |      "responsibleIndividual": {
-       |        "fullName": "Bob Fleming",
-       |        "emailAddress": "bob@example.com"
-       |      },
-       |      "serverLocations": [
-       |        {
-       |          "serverLocation": "inUK"
-       |        }
-       |      ],
-       |      "termsAndConditionsLocation": {
-       |        "termsAndConditionsType": "inDesktop"
-       |      },
-       |      "privacyPolicyLocation": {
-       |        "privacyPolicyType": "inDesktop"
-       |      },
-       |      "termsOfUseAcceptances": [
-       |        {
-       |          "responsibleIndividual": {
-       |            "fullName": "Bob Fleming",
-       |            "emailAddress": "bob@example.com"
-       |          },
-       |          "dateTime": "$nowAsText",
-       |          "submissionId": "4e62811a-7ab3-4421-a89e-65a8bad9b6ae",
-       |          "submissionInstance": 0
-       |        }
-       |      ]
-       |    },
-       |    "accessType": "STANDARD"
-       |  },
-       |  "state": {
-       |    "name": "TESTING",
-       |    "updatedOn": "$nowAsText"
-       |  },
-       |  "rateLimitTier": "BRONZE",
-       |  "blocked": false,
-       |  "trusted": false,
-       |  "ipAllowlist": {
-       |    "required": false,
-       |    "allowlist": []
-       |  },
-       |  "moreApplication": {
-       |    "allowAutoDelete": false,
-       |    "lastActionActor": "UNKNOWN"
-       |
-       |  }
-       |}""".stripMargin
+    Json.toJson(standardApp).toString
   }
 }
