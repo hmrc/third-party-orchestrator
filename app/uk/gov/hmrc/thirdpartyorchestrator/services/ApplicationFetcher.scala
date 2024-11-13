@@ -22,7 +22,7 @@ import scala.util.control.NonFatal
 
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationResponse
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, UserId}
 import uk.gov.hmrc.thirdpartyorchestrator.connectors.EnvironmentAwareThirdPartyApplicationConnector
 import uk.gov.hmrc.thirdpartyorchestrator.utils.ApplicationLogger
@@ -33,9 +33,9 @@ class ApplicationFetcher @Inject() (
   )(implicit ec: ExecutionContext
   ) extends ApplicationLogger {
 
-  def fetchApplication(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationResponse]] = {
-    val subordinateApp: Future[Option[ApplicationResponse]] = thirdPartyApplicationConnector.subordinate.fetchApplication(applicationId) recover recoverWithDefault(None)
-    val principalApp: Future[Option[ApplicationResponse]]   = thirdPartyApplicationConnector.principal.fetchApplication(applicationId)
+  def fetchApplication(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithCollaborators]] = {
+    val subordinateApp: Future[Option[ApplicationWithCollaborators]] = thirdPartyApplicationConnector.subordinate.fetchApplication(applicationId) recover recoverWithDefault(None)
+    val principalApp: Future[Option[ApplicationWithCollaborators]]   = thirdPartyApplicationConnector.principal.fetchApplication(applicationId)
 
     for {
       subordinate <- subordinateApp
@@ -43,9 +43,9 @@ class ApplicationFetcher @Inject() (
     } yield principal.orElse(subordinate)
   }
 
-  def fetchApplication(clientId: ClientId)(implicit hc: HeaderCarrier): Future[Option[ApplicationResponse]] = {
-    val subordinateApp: Future[Option[ApplicationResponse]] = thirdPartyApplicationConnector.subordinate.fetchApplication(clientId) recover recoverWithDefault(None)
-    val principalApp: Future[Option[ApplicationResponse]]   = thirdPartyApplicationConnector.principal.fetchApplication(clientId)
+  def fetchApplication(clientId: ClientId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithCollaborators]] = {
+    val subordinateApp: Future[Option[ApplicationWithCollaborators]] = thirdPartyApplicationConnector.subordinate.fetchApplication(clientId) recover recoverWithDefault(None)
+    val principalApp: Future[Option[ApplicationWithCollaborators]]   = thirdPartyApplicationConnector.principal.fetchApplication(clientId)
 
     for {
       subordinate <- subordinateApp
@@ -53,10 +53,10 @@ class ApplicationFetcher @Inject() (
     } yield principal.orElse(subordinate)
   }
 
-  def fetchApplicationsByUserIds(userIds: List[UserId])(implicit hc: HeaderCarrier): Future[List[ApplicationResponse]] = {
+  def fetchApplicationsByUserIds(userIds: List[UserId])(implicit hc: HeaderCarrier): Future[List[ApplicationWithCollaborators]] = {
     if (userIds.nonEmpty) {
-      val subordinateApp: Future[List[ApplicationResponse]] = thirdPartyApplicationConnector.subordinate.fetchApplicationsByUserIds(userIds)
-      val principalApp: Future[List[ApplicationResponse]]   = thirdPartyApplicationConnector.principal.fetchApplicationsByUserIds(userIds)
+      val subordinateApp: Future[List[ApplicationWithCollaborators]] = thirdPartyApplicationConnector.subordinate.fetchApplicationsByUserIds(userIds)
+      val principalApp: Future[List[ApplicationWithCollaborators]]   = thirdPartyApplicationConnector.principal.fetchApplicationsByUserIds(userIds)
 
       for {
         subordinate <- subordinateApp

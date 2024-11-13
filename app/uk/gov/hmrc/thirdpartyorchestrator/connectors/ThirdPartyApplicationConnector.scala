@@ -25,7 +25,7 @@ import uk.gov.hmrc.http.client.{HttpClientV2, RequestBuilder}
 import uk.gov.hmrc.http.{StringContextOps, _}
 import uk.gov.hmrc.play.http.metrics.common._
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationResponse
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, UserId}
 import uk.gov.hmrc.thirdpartyorchestrator.utils.EbridgeConfigurator
 
@@ -36,9 +36,9 @@ object CollaboratorUserIds {
 }
 
 trait ThirdPartyApplicationConnector {
-  def fetchApplication(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationResponse]]
-  def fetchApplication(clientId: ClientId)(implicit hc: HeaderCarrier): Future[Option[ApplicationResponse]]
-  def fetchApplicationsByUserIds(userIds: List[UserId])(implicit hc: HeaderCarrier): Future[List[ApplicationResponse]]
+  def fetchApplication(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithCollaborators]]
+  def fetchApplication(clientId: ClientId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithCollaborators]]
+  def fetchApplicationsByUserIds(userIds: List[UserId])(implicit hc: HeaderCarrier): Future[List[ApplicationWithCollaborators]]
 }
 
 abstract class AbstractThirdPartyApplicationConnector(implicit val ec: ExecutionContext) extends ThirdPartyApplicationConnector with RecordMetrics {
@@ -52,25 +52,25 @@ abstract class AbstractThirdPartyApplicationConnector(implicit val ec: Execution
 
   def configureEbridgeIfRequired(requestBuilder: RequestBuilder): RequestBuilder
 
-  def fetchApplication(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationResponse]] =
+  def fetchApplication(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithCollaborators]] =
     record {
       configureEbridgeIfRequired(http.get(url"$serviceBaseUrl/application/$applicationId"))
-        .execute[Option[ApplicationResponse]]
+        .execute[Option[ApplicationWithCollaborators]]
     }
 
-  def fetchApplication(clientId: ClientId)(implicit hc: HeaderCarrier): Future[Option[ApplicationResponse]] =
+  def fetchApplication(clientId: ClientId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithCollaborators]] =
     record {
       val params = Seq("clientId" -> clientId.value)
 
       configureEbridgeIfRequired(http.get(url"$serviceBaseUrl/application?$params"))
-        .execute[Option[ApplicationResponse]]
+        .execute[Option[ApplicationWithCollaborators]]
     }
 
-  def fetchApplicationsByUserIds(userIds: List[UserId])(implicit hc: HeaderCarrier): Future[List[ApplicationResponse]] =
+  def fetchApplicationsByUserIds(userIds: List[UserId])(implicit hc: HeaderCarrier): Future[List[ApplicationWithCollaborators]] =
     record {
       configureEbridgeIfRequired(http.post(url"$serviceBaseUrl/developer/applications"))
         .withBody(Json.toJson(CollaboratorUserIds(userIds)))
-        .execute[List[ApplicationResponse]]
+        .execute[List[ApplicationWithCollaborators]]
     }
 }
 

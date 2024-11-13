@@ -21,15 +21,17 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 
 import play.api.http.Status._
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.libs.json.Json
 import play.api.{Application, Configuration, Mode}
 import uk.gov.hmrc.http.HeaderCarrier
 
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaboratorsFixtures
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, UserId}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
-import uk.gov.hmrc.thirdpartyorchestrator.utils.{ApplicationBuilder, WireMockExtensions}
+import uk.gov.hmrc.thirdpartyorchestrator.utils.WireMockExtensions
 
 class ThirdPartyApplicationConnectorIntegrationSpec extends BaseConnectorIntegrationSpec
-    with GuiceOneAppPerSuite with WireMockExtensions with FixedClock {
+    with GuiceOneAppPerSuite with WireMockExtensions with FixedClock with ApplicationWithCollaboratorsFixtures {
 
   private val stubConfig = Configuration(
     "microservice.services.third-party-application-principal.port" -> stubPort
@@ -41,14 +43,14 @@ class ThirdPartyApplicationConnectorIntegrationSpec extends BaseConnectorIntegra
       .in(Mode.Test)
       .build()
 
-  trait Setup extends ApplicationBuilder {
+  trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    val applicationId       = ApplicationId.random
-    val clientId            = ClientId.random
-    val userId1             = UserId.random
-    val userId2             = UserId.random
-    val expectedApplication = buildApplication(applicationId, clientId, userId1, userId2)
+    val userId1                      = userIdOne
+    val userId2                      = userIdTwo
+    val expectedApplication          = standardApp
+    val clientId: ClientId           = expectedApplication.clientId
+    val applicationId: ApplicationId = expectedApplication.id
 
     val underTest: ThirdPartyApplicationConnector = app.injector.instanceOf[PrincipalThirdPartyApplicationConnector]
   }
@@ -113,79 +115,6 @@ class ThirdPartyApplicationConnectorIntegrationSpec extends BaseConnectorIntegra
   }
 
   private def getBody(applicationId: ApplicationId, clientId: ClientId, userId1: UserId, userId2: UserId) = {
-    s"""{
-       |  "id": "$applicationId",
-       |  "clientId": "$clientId",
-       |  "gatewayId": "gateway-id",
-       |  "name": "Petes test application",
-       |  "deployedTo": "PRODUCTION",
-       |  "description": "Petes test application description",
-       |  "collaborators": [
-       |    {
-       |      "userId": "$userId1",
-       |      "emailAddress": "bob@example.com",
-       |      "role": "ADMINISTRATOR"
-       |    },
-       |    {
-       |      "userId": "$userId2",
-       |      "emailAddress": "bob@example.com",
-       |      "role": "ADMINISTRATOR"
-       |    }
-       |  ],
-       |  "createdOn": "$nowAsText",
-       |  "lastAccess": "$nowAsText",
-       |  "grantLength": 547,
-       |  "redirectUris": [],
-       |  "access": {
-       |    "redirectUris": [],
-       |    "overrides": [],
-       |    "importantSubmissionData": {
-       |      "organisationUrl": "https://www.example.com",
-       |      "responsibleIndividual": {
-       |        "fullName": "Bob Fleming",
-       |        "emailAddress": "bob@example.com"
-       |      },
-       |      "serverLocations": [
-       |        {
-       |          "serverLocation": "inUK"
-       |        }
-       |      ],
-       |      "termsAndConditionsLocation": {
-       |        "termsAndConditionsType": "inDesktop"
-       |      },
-       |      "privacyPolicyLocation": {
-       |        "privacyPolicyType": "inDesktop"
-       |      },
-       |      "termsOfUseAcceptances": [
-       |        {
-       |          "responsibleIndividual": {
-       |            "fullName": "Bob Fleming",
-       |            "emailAddress": "bob@example.com"
-       |          },
-       |          "dateTime": "$nowAsText",
-       |          "submissionId": "4e62811a-7ab3-4421-a89e-65a8bad9b6ae",
-       |          "submissionInstance": 0
-       |        }
-       |      ]
-       |    },
-       |    "accessType": "STANDARD"
-       |  },
-       |  "state": {
-       |    "name": "TESTING",
-       |    "updatedOn": "$nowAsText"
-       |  },
-       |  "rateLimitTier": "BRONZE",
-       |  "blocked": false,
-       |  "trusted": false,
-       |  "ipAllowlist": {
-       |    "required": false,
-       |    "allowlist": []
-       |  },
-       |  "moreApplication": {
-       |    "allowAutoDelete": false,
-       |    "lastActionActor": "UNKNOWN"
-       |
-       |  }
-       |}""".stripMargin
+    Json.toJson(standardApp).toString
   }
 }

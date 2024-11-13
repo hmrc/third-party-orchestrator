@@ -3,9 +3,10 @@ import sbt.*
 object AppDependencies {
 
   private val bootstrapVersion = "9.1.0"
-  private val commonDomainVersion = "0.15.0"
-  private val applicationEventVersion  = "0.64.0"
-  private val tpdDomainVersion  = "0.9.0"
+  private val commonDomainVersion = "0.17.0"
+  private val applicationEventVersion  = "0.66.5"
+  private val tpdDomainVersion  = "0.11.0"
+  private val appDomainVersion = "0.62.0"
 
   def apply(): Seq[ModuleID] = compileDeps ++ testDeps
 
@@ -17,7 +18,8 @@ object AppDependencies {
   )
 
   val testDeps = Seq(
-    "uk.gov.hmrc" %% "bootstrap-test-play-30"          % bootstrapVersion,
-    "uk.gov.hmrc" %% "api-platform-test-tpd-domain"    % tpdDomainVersion
+    "uk.gov.hmrc" %% "bootstrap-test-play-30"                      % bootstrapVersion,
+    "uk.gov.hmrc" %% "api-platform-test-tpd-domain"                % tpdDomainVersion,
+    "uk.gov.hmrc" %% "api-platform-application-domain-fixtures"    % appDomainVersion
   ).map(_ % "test")
 }
