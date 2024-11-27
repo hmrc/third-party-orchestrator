@@ -52,7 +52,7 @@ class ApplicationController @Inject() (
   def getApplicationsByEmail(): Action[JsValue] = Action.async(parse.json) { implicit request =>
     withJsonBody[ApplicationsByRequest] {
       emailsRequest =>
-        applicationService.fetchApplicationsForEmails(emailsRequest.emails)
+        applicationService.fetchApplicationsForEmails(emailsRequest.emails, request.queryString.map { case (k, v) => k -> v.mkString })
           .map(response => Ok(Json.toJson(response))) recover recovery
     }
   }
