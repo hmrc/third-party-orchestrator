@@ -14,7 +14,6 @@ object AppDependencies {
     "uk.gov.hmrc" %% "bootstrap-backend-play-30"       % bootstrapVersion,
     "uk.gov.hmrc" %% "http-metrics"                    % "2.8.0",
     "uk.gov.hmrc" %% "api-platform-application-events" % applicationEventVersion,
-    "uk.gov.hmrc" %% "api-platform-application-domain" % appDomainVersion,
     "uk.gov.hmrc" %% "api-platform-tpd-domain"         % tpdDomainVersion,
   )
 

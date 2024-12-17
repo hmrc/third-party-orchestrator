@@ -56,7 +56,7 @@ class AppCmdControllerISpec
       .build()
 
   trait Setup {
-    // val applicationId              = ApplicationId.random
+    val applicationId              = standardApp.id
     implicit val hc: HeaderCarrier = HeaderCarrier()
     lazy val baseUrl               = s"http://localhost:$port"
 
@@ -69,20 +69,26 @@ class AppCmdControllerISpec
   }
 
   "AppCmdController" should {
-    // "return 400 when payload is valid json but not valid object" in new Setup {
-    //   // command: ApplicationCommand, verifiedCollaboratorsToNotify: Set[LaxEmailAddress])
-    //   val body                 = Json.toJson("""{"command":"somecommand", "verifiedCollaboratorsToNotify":[]  }""").toString()
-    //   val response: WSResponse = await(wsClient.url(s"${baseUrl}/applications/${applicationId.value}/dispatch").withHttpHeaders(("content-type", "application/json")).patch(body))
-    //   response.status shouldBe BAD_REQUEST
-
-    //   // check stub not called.????
-    // }
+    "return 400 when payload is valid json but not valid object" in new Setup {
+      // Property "command" must be a valid ApplicationCommand
+      val body                 = Json.toJson("""{"command":"somecommand", "verifiedCollaboratorsToNotify":[]  }""").toString()
+      val response: WSResponse = await(wsClient.url(s"$baseUrl/applications/$applicationId/dispatch").withHttpHeaders(("content-type", "application/json")).patch(body))
+      response.status shouldBe BAD_REQUEST
+    }
 
     "return 401 when Unauthorised is returned from connector" in new Setup {
-      stubForApplication(applicationIdOne, ClientId.random)
+      stubFor(Environment.SANDBOX)(
+        get(urlPathEqualTo(s"/application/$applicationId"))
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withHeader("Content-Type", "application/json")
+              .withBody(Json.toJson(standardApp.inSandbox().withId(applicationId)).toString())
+          )
+      )
 
       stubFor(Environment.SANDBOX)(
-        patch(urlMatching(s"/application/$applicationIdOne/dispatch"))
+        patch(urlMatching(s"/application/$applicationId/dispatch"))
           .willReturn(
             aResponse()
               .withStatus(UNAUTHORIZED)
@@ -90,33 +96,9 @@ class AppCmdControllerISpec
       )
 
       val body                 = Json.toJson(request).toString()
-      val response: WSResponse = await(wsClient.url(s"${baseUrl}/applications/$applicationIdOne/dispatch").withHttpHeaders(("content-type", "application/json")).patch(body))
+      val response: WSResponse = await(wsClient.url(s"$baseUrl/applications/$applicationId/dispatch").withHttpHeaders(("content-type", "application/json")).patch(body))
       response.status shouldBe UNAUTHORIZED
     }
   }
 
-  private def stubForApplication(applicationId: ApplicationId, clientId: ClientId, userId1: UserId = UserId.random, userId2: UserId = UserId.random) = {
-    stubFor(Environment.PRODUCTION)(
-      get(urlPathEqualTo(s"/application/$applicationId"))
-        .willReturn(
-          aResponse()
-            .withStatus(NOT_FOUND)
-            .withHeader("Content-Type", "application/json")
-        )
-    )
-    stubFor(Environment.SANDBOX)(
-      get(urlPathEqualTo(s"/application/$applicationId"))
-        .willReturn(
-          aResponse()
-            .withStatus(OK)
-            .withHeader("Content-Type", "application/json")
-            .withBody(getBody(applicationId, clientId, userId1, userId2))
-        )
-    )
-  }
-
-  private def getBody(applicationId: ApplicationId, clientId: ClientId, userId1: UserId, userId2: UserId) = {
-    val app = standardApp.withId(applicationId).modify(_.copy(clientId = clientId, deployedTo = Environment.SANDBOX))
-    Json.toJson(app).toString()
-  }
 }
