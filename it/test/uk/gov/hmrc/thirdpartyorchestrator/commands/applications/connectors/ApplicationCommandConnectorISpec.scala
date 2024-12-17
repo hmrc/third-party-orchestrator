@@ -73,7 +73,8 @@ class ApplicationCommandConnectorISpec
           blocked = false,
           ipAllowlist = IpAllowlist(),
           allowAutoDelete = true,
-          lastActionActor = ActorType.UNKNOWN
+          lastActionActor = ActorType.UNKNOWN,
+          deleteRestriction = DeleteRestriction.NoRestriction
         ),
         collaborators = Set.empty
       )
