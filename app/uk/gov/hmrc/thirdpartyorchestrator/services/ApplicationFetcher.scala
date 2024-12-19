@@ -53,10 +53,10 @@ class ApplicationFetcher @Inject() (
     } yield principal.orElse(subordinate)
   }
 
-  def fetchApplicationsByUserIds(userIds: List[UserId])(implicit hc: HeaderCarrier): Future[List[ApplicationWithCollaborators]] = {
+  def fetchApplicationsByUserIds(userIds: List[UserId], params: Map[String, String])(implicit hc: HeaderCarrier): Future[List[ApplicationWithCollaborators]] = {
     if (userIds.nonEmpty) {
-      val subordinateApp: Future[List[ApplicationWithCollaborators]] = thirdPartyApplicationConnector.subordinate.fetchApplicationsByUserIds(userIds)
-      val principalApp: Future[List[ApplicationWithCollaborators]]   = thirdPartyApplicationConnector.principal.fetchApplicationsByUserIds(userIds)
+      val subordinateApp: Future[List[ApplicationWithCollaborators]] = thirdPartyApplicationConnector.subordinate.fetchApplicationsByUserIds(userIds, params)
+      val principalApp: Future[List[ApplicationWithCollaborators]]   = thirdPartyApplicationConnector.principal.fetchApplicationsByUserIds(userIds, params)
 
       for {
         subordinate <- subordinateApp
