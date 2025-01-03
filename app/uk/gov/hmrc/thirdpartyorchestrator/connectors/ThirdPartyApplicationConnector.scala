@@ -38,7 +38,7 @@ object CollaboratorUserIds {
 trait ThirdPartyApplicationConnector {
   def fetchApplication(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithCollaborators]]
   def fetchApplication(clientId: ClientId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithCollaborators]]
-  def fetchApplicationsByUserIds(userIds: List[UserId], params: Map[String, String])(implicit hc: HeaderCarrier): Future[List[ApplicationWithCollaborators]]
+  def fetchApplicationsByUserIds(userIds: List[UserId])(implicit hc: HeaderCarrier): Future[List[ApplicationWithCollaborators]]
 }
 
 abstract class AbstractThirdPartyApplicationConnector(implicit val ec: ExecutionContext) extends ThirdPartyApplicationConnector with RecordMetrics {
@@ -66,9 +66,9 @@ abstract class AbstractThirdPartyApplicationConnector(implicit val ec: Execution
         .execute[Option[ApplicationWithCollaborators]]
     }
 
-  def fetchApplicationsByUserIds(userIds: List[UserId], params: Map[String, String])(implicit hc: HeaderCarrier): Future[List[ApplicationWithCollaborators]] =
+  def fetchApplicationsByUserIds(userIds: List[UserId])(implicit hc: HeaderCarrier): Future[List[ApplicationWithCollaborators]] =
     record {
-      configureEbridgeIfRequired(http.post(url"$serviceBaseUrl/developer/applications?$params"))
+      configureEbridgeIfRequired(http.post(url"$serviceBaseUrl/developer/applications"))
         .withBody(Json.toJson(CollaboratorUserIds(userIds)))
         .execute[List[ApplicationWithCollaborators]]
     }

@@ -61,13 +61,13 @@ trait ThirdPartyApplicationConnectorMockModule extends MockitoSugar with Argumen
     object FetchApplicationsByUserIds {
 
       def thenReturn(userIds: List[UserId])(applications: List[ApplicationWithCollaborators]) =
-        when(aMock.fetchApplicationsByUserIds(eqTo(userIds), *[Map[String, String]])(*)).thenReturn(successful(applications))
+        when(aMock.fetchApplicationsByUserIds(eqTo(userIds))(*)).thenReturn(successful(applications))
 
       def thenReturnEmptyList(userIds: List[UserId]) =
-        when(aMock.fetchApplicationsByUserIds(eqTo(userIds), *[Map[String, String]])(*)).thenReturn(successful(List.empty))
+        when(aMock.fetchApplicationsByUserIds(eqTo(userIds))(*)).thenReturn(successful(List.empty))
 
       def thenThrowException(userIds: List[UserId])(exception: Exception) =
-        when(aMock.fetchApplicationsByUserIds(eqTo(userIds), *[Map[String, String]])(*)).thenReturn(failed(exception))
+        when(aMock.fetchApplicationsByUserIds(eqTo(userIds))(*)).thenReturn(failed(exception))
     }
   }
 

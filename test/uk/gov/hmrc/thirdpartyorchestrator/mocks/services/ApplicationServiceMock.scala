@@ -31,10 +31,10 @@ trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar {
   val applicationServiceMock = mock[ApplicationService]
 
   def fetchApplicationsForEmailReturns(emails: List[LaxEmailAddress], returns: ApplicationWithCollaborators) =
-    when(applicationServiceMock.fetchApplicationsForEmails(eqTo(emails), *[Map[String, String]])(*)).thenReturn(successful(List(returns)))
+    when(applicationServiceMock.fetchApplicationsForEmails(eqTo(emails))(*)).thenReturn(successful(List(returns)))
 
   def fetchApplicationsForEmailFails() =
-    when(applicationServiceMock.fetchApplicationsForEmails(*, *)(*)).thenReturn(failed(UpstreamErrorResponse("some problem happened", 500)))
+    when(applicationServiceMock.fetchApplicationsForEmails(*)(*)).thenReturn(failed(UpstreamErrorResponse("some problem happened", 500)))
 
   def fetchApplicationByIdReturns(applicationId: ApplicationId, returns: ApplicationWithCollaborators) =
     when(applicationServiceMock.fetchApplication(eqTo(applicationId))(*)).thenReturn(successful(Some(returns)))
