@@ -42,11 +42,11 @@ class ApplicationService @Inject() (
     applicationFetcher.fetchApplication(clientId)
   }
 
-  def fetchApplicationsForEmails(emails: List[LaxEmailAddress], params: Map[String, String])(implicit hc: HeaderCarrier): Future[List[ApplicationWithCollaborators]] = {
+  def fetchApplicationsForEmails(emails: List[LaxEmailAddress])(implicit hc: HeaderCarrier): Future[List[ApplicationWithCollaborators]] = {
     for {
       developers              <- thirdPartyDeveloperConnector.fetchDevelopers(emails)
       verifiedDeveloperUserIds = developers.filter(_.verified).map(_.userId)
-      applications            <- applicationFetcher.fetchApplicationsByUserIds(verifiedDeveloperUserIds, params)
+      applications            <- applicationFetcher.fetchApplicationsByUserIds(verifiedDeveloperUserIds)
     } yield applications
   }
 

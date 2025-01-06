@@ -91,7 +91,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec {
       ThirdPartyDeveloperConnectorMock.FetchDevelopers.thenReturn(List(emailOne, emailTwo))(List(developer1, developer2.copy(verified = true)))
       ApplicationFetcherMock.FetchApplicationsByUserId.thenReturn(List(userIdOne, userIdTwo))(List(application))
 
-      val result = await(underTest.fetchApplicationsForEmails(List(emailOne, emailTwo), Map.empty))
+      val result = await(underTest.fetchApplicationsForEmails(List(emailOne, emailTwo)))
 
       result shouldBe List(application)
     }
@@ -100,7 +100,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec {
       ThirdPartyDeveloperConnectorMock.FetchDevelopers.thenReturn(List(emailOne, emailTwo))(List(developer1, developer2))
       ApplicationFetcherMock.FetchApplicationsByUserId.thenReturn(List(userIdOne))(List(application))
 
-      val result = await(underTest.fetchApplicationsForEmails(List(emailOne, emailTwo), Map.empty))
+      val result = await(underTest.fetchApplicationsForEmails(List(emailOne, emailTwo)))
 
       result shouldBe List(application)
     }
@@ -109,7 +109,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec {
       ThirdPartyDeveloperConnectorMock.FetchDevelopers.thenReturn(List(emailOne, emailTwo))(List.empty)
       ApplicationFetcherMock.FetchApplicationsByUserId.thenReturn(List.empty)(List.empty)
 
-      val result = await(underTest.fetchApplicationsForEmails(List(emailOne, emailTwo), Map.empty))
+      val result = await(underTest.fetchApplicationsForEmails(List(emailOne, emailTwo)))
 
       result shouldBe List.empty
     }
@@ -118,7 +118,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec {
       ThirdPartyDeveloperConnectorMock.FetchDevelopers.thenReturn(List(emailOne, emailTwo))(List(developer1, developer2.copy(verified = true)))
       ApplicationFetcherMock.FetchApplicationsByUserId.thenReturn(List(userIdOne, userIdTwo))(List.empty)
 
-      val result = await(underTest.fetchApplicationsForEmails(List(emailOne, emailTwo), Map.empty))
+      val result = await(underTest.fetchApplicationsForEmails(List(emailOne, emailTwo)))
 
       result shouldBe List.empty
     }
