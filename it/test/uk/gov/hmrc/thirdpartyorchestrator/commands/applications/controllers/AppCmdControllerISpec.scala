@@ -39,6 +39,7 @@ class AppCmdControllerISpec
     with GuiceOneServerPerSuite
     with ConfigBuilder
     with PrincipalAndSubordinateWireMockSetup
+    with ApplicationWithCollaboratorsFixtures
     with utils.FixedClock {
 
   private val stubConfig = Configuration(
@@ -55,7 +56,7 @@ class AppCmdControllerISpec
       .build()
 
   trait Setup {
-    val applicationId              = ApplicationId.random
+    val applicationId              = standardApp.id
     implicit val hc: HeaderCarrier = HeaderCarrier()
     lazy val baseUrl               = s"http://localhost:$port"
 
@@ -68,124 +69,36 @@ class AppCmdControllerISpec
   }
 
   "AppCmdController" should {
-
     "return 400 when payload is valid json but not valid object" in new Setup {
-      // command: ApplicationCommand, verifiedCollaboratorsToNotify: Set[LaxEmailAddress])
+      // Property "command" must be a valid ApplicationCommand
       val body                 = Json.toJson("""{"command":"somecommand", "verifiedCollaboratorsToNotify":[]  }""").toString()
-      val response: WSResponse = await(wsClient.url(s"${baseUrl}/applications/${applicationId.value}/dispatch").withHttpHeaders(("content-type", "application/json")).patch(body))
+      val response: WSResponse = await(wsClient.url(s"$baseUrl/applications/$applicationId/dispatch").withHttpHeaders(("content-type", "application/json")).patch(body))
       response.status shouldBe BAD_REQUEST
     }
 
     "return 401 when Unauthorised is returned from connector" in new Setup {
-
-      stubForApplication(applicationId, ClientId.random, UserId.random, UserId.random)
+      stubFor(Environment.SANDBOX)(
+        get(urlPathEqualTo(s"/application/$applicationId"))
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withHeader("Content-Type", "application/json")
+              .withBody(Json.toJson(standardApp.inSandbox().withId(applicationId)).toString())
+          )
+      )
 
       stubFor(Environment.SANDBOX)(
-        patch(urlMatching(s"/application/${applicationId.value}/dispatch"))
+        patch(urlMatching(s"/application/$applicationId/dispatch"))
           .willReturn(
             aResponse()
               .withStatus(UNAUTHORIZED)
           )
       )
+
       val body                 = Json.toJson(request).toString()
-      val response: WSResponse = await(wsClient.url(s"${baseUrl}/applications/${applicationId.value}/dispatch").withHttpHeaders(("content-type", "application/json")).patch(body))
+      val response: WSResponse = await(wsClient.url(s"$baseUrl/applications/$applicationId/dispatch").withHttpHeaders(("content-type", "application/json")).patch(body))
       response.status shouldBe UNAUTHORIZED
     }
   }
 
-  private def stubForApplication(applicationId: ApplicationId, clientId: ClientId, userId1: UserId, userId2: UserId) = {
-    stubFor(Environment.PRODUCTION)(
-      get(urlPathEqualTo(s"/application/$applicationId"))
-        .willReturn(
-          aResponse()
-            .withStatus(NOT_FOUND)
-            .withHeader("Content-Type", "application/json")
-        )
-    )
-    stubFor(Environment.SANDBOX)(
-      get(urlPathEqualTo(s"/application/$applicationId"))
-        .willReturn(
-          aResponse()
-            .withStatus(OK)
-            .withHeader("Content-Type", "application/json")
-            .withBody(getBody(applicationId, clientId, userId1, userId2))
-        )
-    )
-  }
-
-  private def getBody(applicationId: ApplicationId, clientId: ClientId, userId1: UserId, userId2: UserId) = {
-    s"""{
-       |  "id": "$applicationId",
-       |  "clientId": "$clientId",
-       |  "gatewayId": "gateway-id",
-       |  "name": "Petes test application",
-       |  "deployedTo": "SANDBOX",
-       |  "description": "Petes test application description",
-       |  "collaborators": [
-       |    {
-       |      "userId": "$userId1",
-       |      "emailAddress": "bob@example.com",
-       |      "role": "ADMINISTRATOR"
-       |    },
-       |    {
-       |      "userId": "$userId2",
-       |      "emailAddress": "bob@example.com",
-       |      "role": "ADMINISTRATOR"
-       |    }
-       |  ],
-       |  "createdOn": "$nowAsText",
-       |  "lastAccess": "$nowAsText",
-       |  "grantLength": 547,
-       |  "redirectUris": [],
-       |  "access": {
-       |    "redirectUris": [],
-       |    "overrides": [],
-       |    "importantSubmissionData": {
-       |      "organisationUrl": "https://www.example.com",
-       |      "responsibleIndividual": {
-       |        "fullName": "Bob Fleming",
-       |        "emailAddress": "bob@example.com"
-       |      },
-       |      "serverLocations": [
-       |        {
-       |          "serverLocation": "inUK"
-       |        }
-       |      ],
-       |      "termsAndConditionsLocation": {
-       |        "termsAndConditionsType": "inDesktop"
-       |      },
-       |      "privacyPolicyLocation": {
-       |        "privacyPolicyType": "inDesktop"
-       |      },
-       |      "termsOfUseAcceptances": [
-       |        {
-       |          "responsibleIndividual": {
-       |            "fullName": "Bob Fleming",
-       |            "emailAddress": "bob@example.com"
-       |          },
-       |          "dateTime": "$nowAsText",
-       |          "submissionId": "4e62811a-7ab3-4421-a89e-65a8bad9b6ae",
-       |          "submissionInstance": 0
-       |        }
-       |      ]
-       |    },
-       |    "accessType": "STANDARD"
-       |  },
-       |  "state": {
-       |    "name": "TESTING",
-       |    "updatedOn": "$nowAsText"
-       |  },
-       |  "rateLimitTier": "BRONZE",
-       |  "blocked": false,
-       |  "trusted": false,
-       |  "ipAllowlist": {
-       |    "required": false,
-       |    "allowlist": []
-       |  },
-       |  "moreApplication": {
-       |    "allowAutoDelete": false,
-       |    "lastActionActor": "UNKNOWN"
-       |  }
-       |}""".stripMargin
-  }
 }
