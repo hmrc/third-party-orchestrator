@@ -2,6 +2,7 @@
 
 POST        /session/validate                   uk.gov.hmrc.thirdpartyorchestrator.controllers.SessionController.getDeveloperForSession()
 GET         /applications                       uk.gov.hmrc.thirdpartyorchestrator.controllers.ApplicationController.queryDispatcher()
+GET         /applications/paginated             uk.gov.hmrc.thirdpartyorchestrator.controllers.ApplicationController.pageQueryDispatcher()
 GET         /applications/:id                   uk.gov.hmrc.thirdpartyorchestrator.controllers.ApplicationController.getApplication(id: ApplicationId)
 GET         /applications/:id/developers        uk.gov.hmrc.thirdpartyorchestrator.controllers.ApplicationController.getVerifiedDevelopersForApplication(id: ApplicationId)
 

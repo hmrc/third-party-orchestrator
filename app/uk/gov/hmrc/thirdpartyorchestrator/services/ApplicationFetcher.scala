@@ -21,11 +21,14 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 
 import uk.gov.hmrc.http.HeaderCarrier
-
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
+import java.time.Instant
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, PaginatedApplications}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, UserId}
 import uk.gov.hmrc.thirdpartyorchestrator.connectors.EnvironmentAwareThirdPartyApplicationConnector
 import uk.gov.hmrc.thirdpartyorchestrator.utils.ApplicationLogger
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment.SANDBOX
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment.PRODUCTION
 
 @Singleton
 class ApplicationFetcher @Inject() (
@@ -64,6 +67,14 @@ class ApplicationFetcher @Inject() (
       } yield principal ++ subordinate
     } else {
       Future.successful(List.empty)
+    }
+  }
+
+ 
+  def applicationSearch(params: Map[String, Seq[String]], environment: Environment)(implicit hc: HeaderCarrier): Future[PaginatedApplications] = {
+    environment match {
+      case SANDBOX      =>   thirdPartyApplicationConnector.subordinate.applicationSearch(params)
+      case PRODUCTION   =>   thirdPartyApplicationConnector.principal.applicationSearch(params)
     }
   }
 

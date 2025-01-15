@@ -25,9 +25,15 @@ import uk.gov.hmrc.http.client.{HttpClientV2, RequestBuilder}
 import uk.gov.hmrc.http.{StringContextOps, _}
 import uk.gov.hmrc.play.http.metrics.common._
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, PaginatedApplications}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, UserId}
 import uk.gov.hmrc.thirdpartyorchestrator.utils.EbridgeConfigurator
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
+import java.time.format.DateTimeFormatter
+import java.time.Instant
+import java.time.ZoneOffset
+import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 
 case class CollaboratorUserIds(userIds: List[UserId])
 
@@ -36,6 +42,8 @@ object CollaboratorUserIds {
 }
 
 trait ThirdPartyApplicationConnector {
+ 
+  def applicationSearch(params: Map[String, Seq[String]])(implicit hc: HeaderCarrier): Future[PaginatedApplications]
   def fetchApplication(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithCollaborators]]
   def fetchApplication(clientId: ClientId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithCollaborators]]
   def fetchApplicationsByUserIds(userIds: List[UserId])(implicit hc: HeaderCarrier): Future[List[ApplicationWithCollaborators]]
@@ -66,12 +74,33 @@ abstract class AbstractThirdPartyApplicationConnector(implicit val ec: Execution
         .execute[Option[ApplicationWithCollaborators]]
     }
 
+  def fetchApplicationsByUserId(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[ApplicationWithCollaborators]] = {
+    configureEbridgeIfRequired(
+      http.get(url"$serviceBaseUrl/developer/$userId/applications")
+    )
+      .execute[Seq[ApplicationWithCollaborators]] 
+  }
+
   def fetchApplicationsByUserIds(userIds: List[UserId])(implicit hc: HeaderCarrier): Future[List[ApplicationWithCollaborators]] =
     record {
       configureEbridgeIfRequired(http.post(url"$serviceBaseUrl/developer/applications"))
         .withBody(Json.toJson(CollaboratorUserIds(userIds)))
         .execute[List[ApplicationWithCollaborators]]
     }
+
+  def applicationSearch(params: Map[String, Seq[String]])(implicit hc: HeaderCarrier): Future[PaginatedApplications] = {
+    def asQueryParams(): Seq[(String, String)] = {
+       params.map({
+        case (x: String, y: Seq[String])  => (x, y.head)
+       }).toList
+    }
+
+    implicit val hc: HeaderCarrier = HeaderCarrier()
+
+    configureEbridgeIfRequired(
+      http.get(url"$serviceBaseUrl/applications?${asQueryParams()}")
+    ).execute[PaginatedApplications]
+  }
 }
 
 object PrincipalThirdPartyApplicationConnector {

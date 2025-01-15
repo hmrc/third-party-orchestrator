@@ -19,6 +19,7 @@ package uk.gov.hmrc.thirdpartyorchestrator.controllers
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future.successful
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
 
 import play.api.libs.json.{JsValue, Json, OFormat}
 import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
@@ -54,6 +55,18 @@ class ApplicationController @Inject() (
       emailsRequest =>
         applicationService.fetchApplicationsForEmails(emailsRequest.emails)
           .map(response => Ok(Json.toJson(response))) recover recovery
+    }
+  }
+
+  def pagedQueryDispatcher(): Action[AnyContent] = Action.async { implicit request =>
+    val queryBy = request.queryString.keys.toList.sorted
+    queryBy match {
+      case ("environment" :: _) => 
+        Environment.apply(request.queryString("environment").head) match {
+          case Some(environment) => applicationService.fetchApplications(request.queryString, environment).map(x => Ok(Json.toJson(x)))
+          case _ => successful(BadRequest("invalid environment"))
+        }
+      case _                 => successful(BadRequest("Unknown or missing query parameters"))
     }
   }
 

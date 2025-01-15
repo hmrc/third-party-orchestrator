@@ -20,7 +20,7 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 import uk.gov.hmrc.http.HeaderCarrier
-
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, LaxEmailAddress}
 import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
@@ -48,6 +48,10 @@ class ApplicationService @Inject() (
       verifiedDeveloperUserIds = developers.filter(_.verified).map(_.userId)
       applications            <- applicationFetcher.fetchApplicationsByUserIds(verifiedDeveloperUserIds)
     } yield applications
+  }
+
+  def fetchApplications(params: Map[String, Seq[String]], environment: Environment)(implicit hc: HeaderCarrier) = {
+    applicationFetcher.applicationSearch(params, environment)
   }
 
   def fetchVerifiedCollaboratorsForApplication(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Either[String, Set[User]]] = {
