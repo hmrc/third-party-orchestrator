@@ -1,10 +1,12 @@
 # microservice specific routes
 
-POST        /session/validate                   uk.gov.hmrc.thirdpartyorchestrator.controllers.SessionController.getDeveloperForSession()
-GET         /applications                       uk.gov.hmrc.thirdpartyorchestrator.controllers.ApplicationController.queryDispatcher()
-GET         /applications/:id                   uk.gov.hmrc.thirdpartyorchestrator.controllers.ApplicationController.getApplication(id: ApplicationId)
-GET         /applications/:id/developers        uk.gov.hmrc.thirdpartyorchestrator.controllers.ApplicationController.getVerifiedDevelopersForApplication(id: ApplicationId)
+POST        /session/validate                           uk.gov.hmrc.thirdpartyorchestrator.controllers.SessionController.getDeveloperForSession()
+GET         /applications                               uk.gov.hmrc.thirdpartyorchestrator.controllers.ApplicationController.queryDispatcher()
+GET         /applications/:id                           uk.gov.hmrc.thirdpartyorchestrator.controllers.ApplicationController.getApplication(id: ApplicationId)
+GET         /applications/:id/developers                uk.gov.hmrc.thirdpartyorchestrator.controllers.ApplicationController.getVerifiedDevelopersForApplication(id: ApplicationId)
+        
+PATCH       /applications/:id/dispatch                  uk.gov.hmrc.thirdpartyorchestrator.commands.applications.controllers.AppCmdController.dispatch(id: ApplicationId)
+        
+POST        /developer/applications                     uk.gov.hmrc.thirdpartyorchestrator.controllers.ApplicationController.getApplicationsByEmail()
 
-PATCH       /applications/:id/dispatch          uk.gov.hmrc.thirdpartyorchestrator.commands.applications.controllers.AppCmdController.dispatch(id: ApplicationId)
-
-POST        /developer/applications             uk.gov.hmrc.thirdpartyorchestrator.controllers.ApplicationController.getApplicationsByEmail()
+GET         /environment/:environment/applications      uk.gov.hmrc.thirdpartyorchestrator.controllers.EnvironmentApplicationController.searchApplications(environment: Environment)

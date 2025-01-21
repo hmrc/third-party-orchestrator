@@ -25,7 +25,7 @@ import uk.gov.hmrc.http.client.{HttpClientV2, RequestBuilder}
 import uk.gov.hmrc.http.{StringContextOps, _}
 import uk.gov.hmrc.play.http.metrics.common._
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, PaginatedApplications}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, UserId}
 import uk.gov.hmrc.thirdpartyorchestrator.utils.EbridgeConfigurator
 
@@ -36,6 +36,8 @@ object CollaboratorUserIds {
 }
 
 trait ThirdPartyApplicationConnector {
+  def searchApplications(queryString: Map[String, Seq[String]])(implicit hc: HeaderCarrier): Future[PaginatedApplications]
+
   def fetchApplication(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithCollaborators]]
   def fetchApplication(clientId: ClientId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithCollaborators]]
   def fetchApplicationsByUserIds(userIds: List[UserId])(implicit hc: HeaderCarrier): Future[List[ApplicationWithCollaborators]]
@@ -51,6 +53,16 @@ abstract class AbstractThirdPartyApplicationConnector(implicit val ec: Execution
   val api = API("third-party-application")
 
   def configureEbridgeIfRequired(requestBuilder: RequestBuilder): RequestBuilder
+
+  def searchApplications(queryString: Map[String, Seq[String]])(implicit hc: HeaderCarrier): Future[PaginatedApplications] =
+    record {
+      val queryStringFirstVal: Seq[(String, String)] = queryString.map {
+        case (k, vs) => (k, vs.head)
+      }.toSeq
+
+      configureEbridgeIfRequired(http.get(url"$serviceBaseUrl/applications?$queryStringFirstVal"))
+        .execute[PaginatedApplications]
+    }
 
   def fetchApplication(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithCollaborators]] =
     record {

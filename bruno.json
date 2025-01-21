@@ -1,0 +1,138 @@
+{
+  "name": "TPO",
+  "version": "1",
+  "items": [
+    {
+      "type": "http",
+      "name": "Search Applications - access type",
+      "seq": 3,
+      "request": {
+        "url": "{{protocol}}{{baseUrl}}/environment/production/applications?accessType=STANDARD",
+        "method": "GET",
+        "headers": [],
+        "params": [
+          {
+            "name": "accessType",
+            "value": "STANDARD",
+            "type": "query",
+            "enabled": true
+          }
+        ],
+        "body": {
+          "mode": "none",
+          "formUrlEncoded": [],
+          "multipartForm": []
+        },
+        "script": {},
+        "vars": {},
+        "assertions": [],
+        "tests": "",
+        "docs": "",
+        "auth": {
+          "mode": "none"
+        }
+      }
+    },
+    {
+      "type": "http",
+      "name": "Search Applications - bad env",
+      "seq": 4,
+      "request": {
+        "url": "{{protocol}}{{baseUrl}}/environment/bobbins/applications?accessType=STANDARD",
+        "method": "GET",
+        "headers": [],
+        "params": [
+          {
+            "name": "accessType",
+            "value": "STANDARD",
+            "type": "query",
+            "enabled": true
+          }
+        ],
+        "body": {
+          "mode": "none",
+          "formUrlEncoded": [],
+          "multipartForm": []
+        },
+        "script": {},
+        "vars": {},
+        "assertions": [],
+        "tests": "",
+        "docs": "",
+        "auth": {
+          "mode": "none"
+        }
+      }
+    },
+    {
+      "type": "http",
+      "name": "Search Applications - no query params",
+      "seq": 1,
+      "request": {
+        "url": "{{protocol}}{{baseUrl}}/environment/production/applications",
+        "method": "GET",
+        "headers": [],
+        "params": [],
+        "body": {
+          "mode": "none",
+          "formUrlEncoded": [],
+          "multipartForm": []
+        },
+        "script": {},
+        "vars": {},
+        "assertions": [],
+        "tests": "",
+        "docs": "",
+        "auth": {
+          "mode": "none"
+        }
+      }
+    }
+  ],
+  "activeEnvironmentUid": "3RZXjuyiwbP9yZN23ysDy",
+  "environments": [
+    {
+      "variables": [
+        {
+          "name": "protocol",
+          "value": "http://",
+          "enabled": true,
+          "secret": false,
+          "type": "text"
+        },
+        {
+          "name": "baseUrl",
+          "value": "localhost:15501",
+          "enabled": true,
+          "secret": false,
+          "type": "text"
+        }
+      ],
+      "name": "LOCAL"
+    }
+  ],
+  "root": {
+    "request": {
+      "vars": {
+        "req": [
+          {
+            "name": "hostpath",
+            "value": "http://localhost:15501",
+            "enabled": true,
+            "local": false,
+            "uid": "U3sL3wraQbxGckX1a3xL9"
+          }
+        ]
+      }
+    }
+  },
+  "brunoConfig": {
+    "version": "1",
+    "name": "TPO",
+    "type": "collection",
+    "ignore": [
+      "node_modules",
+      ".git"
+    ]
+  }
+}
