@@ -86,6 +86,7 @@ class AppCmdControllerSpec extends AsyncHmrcSpec with FixedClock with Applicatio
         CommandConnectorMocks.Sandbox.IssueCommand.Dispatch.succeedsWith(sandboxApplication)
 
         val cmd: ApplicationCommands.AddCollaborator = ApplicationCommands.AddCollaborator(Actors.AppCollaborator(adminEmail), developerAsCollaborator, instant)
+        println(Json.toJson[ApplicationCommand](cmd))
         val inboundDispatchRequest: DispatchRequest  = DispatchRequest(cmd, verifiedEmails)
         val request: FakeRequest[JsValue]            = FakeRequest("PATCH", s"/applications/${sandboxApplicationId}/dispatch").withBody(Json.toJson(inboundDispatchRequest))
 

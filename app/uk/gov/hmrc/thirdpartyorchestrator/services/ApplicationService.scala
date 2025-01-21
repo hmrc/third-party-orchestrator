@@ -22,7 +22,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, LaxEmailAddress}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, LaxEmailAddress, UserId}
 import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.thirdpartyorchestrator.connectors.ThirdPartyDeveloperConnector
@@ -47,6 +47,12 @@ class ApplicationService @Inject() (
       developers              <- thirdPartyDeveloperConnector.fetchDevelopers(emails)
       verifiedDeveloperUserIds = developers.filter(_.verified).map(_.userId)
       applications            <- applicationFetcher.fetchApplicationsByUserIds(verifiedDeveloperUserIds)
+    } yield applications
+  }
+
+  def fetchApplicationsByUserIds(userIds: List[UserId])(implicit hc: HeaderCarrier): Future[List[ApplicationWithCollaborators]] = {
+    for {
+      applications <- applicationFetcher.fetchApplicationsByUserIds(userIds)
     } yield applications
   }
 

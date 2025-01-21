@@ -5,12 +5,15 @@ GET         /applications                                         uk.gov.hmrc.th
 GET         /applications/:id                                     uk.gov.hmrc.thirdpartyorchestrator.controllers.ApplicationController.getApplication(id: ApplicationId)
 GET         /applications/:id/developers                          uk.gov.hmrc.thirdpartyorchestrator.controllers.ApplicationController.getVerifiedDevelopersForApplication(id: ApplicationId)
 
+# deprecated
 PATCH       /applications/:id/dispatch                            uk.gov.hmrc.thirdpartyorchestrator.commands.applications.controllers.AppCmdController.dispatch(id: ApplicationId)
+
 PATCH       /applications/:id                                     uk.gov.hmrc.thirdpartyorchestrator.commands.applications.controllers.AppCmdController.dispatch(id: ApplicationId)
-
-
 
 POST        /developer/applications                               uk.gov.hmrc.thirdpartyorchestrator.controllers.ApplicationController.getApplicationsByEmail()
 
 GET         /environment/:environment/applications                uk.gov.hmrc.thirdpartyorchestrator.controllers.EnvironmentApplicationController.searchApplications(environment: Environment)
+
 PATCH       /environment/:environment/applications/:id            uk.gov.hmrc.thirdpartyorchestrator.commands.applications.controllers.AppCmdController.dispatchToEnvironment(environment: Environment, id: ApplicationId)
+
+GET         /developer/:userId/applications                       uk.gov.hmrc.thirdpartyorchestrator.controllers.ApplicationController.getApplicationsByCollaborator(userId: UserId)

@@ -87,6 +87,77 @@
           "mode": "none"
         }
       }
+    },
+    {
+      "type": "http",
+      "name": "Get Applications by Collaborator",
+      "seq": 5,
+      "request": {
+        "url": "{{protocol}}{{baseUrl}}/developer/{{userId}}/applications",
+        "method": "GET",
+        "headers": [],
+        "params": [
+          {
+            "name": "",
+            "value": "",
+            "type": "query",
+            "enabled": true
+          }
+        ],
+        "body": {
+          "mode": "none",
+          "formUrlEncoded": [],
+          "multipartForm": []
+        },
+        "script": {},
+        "vars": {},
+        "assertions": [],
+        "tests": "",
+        "docs": "",
+        "auth": {
+          "mode": "none"
+        }
+      }
+    },
+    {
+      "type": "http",
+      "name": "POST a command",
+      "seq": 6,
+      "request": {
+        "url": "{{protocol}}{{baseUrl}}/environment/{{environment}}/applications/{{id}}",
+        "method": "PATCH",
+        "headers": [],
+        "params": [],
+        "body": {
+          "mode": "json",
+          "json": "{\n  \"actor\":{\"email\":\"andy.spaven@digital.hmrc.gov.uk\",\"actorType\":\"COLLABORATOR\"}\n, \"collaborator\":{\n    \"userId\":\"441108d3-7cbc-4da0-a963-45ccf417d2c2\"\n,   \"emailAddress\":\"charlie@example.com\"\n,   \"role\":\"DEVELOPER\"\n  }\n, \"timestamp\":\"2020-01-02T03:04:05.006Z\"\n, \"updateType\":\"addCollaborator\"\n}",
+          "formUrlEncoded": [],
+          "multipartForm": []
+        },
+        "script": {},
+        "vars": {
+          "req": [
+            {
+              "name": "environment",
+              "value": "SANDBOX",
+              "enabled": true,
+              "local": false
+            },
+            {
+              "name": "id",
+              "value": "027d399c-0297-40f4-a255-d7eac9649b8d",
+              "enabled": true,
+              "local": false
+            }
+          ]
+        },
+        "assertions": [],
+        "tests": "",
+        "docs": "",
+        "auth": {
+          "mode": "none"
+        }
+      }
     }
   ],
   "activeEnvironmentUid": "3RZXjuyiwbP9yZN23ysDy",
@@ -106,6 +177,13 @@
           "enabled": true,
           "secret": false,
           "type": "text"
+        },
+        {
+          "name": "userId",
+          "value": "85682eda-5758-4a13-8b97-057c94b3657b",
+          "enabled": true,
+          "secret": false,
+          "type": "text"
         }
       ],
       "name": "LOCAL"
@@ -120,7 +198,7 @@
             "value": "http://localhost:15501",
             "enabled": true,
             "local": false,
-            "uid": "U3sL3wraQbxGckX1a3xL9"
+            "uid": "ZMX6cvFf1Im9bRcSiJi7Z"
           }
         ]
       }

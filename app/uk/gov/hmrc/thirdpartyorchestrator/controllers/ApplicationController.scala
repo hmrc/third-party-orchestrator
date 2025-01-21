@@ -24,7 +24,7 @@ import play.api.libs.json.{JsValue, Json, OFormat}
 import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, LaxEmailAddress}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, LaxEmailAddress, UserId}
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.thirdpartyorchestrator.services.ApplicationService
 import uk.gov.hmrc.thirdpartyorchestrator.utils.ApplicationLogger
@@ -55,6 +55,11 @@ class ApplicationController @Inject() (
         applicationService.fetchApplicationsForEmails(emailsRequest.emails)
           .map(response => Ok(Json.toJson(response))) recover recovery
     }
+  }
+
+  def getApplicationsByCollaborator(userId: UserId): Action[AnyContent] = Action.async { implicit request =>
+    applicationService.fetchApplicationsByUserIds(List(userId))
+      .map(response => Ok(Json.toJson(response))) recover recovery
   }
 
   def queryDispatcher(): Action[AnyContent] = Action.async { implicit request =>
