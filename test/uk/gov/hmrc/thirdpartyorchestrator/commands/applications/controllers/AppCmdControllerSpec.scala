@@ -63,70 +63,87 @@ class AppCmdControllerSpec extends AsyncHmrcSpec with FixedClock with Applicatio
       new AppCmdController(ApplicationFetcherMock.aMock, envAwareCmdConnector, Helpers.stubControllerComponents())
   }
 
-  "AppCmdController" should {
-    import cats.syntax.option._
+  "AppCmdController" when {
+    "calling dispatch" should {
+      import cats.syntax.option._
 
-    "dont preprocess or dispatch command when the app does not exist" in new Setup {
+      "dont preprocess or dispatch command when the app does not exist" in new Setup {
+        ApplicationFetcherMock.FetchApplication.thenReturn(productionApplicationId)(None)
 
-      ApplicationFetcherMock.FetchApplication.thenReturn(productionApplicationId)(None)
+        val cmd: ApplicationCommands.AddCollaborator = ApplicationCommands.AddCollaborator(Actors.AppCollaborator(adminEmail), developerAsCollaborator, instant)
+        val request: FakeRequest[JsValue]            =
+          FakeRequest("PATCH", s"/applications/${productionApplicationId}/dispatch").withBody(Json.toJson(DispatchRequest(cmd, verifiedEmails)))
 
-      val cmd: ApplicationCommands.AddCollaborator = ApplicationCommands.AddCollaborator(Actors.AppCollaborator(adminEmail), developerAsCollaborator, instant)
-      val request: FakeRequest[JsValue]            =
-        FakeRequest("PATCH", s"/applications/${productionApplicationId.value}/dispatch").withBody(Json.toJson(DispatchRequest(cmd, verifiedEmails)))
+        status(controller.dispatch(productionApplicationId)(request)) shouldBe BAD_REQUEST
 
-      status(controller.dispatch(productionApplicationId)(request)) shouldBe BAD_REQUEST
+        CommandConnectorMocks.Sandbox.IssueCommand.verifyNoCommandsIssued()
+        CommandConnectorMocks.Prod.IssueCommand.verifyNoCommandsIssued()
+      }
 
-      CommandConnectorMocks.Sandbox.IssueCommand.verifyNoCommandsIssued()
-      CommandConnectorMocks.Prod.IssueCommand.verifyNoCommandsIssued()
+      "dispatch a command when the app exists in sandbox" in new Setup {
+        ApplicationFetcherMock.FetchApplication.thenReturn(sandboxApplicationId)(sandboxApplication.some)
+
+        CommandConnectorMocks.Sandbox.IssueCommand.Dispatch.succeedsWith(sandboxApplication)
+
+        val cmd: ApplicationCommands.AddCollaborator = ApplicationCommands.AddCollaborator(Actors.AppCollaborator(adminEmail), developerAsCollaborator, instant)
+        println(Json.toJson[ApplicationCommand](cmd))
+        val inboundDispatchRequest: DispatchRequest  = DispatchRequest(cmd, verifiedEmails)
+        val request: FakeRequest[JsValue]            = FakeRequest("PATCH", s"/applications/${sandboxApplicationId}/dispatch").withBody(Json.toJson(inboundDispatchRequest))
+
+        status(controller.dispatch(sandboxApplicationId)(request)) shouldBe OK
+
+        CommandConnectorMocks.Prod.IssueCommand.verifyNoCommandsIssued()
+        CommandConnectorMocks.Sandbox.IssueCommand.verifyCalledWith(cmd, verifiedEmails)
+      }
+
+      "dispatch a command when the app exists in production" in new Setup {
+        ApplicationFetcherMock.FetchApplication.thenReturn(productionApplicationId)(productionApplication.some)
+
+        CommandConnectorMocks.Prod.IssueCommand.Dispatch.succeedsWith(productionApplication)
+
+        val cmd: ApplicationCommands.AddCollaborator = ApplicationCommands.AddCollaborator(Actors.AppCollaborator(adminEmail), developerAsCollaborator, instant)
+        val request: FakeRequest[JsValue]            =
+          FakeRequest("PATCH", s"/applications/${productionApplicationId}/dispatch").withBody(Json.toJson(DispatchRequest(cmd, verifiedEmails)))
+
+        status(controller.dispatch(productionApplicationId)(request)) shouldBe OK
+
+        CommandConnectorMocks.Sandbox.IssueCommand.verifyNoCommandsIssued()
+        CommandConnectorMocks.Prod.IssueCommand.verifyCalledWith(cmd, verifiedEmails)
+      }
+
+      "dispatch a command and handle command failure" in new Setup {
+        ApplicationFetcherMock.FetchApplication.thenReturn(productionApplicationId)(productionApplication.some)
+
+        CommandConnectorMocks.Prod.IssueCommand.Dispatch.failsWith(CommandFailures.ActorIsNotACollaboratorOnApp)
+
+        val cmd: ApplicationCommands.AddCollaborator = ApplicationCommands.AddCollaborator(Actors.AppCollaborator(adminEmail), developerAsCollaborator, instant)
+        val request: FakeRequest[JsValue]            =
+          FakeRequest("PATCH", s"/applications/${productionApplicationId}/dispatch").withBody(Json.toJson(DispatchRequest(cmd, verifiedEmails)))
+
+        val result: Future[Result] = controller.dispatch(productionApplicationId)(request)
+        status(result) shouldBe BAD_REQUEST
+
+        import uk.gov.hmrc.apiplatform.modules.common.domain.services.NonEmptyListFormatters._
+        Json.fromJson[NonEmptyList[CommandFailure]](contentAsJson(result)).get shouldBe NonEmptyList.one(CommandFailures.ActorIsNotACollaboratorOnApp)
+
+        CommandConnectorMocks.Prod.IssueCommand.verifyCalledWith(cmd, verifiedEmails)
+        CommandConnectorMocks.Sandbox.IssueCommand.verifyNoCommandsIssued()
+      }
     }
 
-    "dispatch a command when the app exists in sandbox" in new Setup {
-      ApplicationFetcherMock.FetchApplication.thenReturn(sandboxApplicationId)(sandboxApplication.some)
+    "calling dispatchToEnvironment" should {
+      "dispatch a command when the app exists in the environment specified" in new Setup {
+        CommandConnectorMocks.Sandbox.IssueCommand.Dispatch.succeedsWith(sandboxApplication)
 
-      CommandConnectorMocks.Sandbox.IssueCommand.Dispatch.succeedsWith(sandboxApplication)
+        val cmd: ApplicationCommands.AddCollaborator = ApplicationCommands.AddCollaborator(Actors.AppCollaborator(adminEmail), developerAsCollaborator, instant)
+        val inboundDispatchRequest: DispatchRequest  = DispatchRequest(cmd, verifiedEmails)
+        val request: FakeRequest[JsValue]            = FakeRequest("PATCH", s"/environment/SANDBOX/applications/$sandboxApplicationId").withBody(Json.toJson(inboundDispatchRequest))
 
-      val cmd: ApplicationCommands.AddCollaborator = ApplicationCommands.AddCollaborator(Actors.AppCollaborator(adminEmail), developerAsCollaborator, instant)
-      val inboundDispatchRequest: DispatchRequest  = DispatchRequest(cmd, verifiedEmails)
-      val request: FakeRequest[JsValue]            = FakeRequest("PATCH", s"/applications/${sandboxApplicationId.value}/dispatch").withBody(Json.toJson(inboundDispatchRequest))
+        status(controller.dispatchToEnvironment(Environment.SANDBOX, sandboxApplicationId)(request)) shouldBe OK
 
-      status(controller.dispatch(sandboxApplicationId)(request)) shouldBe OK
-
-      CommandConnectorMocks.Prod.IssueCommand.verifyNoCommandsIssued()
-      CommandConnectorMocks.Sandbox.IssueCommand.verifyCalledWith(cmd, verifiedEmails)
-    }
-
-    "dispatch a command when the app exists in production" in new Setup {
-      ApplicationFetcherMock.FetchApplication.thenReturn(productionApplicationId)(productionApplication.some)
-
-      CommandConnectorMocks.Prod.IssueCommand.Dispatch.succeedsWith(productionApplication)
-
-      val cmd: ApplicationCommands.AddCollaborator = ApplicationCommands.AddCollaborator(Actors.AppCollaborator(adminEmail), developerAsCollaborator, instant)
-      val request: FakeRequest[JsValue]            =
-        FakeRequest("PATCH", s"/applications/${productionApplicationId.value}/dispatch").withBody(Json.toJson(DispatchRequest(cmd, verifiedEmails)))
-
-      status(controller.dispatch(productionApplicationId)(request)) shouldBe OK
-
-      CommandConnectorMocks.Sandbox.IssueCommand.verifyNoCommandsIssued()
-      CommandConnectorMocks.Prod.IssueCommand.verifyCalledWith(cmd, verifiedEmails)
-    }
-
-    "dispatch a command and handle command failure" in new Setup {
-      ApplicationFetcherMock.FetchApplication.thenReturn(productionApplicationId)(productionApplication.some)
-
-      CommandConnectorMocks.Prod.IssueCommand.Dispatch.failsWith(CommandFailures.ActorIsNotACollaboratorOnApp)
-
-      val cmd: ApplicationCommands.AddCollaborator = ApplicationCommands.AddCollaborator(Actors.AppCollaborator(adminEmail), developerAsCollaborator, instant)
-      val request: FakeRequest[JsValue]            =
-        FakeRequest("PATCH", s"/applications/${productionApplicationId.value}/dispatch").withBody(Json.toJson(DispatchRequest(cmd, verifiedEmails)))
-
-      val result: Future[Result] = controller.dispatch(productionApplicationId)(request)
-      status(result) shouldBe BAD_REQUEST
-
-      import uk.gov.hmrc.apiplatform.modules.common.domain.services.NonEmptyListFormatters._
-      Json.fromJson[NonEmptyList[CommandFailure]](contentAsJson(result)).get shouldBe NonEmptyList.one(CommandFailures.ActorIsNotACollaboratorOnApp)
-
-      CommandConnectorMocks.Prod.IssueCommand.verifyCalledWith(cmd, verifiedEmails)
-      CommandConnectorMocks.Sandbox.IssueCommand.verifyNoCommandsIssued()
+        CommandConnectorMocks.Prod.IssueCommand.verifyNoCommandsIssued()
+        CommandConnectorMocks.Sandbox.IssueCommand.verifyCalledWith(cmd, verifiedEmails)
+      }
     }
   }
 }

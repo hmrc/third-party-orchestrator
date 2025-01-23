@@ -23,9 +23,9 @@ import play.api.http.Status._
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.{Application, Configuration, Mode}
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaboratorsFixtures
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, ApplicationWithCollaboratorsFixtures, PaginatedApplications}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, UserId}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartyorchestrator.utils.WireMockExtensions
@@ -53,6 +53,40 @@ class ThirdPartyApplicationConnectorIntegrationSpec extends BaseConnectorIntegra
     val applicationId: ApplicationId = expectedApplication.id
 
     val underTest: ThirdPartyApplicationConnector = app.injector.instanceOf[PrincipalThirdPartyApplicationConnector]
+  }
+
+  "searchApplications" should {
+    "return applications" in new Setup {
+      stubFor(
+        get(urlEqualTo(s"/applications?accessType=STANDARD"))
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withHeader("Content-Type", "application/json")
+              .withBody(paginatedBody(standardApp))
+          )
+      )
+
+      private val result = await(underTest.searchApplications(Map("accessType" -> Seq("STANDARD"))))
+
+      result shouldBe PaginatedApplications(List(standardApp), 1, Int.MaxValue, 1, 1)
+    }
+
+    "return errors" in new Setup {
+      stubFor(
+        get(urlEqualTo(s"/applications?accessType=STANDARD"))
+          .willReturn(
+            aResponse()
+              .withStatus(BAD_REQUEST)
+          )
+      )
+
+      val e = intercept[UpstreamErrorResponse] {
+        await(underTest.searchApplications(Map("accessType" -> Seq("STANDARD"))))
+      }
+
+      e.statusCode shouldBe BAD_REQUEST
+    }
   }
 
   "fetchApplication" should {
@@ -112,6 +146,10 @@ class ThirdPartyApplicationConnectorIntegrationSpec extends BaseConnectorIntegra
 
       result shouldBe Some(expectedApplication)
     }
+  }
+
+  private def paginatedBody(apps: ApplicationWithCollaborators*) = {
+    Json.toJson(PaginatedApplications(apps.toList, 1, Int.MaxValue, apps.size, apps.size)).toString
   }
 
   private def getBody(applicationId: ApplicationId, clientId: ClientId, userId1: UserId, userId2: UserId) = {

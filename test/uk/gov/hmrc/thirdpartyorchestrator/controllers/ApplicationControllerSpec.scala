@@ -132,4 +132,28 @@ class ApplicationControllerSpec extends BaseControllerSpec with Matchers {
     }
 
   }
+
+  "getApplicationsByCollaborator" should {
+    "return the applications if successful" in new Setup {
+      val appRequest = FakeRequest("GET", s"/developer/$userIdOne/applications")
+
+      fetchApplicationsForUserIdReturns(userIdOne, application)
+
+      val result = controller.getApplicationsByCollaborator(userIdOne)(appRequest)
+
+      status(result) shouldBe Status.OK
+      contentAsJson(result) shouldBe Json.toJson(List(application))
+    }
+
+    "return 500 if service call failed" in new Setup {
+      val appRequest = FakeRequest("GET", s"/developer/$userIdOne/applications")
+
+      fetchApplicationsForUserIdFails()
+
+      val result = controller.getApplicationsByCollaborator(userIdOne)(appRequest)
+
+      status(result) shouldBe Status.INTERNAL_SERVER_ERROR
+    }
+
+  }
 }

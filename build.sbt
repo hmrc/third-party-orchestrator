@@ -30,7 +30,7 @@ lazy val microservice = Project(appName, file("."))
   .settings(ScoverageSettings())
   .settings(
     routesImport ++= Seq(
-      "uk.gov.hmrc.thirdpartyorchestrator.commands.applications.controllers.binders._",
+      "uk.gov.hmrc.thirdpartyorchestrator.binders._",
       "uk.gov.hmrc.apiplatform.modules.common.domain.models._"
     )
   )
