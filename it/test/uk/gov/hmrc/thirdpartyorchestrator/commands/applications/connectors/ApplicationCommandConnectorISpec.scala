@@ -72,7 +72,6 @@ class ApplicationCommandConnectorISpec
           checkInformation = None,
           blocked = false,
           ipAllowlist = IpAllowlist(),
-          allowAutoDelete = true,
           lastActionActor = ActorType.UNKNOWN,
           deleteRestriction = DeleteRestriction.NoRestriction
         ),
