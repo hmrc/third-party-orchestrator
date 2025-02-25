@@ -26,13 +26,19 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, Clie
 import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.thirdpartyorchestrator.connectors.ThirdPartyDeveloperConnector
-
+import uk.gov.hmrc.thirdpartyorchestrator.connectors.EnvironmentAwareThirdPartyApplicationConnector
+import  uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.CreateApplicationRequest
 @Singleton
 class ApplicationService @Inject() (
     val thirdPartyDeveloperConnector: ThirdPartyDeveloperConnector,
-    val applicationFetcher: ApplicationFetcher
+    val applicationFetcher: ApplicationFetcher,
+    val thirdPartyApplicationConnector: EnvironmentAwareThirdPartyApplicationConnector
   )(implicit val ec: ExecutionContext
   ) {
+
+  def createApplication(request: CreateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationWithCollaborators] = {
+    thirdPartyApplicationConnector(request.environment).create(request)
+  }  
 
   def fetchApplication(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithCollaborators]] = {
     applicationFetcher.fetchApplication(applicationId)

@@ -28,6 +28,7 @@ import uk.gov.hmrc.play.http.metrics.common._
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, PaginatedApplications}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, UserId}
 import uk.gov.hmrc.thirdpartyorchestrator.utils.EbridgeConfigurator
+import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.CreateApplicationRequest
 
 case class CollaboratorUserIds(userIds: List[UserId])
 
@@ -36,6 +37,7 @@ object CollaboratorUserIds {
 }
 
 trait ThirdPartyApplicationConnector {
+  def create(req: CreateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationWithCollaborators]
   def searchApplications(queryString: Map[String, Seq[String]])(implicit hc: HeaderCarrier): Future[PaginatedApplications]
 
   def fetchApplication(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithCollaborators]]
@@ -53,6 +55,13 @@ abstract class AbstractThirdPartyApplicationConnector(implicit val ec: Execution
   val api = API("third-party-application")
 
   def configureEbridgeIfRequired(requestBuilder: RequestBuilder): RequestBuilder
+
+  
+  override def create(req: CreateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationWithCollaborators] = 
+     configureEbridgeIfRequired(http
+      .post(url"$serviceBaseUrl/application")
+      .withBody(Json.toJson(req)))
+      .execute[ApplicationWithCollaborators]
 
   def searchApplications(queryString: Map[String, Seq[String]])(implicit hc: HeaderCarrier): Future[PaginatedApplications] =
     record {
@@ -102,6 +111,7 @@ class PrincipalThirdPartyApplicationConnector @Inject() (
   )(implicit override val ec: ExecutionContext
   ) extends AbstractThirdPartyApplicationConnector {
 
+
   val serviceBaseUrl = config.serviceBaseUrl
 
   def configureEbridgeIfRequired(requestBuilder: RequestBuilder): RequestBuilder = requestBuilder
@@ -125,6 +135,7 @@ class SubordinateThirdPartyApplicationConnector @Inject() (
     val apiMetrics: ApiMetrics
   )(implicit override val ec: ExecutionContext
   ) extends AbstractThirdPartyApplicationConnector {
+
 
   val serviceBaseUrl: String = config.serviceBaseUrl
 

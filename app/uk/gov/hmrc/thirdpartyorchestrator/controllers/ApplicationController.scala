@@ -28,6 +28,8 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, Clie
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.thirdpartyorchestrator.services.ApplicationService
 import uk.gov.hmrc.thirdpartyorchestrator.utils.ApplicationLogger
+import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.CreateApplicationRequestV2
+
 
 case class ApplicationsByRequest(emails: List[LaxEmailAddress])
 
@@ -41,6 +43,13 @@ class ApplicationController @Inject() (
     cc: ControllerComponents
   )(implicit val ec: ExecutionContext
   ) extends BackendController(cc) with JsonUtils with ApplicationLogger {
+
+  def create() = Action.async(parse.json) { implicit request =>
+    withJsonBody[CreateApplicationRequestV2] { createApplicationRequest =>
+      applicationService.createSandboxApplication(createApplicationRequest)
+      .map(app => Ok(Json.toJson(app)))
+    }
+  }
 
   def getApplication(applicationId: ApplicationId): Action[AnyContent] = Action.async { implicit request =>
     applicationService.fetchApplication(applicationId).map {
