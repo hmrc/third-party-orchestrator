@@ -26,7 +26,9 @@ import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaboratorsFixtures, Collaborators}
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationName, ApplicationWithCollaboratorsFixtures, Collaborators}
+import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.CreateApplicationRequestV1
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
@@ -44,6 +46,29 @@ class ApplicationControllerSpec extends BaseControllerSpec with Matchers {
     val developer     = buildUser(emailOne, "Bob", "Fleming").copy(verified = true)
     val application   = standardApp.withCollaborators(Collaborators.Administrator(userIdOne, emailOne))
     val controller    = new ApplicationController(applicationServiceMock, Helpers.stubControllerComponents())
+  }
+
+  "create" should {
+    "return 201 if successful in creating an application" in new Setup {
+      val admin = Collaborators.Administrator(userIdThree, LaxEmailAddress("jim@example.com"))
+
+      val createApplicationRequest =
+        CreateApplicationRequestV1.create(
+          name = ApplicationName("Test V1 Application"),
+          access = Access.Standard(),
+          description = None,
+          environment = Environment.SANDBOX,
+          collaborators = Set(admin),
+          subscriptions = None
+        )
+
+      createApplicationReturns(createApplicationRequest, application)
+
+      val request = FakeRequest("POST", s"/application").withBody(Json.toJson(createApplicationRequest)).withHeaders(("content-type", "application/json"))
+
+      val result = controller.create()(request)
+      status(result) shouldBe Status.CREATED
+    }
   }
 
   "getApplication" should {

@@ -26,9 +26,9 @@ import uk.gov.hmrc.http.{StringContextOps, _}
 import uk.gov.hmrc.play.http.metrics.common._
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, PaginatedApplications}
+import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.CreateApplicationRequest
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, UserId}
 import uk.gov.hmrc.thirdpartyorchestrator.utils.EbridgeConfigurator
-import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.CreateApplicationRequest
 
 case class CollaboratorUserIds(userIds: List[UserId])
 
@@ -56,9 +56,8 @@ abstract class AbstractThirdPartyApplicationConnector(implicit val ec: Execution
 
   def configureEbridgeIfRequired(requestBuilder: RequestBuilder): RequestBuilder
 
-  
-  override def create(req: CreateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationWithCollaborators] = 
-     configureEbridgeIfRequired(http
+  override def create(req: CreateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationWithCollaborators] =
+    configureEbridgeIfRequired(http
       .post(url"$serviceBaseUrl/application")
       .withBody(Json.toJson(req)))
       .execute[ApplicationWithCollaborators]
@@ -111,7 +110,6 @@ class PrincipalThirdPartyApplicationConnector @Inject() (
   )(implicit override val ec: ExecutionContext
   ) extends AbstractThirdPartyApplicationConnector {
 
-
   val serviceBaseUrl = config.serviceBaseUrl
 
   def configureEbridgeIfRequired(requestBuilder: RequestBuilder): RequestBuilder = requestBuilder
@@ -135,7 +133,6 @@ class SubordinateThirdPartyApplicationConnector @Inject() (
     val apiMetrics: ApiMetrics
   )(implicit override val ec: ExecutionContext
   ) extends AbstractThirdPartyApplicationConnector {
-
 
   val serviceBaseUrl: String = config.serviceBaseUrl
 

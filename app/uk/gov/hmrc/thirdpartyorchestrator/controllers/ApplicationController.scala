@@ -24,12 +24,11 @@ import play.api.libs.json.{JsValue, Json, OFormat}
 import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
+import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.CreateApplicationRequest
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, LaxEmailAddress, UserId}
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.thirdpartyorchestrator.services.ApplicationService
 import uk.gov.hmrc.thirdpartyorchestrator.utils.ApplicationLogger
-import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.CreateApplicationRequestV2
-
 
 case class ApplicationsByRequest(emails: List[LaxEmailAddress])
 
@@ -45,9 +44,9 @@ class ApplicationController @Inject() (
   ) extends BackendController(cc) with JsonUtils with ApplicationLogger {
 
   def create() = Action.async(parse.json) { implicit request =>
-    withJsonBody[CreateApplicationRequestV2] { createApplicationRequest =>
-      applicationService.createSandboxApplication(createApplicationRequest)
-      .map(app => Ok(Json.toJson(app)))
+    withJsonBody[CreateApplicationRequest] { createApplicationRequest =>
+      applicationService.createApplication(createApplicationRequest)
+        .map(app => Created(Json.toJson(app))) recover recovery
     }
   }
 

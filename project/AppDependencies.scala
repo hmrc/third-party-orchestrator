@@ -6,16 +6,16 @@ object AppDependencies {
   private val commonDomainVersion = "0.18.0"
   private val tpdDomainVersion  = "0.11.0"
 
-  private val appDomainVersion = "0.71.0"
-  private val applicationEventVersion  = "0.74.0" // Ensure this version of the application-events library uses the appDomainVersion above
+  private val appDomainVersion = "0.73.0"
+  private val appEventVersion  = "0.76.0" // Ensure this version of the application-events library uses the appDomainVersion above
 
   def apply(): Seq[ModuleID] = compileDeps ++ testDeps
 
   val compileDeps = Seq(
     "uk.gov.hmrc" %% "bootstrap-backend-play-30"       % bootstrapVersion,
     "uk.gov.hmrc" %% "http-metrics"                    % "2.8.0",
-    "uk.gov.hmrc" %% "api-platform-application-events" % applicationEventVersion,
-    "uk.gov.hmrc" %% "api-platform-tpd-domain"         % tpdDomainVersion,
+    "uk.gov.hmrc" %% "api-platform-application-events" % appEventVersion,
+    "uk.gov.hmrc" %% "api-platform-tpd-domain"         % tpdDomainVersion
   )
 
   val testDeps = Seq(

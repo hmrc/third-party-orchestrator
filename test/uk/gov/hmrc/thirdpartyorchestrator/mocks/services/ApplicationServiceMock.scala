@@ -23,12 +23,16 @@ import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 import uk.gov.hmrc.http.UpstreamErrorResponse
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
+import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.CreateApplicationRequest
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, LaxEmailAddress, UserId}
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.thirdpartyorchestrator.services.ApplicationService
 
 trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar {
   val applicationServiceMock = mock[ApplicationService]
+
+  def createApplicationReturns(appCreateRequest: CreateApplicationRequest, returns: ApplicationWithCollaborators) =
+    when(applicationServiceMock.createApplication(eqTo(appCreateRequest))(*)).thenReturn(successful(returns))
 
   def fetchApplicationsForEmailReturns(emails: List[LaxEmailAddress], returns: ApplicationWithCollaborators) =
     when(applicationServiceMock.fetchApplicationsForEmails(eqTo(emails))(*)).thenReturn(successful(List(returns)))
