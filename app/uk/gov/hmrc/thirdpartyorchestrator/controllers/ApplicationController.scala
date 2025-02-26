@@ -24,6 +24,7 @@ import play.api.libs.json.{JsValue, Json, OFormat}
 import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
+import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.CreateApplicationRequest
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, LaxEmailAddress, UserId}
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.thirdpartyorchestrator.services.ApplicationService
@@ -41,6 +42,13 @@ class ApplicationController @Inject() (
     cc: ControllerComponents
   )(implicit val ec: ExecutionContext
   ) extends BackendController(cc) with JsonUtils with ApplicationLogger {
+
+  def create() = Action.async(parse.json) { implicit request =>
+    withJsonBody[CreateApplicationRequest] { createApplicationRequest =>
+      applicationService.createApplication(createApplicationRequest)
+        .map(app => Created(Json.toJson(app))) recover recovery
+    }
+  }
 
   def getApplication(applicationId: ApplicationId): Action[AnyContent] = Action.async { implicit request =>
     applicationService.fetchApplication(applicationId).map {

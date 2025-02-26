@@ -23,12 +23,13 @@ import play.api.http.Status._
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.{Application, Configuration, Mode}
+import play.mvc.Http.HeaderNames
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, ApplicationWithCollaboratorsFixtures, PaginatedApplications}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, UserId}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
-import uk.gov.hmrc.thirdpartyorchestrator.utils.WireMockExtensions
+import uk.gov.hmrc.thirdpartyorchestrator.utils.{TestData, WireMockExtensions}
 
 class ThirdPartyApplicationConnectorIntegrationSpec extends BaseConnectorIntegrationSpec
     with GuiceOneAppPerSuite with WireMockExtensions with FixedClock with ApplicationWithCollaboratorsFixtures {
@@ -43,7 +44,7 @@ class ThirdPartyApplicationConnectorIntegrationSpec extends BaseConnectorIntegra
       .in(Mode.Test)
       .build()
 
-  trait Setup {
+  trait Setup extends TestData {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val userId1                      = userIdOne
@@ -55,6 +56,40 @@ class ThirdPartyApplicationConnectorIntegrationSpec extends BaseConnectorIntegra
     val underTest: ThirdPartyApplicationConnector = app.injector.instanceOf[PrincipalThirdPartyApplicationConnector]
   }
 
+  "create" should {
+    "return the newly created" in new Setup {
+      stubFor(
+        post(urlPathEqualTo(s"/application"))
+          .withJsonRequestBody(createSandboxApplicationRequest)
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withHeader(HeaderNames.CONTENT_TYPE, "application/json")
+              .withBody(Json.toJson(standardApp).toString())
+          )
+      )
+
+      private val result = await(underTest.create(createSandboxApplicationRequest))
+      result shouldBe standardApp
+    }
+
+    "handle 404 from downstream" in new Setup {
+      stubFor(
+        post(urlPathEqualTo(s"/application"))
+          .withJsonRequestBody(createSandboxApplicationRequest)
+          .willReturn(
+            aResponse()
+              .withStatus(NOT_FOUND)
+          )
+      )
+
+      val exception = intercept[UpstreamErrorResponse] {
+        await(underTest.create(createSandboxApplicationRequest))
+      }
+      exception.statusCode shouldBe NOT_FOUND
+    }
+  }
+
   "searchApplications" should {
     "return applications" in new Setup {
       stubFor(
@@ -62,7 +97,7 @@ class ThirdPartyApplicationConnectorIntegrationSpec extends BaseConnectorIntegra
           .willReturn(
             aResponse()
               .withStatus(OK)
-              .withHeader("Content-Type", "application/json")
+              .withHeader(HeaderNames.CONTENT_TYPE, "application/json")
               .withBody(paginatedBody(standardApp))
           )
       )
@@ -97,7 +132,7 @@ class ThirdPartyApplicationConnectorIntegrationSpec extends BaseConnectorIntegra
           .willReturn(
             aResponse()
               .withStatus(OK)
-              .withHeader("Content-Type", "application/json")
+              .withHeader(HeaderNames.CONTENT_TYPE, "application/json")
               .withBody(getBody(applicationId, clientId, userId1, userId2))
           )
       )
@@ -117,7 +152,7 @@ class ThirdPartyApplicationConnectorIntegrationSpec extends BaseConnectorIntegra
           .willReturn(
             aResponse()
               .withStatus(OK)
-              .withHeader("Content-Type", "application/json")
+              .withHeader(HeaderNames.CONTENT_TYPE, "application/json")
               .withBody(s"[${getBody(applicationId, clientId, userId1, userId2)}]")
           )
       )
@@ -137,7 +172,7 @@ class ThirdPartyApplicationConnectorIntegrationSpec extends BaseConnectorIntegra
           .willReturn(
             aResponse()
               .withStatus(OK)
-              .withHeader("Content-Type", "application/json")
+              .withHeader(HeaderNames.CONTENT_TYPE, "application/json")
               .withBody(getBody(applicationId, clientId, userId1, userId2))
           )
       )

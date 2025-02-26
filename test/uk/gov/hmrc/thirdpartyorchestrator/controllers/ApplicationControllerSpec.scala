@@ -20,22 +20,26 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 import org.scalatest.matchers.should.Matchers
 
-import play.api.http.Status
+import play.api.http.{ContentTypes, HeaderNames, Status}
 import play.api.libs.json.Json
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaboratorsFixtures, Collaborators}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborators
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartyorchestrator.mocks.services.ApplicationServiceMock
+import uk.gov.hmrc.thirdpartyorchestrator.utils.TestData
 
 class ApplicationControllerSpec extends BaseControllerSpec with Matchers {
 
   trait Setup
-      extends ApplicationServiceMock with UserBuilder with LocalUserIdTracker with ApplicationWithCollaboratorsFixtures {
+      extends ApplicationServiceMock
+      with UserBuilder
+      with LocalUserIdTracker
+      with TestData {
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
@@ -44,6 +48,19 @@ class ApplicationControllerSpec extends BaseControllerSpec with Matchers {
     val developer     = buildUser(emailOne, "Bob", "Fleming").copy(verified = true)
     val application   = standardApp.withCollaborators(Collaborators.Administrator(userIdOne, emailOne))
     val controller    = new ApplicationController(applicationServiceMock, Helpers.stubControllerComponents())
+  }
+
+  "create" should {
+    "return 201 if successful in creating an application" in new Setup {
+      createApplicationReturns(createSandboxApplicationRequest, application)
+
+      val request = FakeRequest("POST", s"/application")
+        .withBody(Json.toJson(createSandboxApplicationRequest))
+        .withHeaders((HeaderNames.CONTENT_TYPE, ContentTypes.JSON))
+
+      val result = controller.create()(request)
+      status(result) shouldBe Status.CREATED
+    }
   }
 
   "getApplication" should {

@@ -20,7 +20,8 @@ import scala.concurrent.Future.{failed, successful}
 
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, PaginatedApplications}
+import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.CreateApplicationRequest
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, UserId}
 import uk.gov.hmrc.thirdpartyorchestrator.connectors.{
   EnvironmentAwareThirdPartyApplicationConnector,
@@ -68,6 +69,23 @@ trait ThirdPartyApplicationConnectorMockModule extends MockitoSugar with Argumen
 
       def thenThrowException(userIds: List[UserId])(exception: Exception) =
         when(aMock.fetchApplicationsByUserIds(eqTo(userIds))(*)).thenReturn(failed(exception))
+    }
+
+    object SearchApplications {
+
+      def thenReturns(applications: PaginatedApplications) = {
+        when(aMock.searchApplications(*)(*)).thenReturn(successful(applications))
+      }
+
+      def thenThrowException(exception: Exception) =
+        when(aMock.searchApplications(*)(*)).thenReturn(failed(exception))
+    }
+
+    object Create {
+
+      def thenReturns(request: CreateApplicationRequest)(response: ApplicationWithCollaborators) = {
+        when(aMock.create(eqTo(request))(*)).thenReturn(successful(response))
+      }
     }
   }
 
