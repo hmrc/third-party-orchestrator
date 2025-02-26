@@ -20,24 +20,26 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 import org.scalatest.matchers.should.Matchers
 
-import play.api.http.Status
+import play.api.http.{ContentTypes, HeaderNames, Status}
 import play.api.libs.json.Json
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationName, ApplicationWithCollaboratorsFixtures, Collaborators}
-import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.CreateApplicationRequestV1
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborators
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartyorchestrator.mocks.services.ApplicationServiceMock
+import uk.gov.hmrc.thirdpartyorchestrator.utils.TestData
 
 class ApplicationControllerSpec extends BaseControllerSpec with Matchers {
 
   trait Setup
-      extends ApplicationServiceMock with UserBuilder with LocalUserIdTracker with ApplicationWithCollaboratorsFixtures {
+      extends ApplicationServiceMock
+      with UserBuilder
+      with LocalUserIdTracker
+      with TestData {
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
@@ -50,21 +52,11 @@ class ApplicationControllerSpec extends BaseControllerSpec with Matchers {
 
   "create" should {
     "return 201 if successful in creating an application" in new Setup {
-      val admin = Collaborators.Administrator(userIdThree, LaxEmailAddress("jim@example.com"))
+      createApplicationReturns(createSandboxApplicationRequest, application)
 
-      val createApplicationRequest =
-        CreateApplicationRequestV1.create(
-          name = ApplicationName("Test V1 Application"),
-          access = Access.Standard(),
-          description = None,
-          environment = Environment.SANDBOX,
-          collaborators = Set(admin),
-          subscriptions = None
-        )
-
-      createApplicationReturns(createApplicationRequest, application)
-
-      val request = FakeRequest("POST", s"/application").withBody(Json.toJson(createApplicationRequest)).withHeaders(("content-type", "application/json"))
+      val request = FakeRequest("POST", s"/application")
+        .withBody(Json.toJson(createSandboxApplicationRequest))
+        .withHeaders((HeaderNames.CONTENT_TYPE, ContentTypes.JSON))
 
       val result = controller.create()(request)
       status(result) shouldBe Status.CREATED

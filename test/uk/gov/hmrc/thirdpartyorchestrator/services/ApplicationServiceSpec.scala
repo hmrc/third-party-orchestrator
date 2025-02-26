@@ -20,12 +20,11 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaboratorsFixtures
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartyorchestrator.mocks.connectors.{ThirdPartyApplicationConnectorMockModule, ThirdPartyDeveloperConnectorMockModule}
 import uk.gov.hmrc.thirdpartyorchestrator.mocks.services.ApplicationFetcherMockModule
-import uk.gov.hmrc.thirdpartyorchestrator.utils.AsyncHmrcSpec
+import uk.gov.hmrc.thirdpartyorchestrator.utils.{AsyncHmrcSpec, TestData}
 
 class ApplicationServiceSpec extends AsyncHmrcSpec {
 
@@ -33,7 +32,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec {
       with ApplicationFetcherMockModule
       with UserBuilder
       with LocalUserIdTracker
-      with ApplicationWithCollaboratorsFixtures
+      with TestData
       with ThirdPartyApplicationConnectorMockModule {
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
@@ -45,6 +44,13 @@ class ApplicationServiceSpec extends AsyncHmrcSpec {
     val application   = standardApp.withCollaborators(standardApp.collaborators.take(2))
     val clientId      = application.clientId
     val applicationId = application.id
+  }
+
+  "create" should {
+    "call the connector correctly" in new Setup {
+      EnvironmentAwareThirdPartyApplicationConnectorMock.Subordinate.Create.thenReturns(createSandboxApplicationRequest)(application)
+      await(underTest.createApplication(createSandboxApplicationRequest)) shouldBe application
+    }
   }
 
   "fetchApplication" should {
