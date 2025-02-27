@@ -16,9 +16,8 @@
 
 package uk.gov.hmrc.thirdpartyorchestrator.utils
 
-import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationName, ApplicationWithCollaboratorsFixtures, Collaborators}
-import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.CreateApplicationRequestV1
+import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.{CreateApplicationRequestV1, CreationAccess}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Environment, LaxEmailAddress}
 
 trait TestData extends ApplicationWithCollaboratorsFixtures {
@@ -26,9 +25,9 @@ trait TestData extends ApplicationWithCollaboratorsFixtures {
   val admin = Collaborators.Administrator(userIdThree, LaxEmailAddress("jim@example.com"))
 
   val createSandboxApplicationRequest =
-    CreateApplicationRequestV1.create(
+    CreateApplicationRequestV1(
       name = ApplicationName("Test V1 Application"),
-      access = Access.Standard(),
+      access = CreationAccess.Standard,
       description = None,
       environment = Environment.SANDBOX,
       collaborators = Set(admin),
