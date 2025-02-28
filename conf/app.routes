@@ -1,5 +1,7 @@
 # microservice specific routes
 
+POST        /application                                          uk.gov.hmrc.thirdpartyorchestrator.controllers.ApplicationController.create()
+
 POST        /session/validate                                     uk.gov.hmrc.thirdpartyorchestrator.controllers.SessionController.getDeveloperForSession()
 GET         /applications                                         uk.gov.hmrc.thirdpartyorchestrator.controllers.ApplicationController.queryDispatcher()
 GET         /applications/:id                                     uk.gov.hmrc.thirdpartyorchestrator.controllers.ApplicationController.getApplication(id: ApplicationId)
@@ -14,6 +16,6 @@ POST        /developer/applications                               uk.gov.hmrc.th
 
 GET         /environment/:environment/applications                uk.gov.hmrc.thirdpartyorchestrator.controllers.EnvironmentApplicationController.searchApplications(environment: Environment)
 
-PATCH       /environment/:environment/application/:id            uk.gov.hmrc.thirdpartyorchestrator.commands.applications.controllers.AppCmdController.dispatchToEnvironment(environment: Environment, id: ApplicationId)
+PATCH       /environment/:environment/application/:id             uk.gov.hmrc.thirdpartyorchestrator.commands.applications.controllers.AppCmdController.dispatchToEnvironment(environment: Environment, id: ApplicationId)
 
 GET         /developer/:userId/applications                       uk.gov.hmrc.thirdpartyorchestrator.controllers.ApplicationController.getApplicationsByCollaborator(userId: UserId)
