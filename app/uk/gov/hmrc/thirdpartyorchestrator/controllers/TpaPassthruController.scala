@@ -18,11 +18,13 @@ package uk.gov.hmrc.thirdpartyorchestrator.controllers
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
+
 import play.api.mvc.ControllerComponents
-import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
-import uk.gov.hmrc.thirdpartyorchestrator.utils.ApplicationLogger
-import uk.gov.hmrc.thirdpartyorchestrator.connectors.PrincipalThirdPartyApplicationConnector
 import uk.gov.hmrc.http.HttpResponse
+import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
+
+import uk.gov.hmrc.thirdpartyorchestrator.connectors.PrincipalThirdPartyApplicationConnector
+import uk.gov.hmrc.thirdpartyorchestrator.utils.ApplicationLogger
 
 @Singleton()
 class TpaPassthruController @Inject() (
@@ -33,10 +35,11 @@ class TpaPassthruController @Inject() (
 
   def verifyUplift(verificationCode: String) = Action.async { implicit request =>
     principalTpaConnector.verify(verificationCode)
-    .map( _ match {
-      case HttpResponse(NO_CONTENT, _, _)     => NoContent
-      case HttpResponse(BAD_REQUEST, msg, _)  => BadRequest(msg)
-      case HttpResponse(status, body, _)      => asJson(new RuntimeException(s"Got unexpected status $status and body $body"))
-    })
+      .map(_ match {
+        case HttpResponse(NO_CONTENT, _, _)    => NoContent
+        case HttpResponse(BAD_REQUEST, msg, _) => BadRequest(msg)
+        case HttpResponse(status, body, _)     => asJson(new RuntimeException(s"Got unexpected status $status and body $body"))
+        case _                                 => asJson(new RuntimeException("Unexpected error when verifying uplift"))
+      })
   }
 }

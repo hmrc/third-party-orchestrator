@@ -20,6 +20,9 @@ import scala.concurrent.Future.{failed, successful}
 
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
+import play.api.http.Status
+import uk.gov.hmrc.http.HttpResponse
+
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, PaginatedApplications}
 import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.CreateApplicationRequest
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, UserId}
@@ -99,6 +102,17 @@ trait ThirdPartyApplicationConnectorMockModule extends MockitoSugar with Argumen
 
   object PrincipalThirdPartyApplicationConnectorMock extends AbstractThirdPartyApplicationMock {
     override val aMock: PrincipalThirdPartyApplicationConnector = mock[PrincipalThirdPartyApplicationConnector]
+
+    object VerifyUplift {
+
+      def succeedsWith(verifyCode: String) = {
+        when(aMock.verify(eqTo(verifyCode))(*)).thenReturn(successful(HttpResponse(Status.NO_CONTENT, "", Map.empty)))
+      }
+
+      def failsWithStatus(verifyCode: String, status: Int) = {
+        when(aMock.verify(eqTo(verifyCode))(*)).thenReturn(successful(HttpResponse(status, "", Map.empty)))
+      }
+    }
   }
 
   object EnvironmentAwareThirdPartyApplicationConnectorMock {

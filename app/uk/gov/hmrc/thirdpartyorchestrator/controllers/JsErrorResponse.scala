@@ -17,8 +17,7 @@
 package uk.gov.hmrc.thirdpartyorchestrator.controllers
 
 import play.api.libs.json.Json.JsValueWrapper
-import play.api.libs.json.JsObject
-import play.api.libs.json.Json
+import play.api.libs.json.{JsObject, Json}
 
 object JsErrorResponse {
 
