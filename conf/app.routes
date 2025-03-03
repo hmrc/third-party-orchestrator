@@ -2,6 +2,8 @@
 
 POST        /application                                          uk.gov.hmrc.thirdpartyorchestrator.controllers.ApplicationController.create()
 
+GET         /verify-uplift/:verificationCode                      uk.gov.hmrc.thirdpartyorchestrator.controllers.TpaPassthruController.verifyUplift(verificationCode: String)
+
 POST        /session/validate                                     uk.gov.hmrc.thirdpartyorchestrator.controllers.SessionController.getDeveloperForSession()
 GET         /applications                                         uk.gov.hmrc.thirdpartyorchestrator.controllers.ApplicationController.queryDispatcher()
 GET         /applications/:id                                     uk.gov.hmrc.thirdpartyorchestrator.controllers.ApplicationController.getApplication(id: ApplicationId)

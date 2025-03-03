@@ -29,6 +29,7 @@ import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{Applicat
 import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.CreateApplicationRequest
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, UserId}
 import uk.gov.hmrc.thirdpartyorchestrator.utils.EbridgeConfigurator
+import play.api.mvc.Result
 
 case class CollaboratorUserIds(userIds: List[UserId])
 
@@ -92,6 +93,7 @@ abstract class AbstractThirdPartyApplicationConnector(implicit val ec: Execution
         .withBody(Json.toJson(CollaboratorUserIds(userIds)))
         .execute[List[ApplicationWithCollaborators]]
     }
+
 }
 
 object PrincipalThirdPartyApplicationConnector {
@@ -113,6 +115,12 @@ class PrincipalThirdPartyApplicationConnector @Inject() (
   val serviceBaseUrl = config.serviceBaseUrl
 
   def configureEbridgeIfRequired(requestBuilder: RequestBuilder): RequestBuilder = requestBuilder
+
+  def verify(verificationCode: String)(implicit hc: HeaderCarrier): Future[HttpResponse] =
+    record {
+      http.post(url"$serviceBaseUrl/verify-uplift/$verificationCode")
+      .execute[HttpResponse]
+  }
 }
 
 object SubordinateThirdPartyApplicationConnector {
