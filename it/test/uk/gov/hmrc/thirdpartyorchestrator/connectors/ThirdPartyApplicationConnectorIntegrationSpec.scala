@@ -53,7 +53,7 @@ class ThirdPartyApplicationConnectorIntegrationSpec extends BaseConnectorIntegra
     val clientId: ClientId           = expectedApplication.clientId
     val applicationId: ApplicationId = expectedApplication.id
 
-    val underTest: ThirdPartyApplicationConnector = app.injector.instanceOf[PrincipalThirdPartyApplicationConnector]
+    val underTest: PrincipalThirdPartyApplicationConnector = app.injector.instanceOf[PrincipalThirdPartyApplicationConnector]
   }
 
   "create" should {
@@ -165,7 +165,6 @@ class ThirdPartyApplicationConnectorIntegrationSpec extends BaseConnectorIntegra
 
   "fetchApplicationByClientId" should {
     "return the application" in new Setup {
-
       stubFor(
         get(urlPathEqualTo("/application"))
           .withQueryParam("clientId", equalTo(clientId.value))
@@ -180,6 +179,25 @@ class ThirdPartyApplicationConnectorIntegrationSpec extends BaseConnectorIntegra
       private val result = await(underTest.fetchApplication(clientId))
 
       result shouldBe Some(expectedApplication)
+    }
+  }
+
+  "verify" should {
+    val verificationCode = "123456"
+
+    "" in new Setup {
+      stubFor(
+        post(urlPathEqualTo(s"/verify-uplift/$verificationCode"))
+          .willReturn(
+            aResponse()
+              .withStatus(NO_CONTENT)
+              .withHeader(HeaderNames.CONTENT_TYPE, "application/json")
+          )
+      )
+
+      val result = await(underTest.verify(verificationCode))
+
+      result.status shouldBe NO_CONTENT
     }
   }
 

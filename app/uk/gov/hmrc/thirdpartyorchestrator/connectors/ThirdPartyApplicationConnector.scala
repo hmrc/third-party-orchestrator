@@ -92,6 +92,7 @@ abstract class AbstractThirdPartyApplicationConnector(implicit val ec: Execution
         .withBody(Json.toJson(CollaboratorUserIds(userIds)))
         .execute[List[ApplicationWithCollaborators]]
     }
+
 }
 
 object PrincipalThirdPartyApplicationConnector {
@@ -113,6 +114,12 @@ class PrincipalThirdPartyApplicationConnector @Inject() (
   val serviceBaseUrl = config.serviceBaseUrl
 
   def configureEbridgeIfRequired(requestBuilder: RequestBuilder): RequestBuilder = requestBuilder
+
+  def verify(verificationCode: String)(implicit hc: HeaderCarrier): Future[HttpResponse] =
+    record {
+      http.post(url"$serviceBaseUrl/verify-uplift/$verificationCode")
+        .execute[HttpResponse]
+    }
 }
 
 object SubordinateThirdPartyApplicationConnector {
