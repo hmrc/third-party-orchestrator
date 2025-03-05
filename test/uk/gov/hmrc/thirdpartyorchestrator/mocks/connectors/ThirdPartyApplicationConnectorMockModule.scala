@@ -24,7 +24,7 @@ import play.api.http.Status
 import uk.gov.hmrc.http.HttpResponse
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, PaginatedApplications}
-import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.CreateApplicationRequest
+import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.{ApplicationNameValidationRequest, ApplicationNameValidationResult, CreateApplicationRequest}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, UserId}
 import uk.gov.hmrc.thirdpartyorchestrator.connectors.{
   EnvironmentAwareThirdPartyApplicationConnector,
@@ -89,6 +89,16 @@ trait ThirdPartyApplicationConnectorMockModule extends MockitoSugar with Argumen
       def thenReturns(request: CreateApplicationRequest)(response: ApplicationWithCollaborators) = {
         when(aMock.create(eqTo(request))(*)).thenReturn(successful(response))
       }
+    }
+
+    object ValidateName {
+
+      def thenReturns(request: ApplicationNameValidationRequest)(response: ApplicationNameValidationResult) = {
+        when(aMock.validateName(eqTo(request))(*)).thenReturn(successful(Some(response)))
+      }
+
+      def thenReturnsNone(request: ApplicationNameValidationRequest) =
+        when(aMock.validateName(eqTo(request))(*)).thenReturn(successful(None))
     }
   }
 
