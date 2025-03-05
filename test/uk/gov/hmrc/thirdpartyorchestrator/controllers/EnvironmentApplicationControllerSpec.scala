@@ -20,12 +20,14 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 import org.scalatest.matchers.should.Matchers
 
-import play.api.http.Status
+import play.api.http.{ContentTypes, HeaderNames, Status}
+import play.api.libs.json.Json
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaboratorsFixtures, Collaborators, PaginatedApplications}
+import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.{ApplicationNameValidationRequest, ApplicationNameValidationResult, ChangeApplicationNameValidationRequest}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
@@ -54,4 +56,29 @@ class EnvironmentApplicationControllerSpec extends BaseControllerSpec with Match
     }
   }
 
+  "validateName" should {
+    "return 200 if successful" in new Setup {
+      val request: ApplicationNameValidationRequest = ChangeApplicationNameValidationRequest("MyAppName", applicationId)
+      val fakeRequest                               = FakeRequest("POST", "/environment/SANDBOX/application/name/validate")
+        .withBody(Json.toJson(request))
+        .withHeaders((HeaderNames.CONTENT_TYPE, ContentTypes.JSON))
+      val response: ApplicationNameValidationResult = ApplicationNameValidationResult.ValidApplicationName
+      EnvironmentAwareThirdPartyApplicationConnectorMock.Subordinate.ValidateName.thenReturns(request)(response)
+
+      val result = controller.validateName(Environment.SANDBOX)(fakeRequest)
+      status(result) shouldBe Status.OK
+      contentAsJson(result) shouldBe Json.toJson(response)
+    }
+
+    "return 404 if application is not found" in new Setup {
+      val request: ApplicationNameValidationRequest = ChangeApplicationNameValidationRequest("MyAppName", applicationId)
+      val fakeRequest                               = FakeRequest("POST", "/environment/SANDBOX/application/name/validate")
+        .withBody(Json.toJson(request))
+        .withHeaders((HeaderNames.CONTENT_TYPE, ContentTypes.JSON))
+      EnvironmentAwareThirdPartyApplicationConnectorMock.Subordinate.ValidateName.thenReturnsNone(request)
+
+      val result = controller.validateName(Environment.SANDBOX)(fakeRequest)
+      status(result) shouldBe Status.NOT_FOUND
+    }
+  }
 }

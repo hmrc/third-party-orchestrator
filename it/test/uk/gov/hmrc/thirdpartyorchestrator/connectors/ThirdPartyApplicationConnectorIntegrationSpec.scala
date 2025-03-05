@@ -27,6 +27,7 @@ import play.mvc.Http.HeaderNames
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, ApplicationWithCollaboratorsFixtures, PaginatedApplications}
+import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.{ApplicationNameValidationRequest, ApplicationNameValidationResult, ChangeApplicationNameValidationRequest}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, UserId}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartyorchestrator.utils.{TestData, WireMockExtensions}
@@ -140,6 +141,28 @@ class ThirdPartyApplicationConnectorIntegrationSpec extends BaseConnectorIntegra
       private val result = await(underTest.fetchApplication(applicationId))
 
       result shouldBe Some(expectedApplication)
+    }
+  }
+
+  "validateName" should {
+    "pass for ChangeApplicationNameValidationRequest" in new Setup {
+      val request: ApplicationNameValidationRequest       = ChangeApplicationNameValidationRequest("MyAppName", applicationId)
+      val expectedResult: ApplicationNameValidationResult = ApplicationNameValidationResult.ValidApplicationName
+
+      stubFor(
+        post(urlPathEqualTo(s"/application/name/validate"))
+          .withJsonRequestBody(request)
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withHeader(HeaderNames.CONTENT_TYPE, "application/json")
+              .withJsonBody(expectedResult)
+          )
+      )
+
+      val result = await(underTest.validateName(request))
+
+      result shouldBe Some(expectedResult)
     }
   }
 

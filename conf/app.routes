@@ -17,6 +17,7 @@ PATCH       /applications/:id                                     uk.gov.hmrc.th
 POST        /developer/applications                               uk.gov.hmrc.thirdpartyorchestrator.controllers.ApplicationController.getApplicationsByEmail()
 
 GET         /environment/:environment/applications                uk.gov.hmrc.thirdpartyorchestrator.controllers.EnvironmentApplicationController.searchApplications(environment: Environment)
+POST        /environment/:environment/application/name/validate   uk.gov.hmrc.thirdpartyorchestrator.controllers.EnvironmentApplicationController.validateName(environment: Environment)
 
 PATCH       /environment/:environment/application/:id             uk.gov.hmrc.thirdpartyorchestrator.commands.applications.controllers.AppCmdController.dispatchToEnvironment(environment: Environment, id: ApplicationId)
 
