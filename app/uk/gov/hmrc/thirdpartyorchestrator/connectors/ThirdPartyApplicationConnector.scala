@@ -75,7 +75,7 @@ abstract class AbstractThirdPartyApplicationConnector(implicit val ec: Execution
   def validateName(request: ApplicationNameValidationRequest)(implicit hc: HeaderCarrier): Future[Option[ApplicationNameValidationResult]] =
     record {
       configureEbridgeIfRequired(
-        http.post(url"$serviceBaseUrl/application/name/validate")
+        http.post(url"$serviceBaseUrl/application/name/validate2")
           .withBody(Json.toJson(request))
       )
         .execute[Option[ApplicationNameValidationResult]]
