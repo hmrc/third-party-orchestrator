@@ -19,10 +19,11 @@ package uk.gov.hmrc.thirdpartyorchestrator.controllers
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
-import play.api.libs.json.Json
-import play.api.mvc.{Action, AnyContent, ControllerComponents}
+import play.api.libs.json.{JsNull, JsValue, Json}
+import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
+import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.ApplicationNameValidationRequest
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
 import uk.gov.hmrc.thirdpartyorchestrator.connectors.EnvironmentAwareThirdPartyApplicationConnector
 import uk.gov.hmrc.thirdpartyorchestrator.utils.ApplicationLogger
@@ -36,5 +37,12 @@ class EnvironmentApplicationController @Inject() (
 
   def searchApplications(environment: Environment): Action[AnyContent] = Action.async { implicit request =>
     connector(environment).searchApplications(request.queryString).map(response => Ok(Json.toJson(response)))
+  }
+
+  def validateName(environment: Environment): Action[JsValue] = Action.async(parse.json) { implicit request =>
+    withJsonBody[ApplicationNameValidationRequest] { req =>
+      connector(environment).validateName(req)
+        .map(response => response.fold[Result](NotFound(JsNull))(r => Ok(Json.toJson(r))))
+    }
   }
 }
