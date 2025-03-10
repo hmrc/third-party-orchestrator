@@ -147,7 +147,7 @@ class ThirdPartyApplicationConnectorIntegrationSpec extends BaseConnectorIntegra
   "validateName" should {
     "pass for ChangeApplicationNameValidationRequest" in new Setup {
       val request: ApplicationNameValidationRequest       = ChangeApplicationNameValidationRequest("MyAppName", applicationId)
-      val expectedResult: ApplicationNameValidationResult = ApplicationNameValidationResult.ValidApplicationName
+      val expectedResult: ApplicationNameValidationResult = ApplicationNameValidationResult.Valid
 
       stubFor(
         post(urlPathEqualTo(s"/application/name/validate2"))

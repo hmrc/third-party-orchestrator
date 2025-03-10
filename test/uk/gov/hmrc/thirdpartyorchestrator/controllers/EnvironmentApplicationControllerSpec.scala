@@ -62,7 +62,7 @@ class EnvironmentApplicationControllerSpec extends BaseControllerSpec with Match
       val fakeRequest                               = FakeRequest("POST", "/environment/SANDBOX/application/name/validate")
         .withBody(Json.toJson(request))
         .withHeaders((HeaderNames.CONTENT_TYPE, ContentTypes.JSON))
-      val response: ApplicationNameValidationResult = ApplicationNameValidationResult.ValidApplicationName
+      val response: ApplicationNameValidationResult = ApplicationNameValidationResult.Valid
       EnvironmentAwareThirdPartyApplicationConnectorMock.Subordinate.ValidateName.thenReturns(request)(response)
 
       val result = controller.validateName(Environment.SANDBOX)(fakeRequest)
