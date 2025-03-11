@@ -26,7 +26,7 @@ import uk.gov.hmrc.http.{StringContextOps, _}
 import uk.gov.hmrc.play.http.metrics.common._
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, PaginatedApplications}
-import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.CreateApplicationRequest
+import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.{CreateApplicationRequest, _}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, UserId}
 import uk.gov.hmrc.thirdpartyorchestrator.utils.EbridgeConfigurator
 
@@ -39,7 +39,7 @@ object CollaboratorUserIds {
 trait ThirdPartyApplicationConnector {
   def create(req: CreateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationWithCollaborators]
   def searchApplications(queryString: Map[String, Seq[String]])(implicit hc: HeaderCarrier): Future[PaginatedApplications]
-
+  def validateName(request: ApplicationNameValidationRequest)(implicit hc: HeaderCarrier): Future[Option[ApplicationNameValidationResult]]
   def fetchApplication(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithCollaborators]]
   def fetchApplication(clientId: ClientId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithCollaborators]]
   def fetchApplicationsByUserIds(userIds: List[UserId])(implicit hc: HeaderCarrier): Future[List[ApplicationWithCollaborators]]
@@ -72,6 +72,15 @@ abstract class AbstractThirdPartyApplicationConnector(implicit val ec: Execution
         .execute[PaginatedApplications]
     }
 
+  def validateName(request: ApplicationNameValidationRequest)(implicit hc: HeaderCarrier): Future[Option[ApplicationNameValidationResult]] =
+    record {
+      configureEbridgeIfRequired(
+        http.post(url"$serviceBaseUrl/application/name/validate2")
+          .withBody(Json.toJson(request))
+      )
+        .execute[Option[ApplicationNameValidationResult]]
+    }
+
   def fetchApplication(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithCollaborators]] =
     record {
       configureEbridgeIfRequired(http.get(url"$serviceBaseUrl/application/$applicationId"))
@@ -92,7 +101,6 @@ abstract class AbstractThirdPartyApplicationConnector(implicit val ec: Execution
         .withBody(Json.toJson(CollaboratorUserIds(userIds)))
         .execute[List[ApplicationWithCollaborators]]
     }
-
 }
 
 object PrincipalThirdPartyApplicationConnector {
