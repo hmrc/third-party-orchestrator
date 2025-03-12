@@ -4,7 +4,7 @@ object AppDependencies {
 
   private val bootstrapVersion = "9.11.0"
   private val commonDomainVersion = "0.18.0"
-  private val tpdDomainVersion  = "0.12.0"
+  private val tpdDomainVersion  = "0.13.0"
   
   private val appDomainVersion = "0.75.0"
   private val appEventVersion  = "0.79.0" // Ensure this version of the application-events library uses the appDomainVersion above
