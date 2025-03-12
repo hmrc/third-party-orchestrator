@@ -150,7 +150,7 @@ class ThirdPartyApplicationConnectorIntegrationSpec extends BaseConnectorIntegra
       val expectedResult: ApplicationNameValidationResult = ApplicationNameValidationResult.Valid
 
       stubFor(
-        post(urlPathEqualTo(s"/application/name/validate2"))
+        post(urlPathEqualTo(s"/application/name/validate"))
           .withJsonRequestBody(request)
           .willReturn(
             aResponse()
