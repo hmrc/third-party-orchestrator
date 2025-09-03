@@ -23,6 +23,7 @@ import scala.util.control.NonFatal
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
+import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.GetAppsForAdminOrRIRequest
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, UserId}
 import uk.gov.hmrc.thirdpartyorchestrator.connectors.EnvironmentAwareThirdPartyApplicationConnector
 import uk.gov.hmrc.thirdpartyorchestrator.utils.ApplicationLogger
@@ -57,6 +58,20 @@ class ApplicationFetcher @Inject() (
     if (userIds.nonEmpty) {
       val subordinateApp: Future[List[ApplicationWithCollaborators]] = thirdPartyApplicationConnector.subordinate.fetchApplicationsByUserIds(userIds)
       val principalApp: Future[List[ApplicationWithCollaborators]]   = thirdPartyApplicationConnector.principal.fetchApplicationsByUserIds(userIds)
+
+      for {
+        subordinate <- subordinateApp
+        principal   <- principalApp
+      } yield principal ++ subordinate
+    } else {
+      Future.successful(List.empty)
+    }
+  }
+
+  def getAppsForResponsibleIndividualOrAdmin(request: GetAppsForAdminOrRIRequest)(implicit hc: HeaderCarrier): Future[List[ApplicationWithCollaborators]] = {
+    if (request.adminOrRespIndEmail.text.nonEmpty) {
+      val subordinateApp: Future[List[ApplicationWithCollaborators]] = thirdPartyApplicationConnector.subordinate.getAppsForResponsibleIndividualOrAdmin(request)
+      val principalApp: Future[List[ApplicationWithCollaborators]]   = thirdPartyApplicationConnector.principal.getAppsForResponsibleIndividualOrAdmin(request)
 
       for {
         subordinate <- subordinateApp

@@ -27,8 +27,13 @@ import play.mvc.Http.HeaderNames
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, ApplicationWithCollaboratorsFixtures, PaginatedApplications}
-import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.{ApplicationNameValidationRequest, ApplicationNameValidationResult, ChangeApplicationNameValidationRequest}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, UserId}
+import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.{
+  ApplicationNameValidationRequest,
+  ApplicationNameValidationResult,
+  ChangeApplicationNameValidationRequest,
+  GetAppsForAdminOrRIRequest
+}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, LaxEmailAddress, UserId}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartyorchestrator.utils.{TestData, WireMockExtensions}
 
@@ -205,6 +210,26 @@ class ThirdPartyApplicationConnectorIntegrationSpec extends BaseConnectorIntegra
     }
   }
 
+  "getAppsForResponsibleIndividualOrAdmin" should {
+    "return the applications" in new Setup {
+      val request = GetAppsForAdminOrRIRequest(LaxEmailAddress("a@example.com"))
+      stubFor(
+        post(urlPathEqualTo(s"/responsible-ind-or-admin/applications"))
+          .withJsonRequestBody(request)
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withHeader(HeaderNames.CONTENT_TYPE, "application/json")
+              .withBody(s"[${getBody}]")
+          )
+      )
+
+      private val result = await(underTest.getAppsForResponsibleIndividualOrAdmin(request))
+
+      result shouldBe List(expectedApplication)
+    }
+  }
+
   "verify" should {
     val verificationCode = "123456"
 
@@ -229,6 +254,10 @@ class ThirdPartyApplicationConnectorIntegrationSpec extends BaseConnectorIntegra
   }
 
   private def getBody(applicationId: ApplicationId, clientId: ClientId, userId1: UserId, userId2: UserId) = {
+    Json.toJson(standardApp).toString
+  }
+
+  private def getBody() = {
     Json.toJson(standardApp).toString
   }
 }

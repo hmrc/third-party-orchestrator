@@ -16,11 +16,12 @@
 
 package uk.gov.hmrc.thirdpartyorchestrator.mocks.services
 
-import scala.concurrent.Future.successful
+import scala.concurrent.Future.{failed, successful}
 
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
+import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.GetAppsForAdminOrRIRequest
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, UserId}
 import uk.gov.hmrc.thirdpartyorchestrator.services.ApplicationFetcher
 
@@ -39,6 +40,18 @@ trait ApplicationFetcherMockModule extends MockitoSugar with ArgumentMatchersSug
 
       def thenReturn(userIds: List[UserId])(applications: List[ApplicationWithCollaborators]) =
         when(aMock.fetchApplicationsByUserIds(eqTo(userIds))(*)).thenReturn(successful(applications))
+    }
+
+    object GetAppsForResponsibleIndividualOrAdmin {
+
+      def thenReturn(request: GetAppsForAdminOrRIRequest)(applications: List[ApplicationWithCollaborators]) =
+        when(aMock.getAppsForResponsibleIndividualOrAdmin(eqTo(request))(*)).thenReturn(successful(applications))
+
+      def thenReturnEmptyList(request: GetAppsForAdminOrRIRequest) =
+        when(aMock.getAppsForResponsibleIndividualOrAdmin(eqTo(request))(*)).thenReturn(successful(List.empty))
+
+      def thenThrowException(request: GetAppsForAdminOrRIRequest)(exception: Exception) =
+        when(aMock.getAppsForResponsibleIndividualOrAdmin(eqTo(request))(*)).thenReturn(failed(exception))
     }
 
     object FetchApplicationByClientId {

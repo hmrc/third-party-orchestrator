@@ -24,10 +24,10 @@ import play.api.libs.json.{JsValue, Json, OFormat}
 import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.CreateApplicationRequest
+import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.{CreateApplicationRequest, GetAppsForAdminOrRIRequest}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, LaxEmailAddress, UserId}
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
-import uk.gov.hmrc.thirdpartyorchestrator.services.ApplicationService
+import uk.gov.hmrc.thirdpartyorchestrator.services.{ApplicationFetcher, ApplicationService}
 import uk.gov.hmrc.thirdpartyorchestrator.utils.ApplicationLogger
 
 case class ApplicationsByRequest(emails: List[LaxEmailAddress])
@@ -39,6 +39,7 @@ object ApplicationsByRequest {
 @Singleton()
 class ApplicationController @Inject() (
     applicationService: ApplicationService,
+    applicationFetcher: ApplicationFetcher,
     cc: ControllerComponents
   )(implicit val ec: ExecutionContext
   ) extends BackendController(cc) with JsonUtils with ApplicationLogger {
@@ -88,6 +89,13 @@ class ApplicationController @Inject() (
     lazy val failed = (msg: String) => NotFound(msg)
     val success     = (users: Set[User]) => Ok(Json.toJson(users))
     applicationService.fetchVerifiedCollaboratorsForApplication(applicationId).map(_.fold(failed, success))
+  }
+
+  def getAppsForResponsibleIndividualOrAdmin(): Action[JsValue] = Action.async(parse.json) { implicit request =>
+    withJsonBody[GetAppsForAdminOrRIRequest] { req =>
+      applicationFetcher.getAppsForResponsibleIndividualOrAdmin(req)
+        .map(response => Ok(Json.toJson(response))) recover recovery
+    }
   }
 
   def recovery: PartialFunction[Throwable, Result] = {
