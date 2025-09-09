@@ -42,6 +42,7 @@ class ApplicationCommandConnectorISpec
     with ConfigBuilder
     with PrincipalAndSubordinateWireMockSetup
     with utils.FixedClock
+    with ApplicationTokenData
     with HttpClientV2Support {
 
   trait Setup {
@@ -51,13 +52,13 @@ class ApplicationCommandConnectorISpec
     val bearer                     = "TestBearerToken"
 
     val applicationId = ApplicationId.random
-    val clientId      = ClientId.random
+    val clientId      = ApplicationTokenData.one.clientId
 
     def anApplicationResponse(): ApplicationWithCollaborators = {
       ApplicationWithCollaborators(
         CoreApplication(
           id = applicationId,
-          clientId = clientId,
+          token = ApplicationTokenData.one,
           gatewayId = "gatewayId",
           name = ApplicationName("appName"),
           deployedTo = Environment.PRODUCTION,
@@ -65,7 +66,6 @@ class ApplicationCommandConnectorISpec
           createdOn = instant,
           lastAccess = Some(instant),
           grantLength = GrantLength.EIGHTEEN_MONTHS,
-          lastAccessTokenUsage = None,
           access = Access.Standard(),
           state = ApplicationState(State.TESTING, None, None, None, updatedOn = instant),
           rateLimitTier = RateLimitTier.BRONZE,
