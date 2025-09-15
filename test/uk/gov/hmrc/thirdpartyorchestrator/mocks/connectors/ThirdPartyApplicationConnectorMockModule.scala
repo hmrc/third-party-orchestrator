@@ -24,7 +24,12 @@ import play.api.http.Status
 import uk.gov.hmrc.http.HttpResponse
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, PaginatedApplications}
-import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.{ApplicationNameValidationRequest, ApplicationNameValidationResult, CreateApplicationRequest}
+import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.{
+  ApplicationNameValidationRequest,
+  ApplicationNameValidationResult,
+  CreateApplicationRequest,
+  GetAppsForAdminOrRIRequest
+}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, UserId}
 import uk.gov.hmrc.thirdpartyorchestrator.connectors.{
   EnvironmentAwareThirdPartyApplicationConnector,
@@ -99,6 +104,18 @@ trait ThirdPartyApplicationConnectorMockModule extends MockitoSugar with Argumen
 
       def thenReturnsNone(request: ApplicationNameValidationRequest) =
         when(aMock.validateName(eqTo(request))(*)).thenReturn(successful(None))
+    }
+
+    object GetAppsForResponsibleIndividualOrAdmin {
+
+      def thenReturn(request: GetAppsForAdminOrRIRequest)(applications: List[ApplicationWithCollaborators]) =
+        when(aMock.getAppsForResponsibleIndividualOrAdmin(eqTo(request))(*)).thenReturn(successful(applications))
+
+      def thenReturnEmptyList(request: GetAppsForAdminOrRIRequest) =
+        when(aMock.getAppsForResponsibleIndividualOrAdmin(eqTo(request))(*)).thenReturn(successful(List.empty))
+
+      def thenThrowException(request: GetAppsForAdminOrRIRequest)(exception: Exception) =
+        when(aMock.getAppsForResponsibleIndividualOrAdmin(eqTo(request))(*)).thenReturn(failed(exception))
     }
   }
 

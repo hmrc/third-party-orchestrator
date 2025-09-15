@@ -24,13 +24,14 @@ import play.api.http.{ContentTypes, HeaderNames, Status}
 import play.api.libs.json.Json
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborators
+import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.GetAppsForAdminOrRIRequest
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
-import uk.gov.hmrc.thirdpartyorchestrator.mocks.services.ApplicationServiceMock
+import uk.gov.hmrc.thirdpartyorchestrator.mocks.services.{ApplicationFetcherMockModule, ApplicationServiceMock}
 import uk.gov.hmrc.thirdpartyorchestrator.utils.TestData
 
 class ApplicationControllerSpec extends BaseControllerSpec with Matchers {
@@ -39,7 +40,8 @@ class ApplicationControllerSpec extends BaseControllerSpec with Matchers {
       extends ApplicationServiceMock
       with UserBuilder
       with LocalUserIdTracker
-      with TestData {
+      with TestData
+      with ApplicationFetcherMockModule {
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
@@ -47,7 +49,7 @@ class ApplicationControllerSpec extends BaseControllerSpec with Matchers {
     val clientId      = ClientId.random
     val developer     = buildUser(emailOne, "Bob", "Fleming").copy(verified = true)
     val application   = standardApp.withCollaborators(Collaborators.Administrator(userIdOne, emailOne))
-    val controller    = new ApplicationController(applicationServiceMock, Helpers.stubControllerComponents())
+    val controller    = new ApplicationController(applicationServiceMock, ApplicationFetcherMock.aMock, Helpers.stubControllerComponents())
   }
 
   "create" should {
@@ -171,6 +173,35 @@ class ApplicationControllerSpec extends BaseControllerSpec with Matchers {
 
       status(result) shouldBe Status.INTERNAL_SERVER_ERROR
     }
+  }
 
+  "getAppsForResponsibleIndividualOrAdmin" should {
+    val request: GetAppsForAdminOrRIRequest = GetAppsForAdminOrRIRequest(LaxEmailAddress("a@example.com"))
+    val fakeRequest                         = FakeRequest("GET", s"/responsible-ind-or-admin/applications")
+      .withBody(Json.toJson(request))
+      .withHeaders((HeaderNames.CONTENT_TYPE, ContentTypes.JSON))
+
+    "return 200 if successful" in new Setup {
+      ApplicationFetcherMock.GetAppsForResponsibleIndividualOrAdmin.thenReturn(request)(List(application))
+
+      val result = controller.getAppsForResponsibleIndividualOrAdmin()(fakeRequest)
+      status(result) shouldBe Status.OK
+    }
+
+    "return 200 if empty list returned" in new Setup {
+      ApplicationFetcherMock.GetAppsForResponsibleIndividualOrAdmin.thenReturnEmptyList(request)
+
+      val result = controller.getAppsForResponsibleIndividualOrAdmin()(fakeRequest)
+      status(result) shouldBe Status.OK
+    }
+
+    "return 500 if connector call failed" in new Setup {
+      ApplicationFetcherMock.GetAppsForResponsibleIndividualOrAdmin
+        .thenThrowException(request)(UpstreamErrorResponse("some problem happened", 500))
+
+      val result = controller.getAppsForResponsibleIndividualOrAdmin()(fakeRequest)
+
+      status(result) shouldBe Status.INTERNAL_SERVER_ERROR
+    }
   }
 }

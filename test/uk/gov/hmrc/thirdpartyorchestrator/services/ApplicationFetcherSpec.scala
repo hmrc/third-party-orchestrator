@@ -23,7 +23,8 @@ import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, ApplicationWithCollaboratorsFixtures}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, UserId}
+import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.GetAppsForAdminOrRIRequest
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, LaxEmailAddress, UserId}
 import uk.gov.hmrc.thirdpartyorchestrator.mocks.connectors._
 import uk.gov.hmrc.thirdpartyorchestrator.utils.AsyncHmrcSpec
 
@@ -154,5 +155,37 @@ class ApplicationFetcherSpec extends AsyncHmrcSpec with ApplicationWithCollabora
       }
     }
 
+    "getAppsForResponsibleIndividualOrAdmin is called" should {
+      val request: GetAppsForAdminOrRIRequest = GetAppsForAdminOrRIRequest(LaxEmailAddress("a@example.com"))
+
+      "return Empty List if given a request with no email" in new Setup {
+        val emptyRequest: GetAppsForAdminOrRIRequest = GetAppsForAdminOrRIRequest(LaxEmailAddress(""))
+        await(fetcher.getAppsForResponsibleIndividualOrAdmin(emptyRequest)) shouldBe List.empty
+      }
+
+      "return Empty List if absent from principal and subordinate" in new Setup {
+        EnvironmentAwareThirdPartyApplicationConnectorMock.Subordinate.GetAppsForResponsibleIndividualOrAdmin.thenReturnEmptyList(request)
+        EnvironmentAwareThirdPartyApplicationConnectorMock.Principal.GetAppsForResponsibleIndividualOrAdmin.thenReturnEmptyList(request)
+        await(fetcher.getAppsForResponsibleIndividualOrAdmin(request)) shouldBe List.empty
+      }
+
+      "return an application from subordinate if present" in new Setup {
+        EnvironmentAwareThirdPartyApplicationConnectorMock.Subordinate.GetAppsForResponsibleIndividualOrAdmin.thenReturn(request)(List(application))
+        EnvironmentAwareThirdPartyApplicationConnectorMock.Principal.GetAppsForResponsibleIndividualOrAdmin.thenReturnEmptyList(request)
+        await(fetcher.getAppsForResponsibleIndividualOrAdmin(request)) shouldBe List(application)
+      }
+
+      "return an application from principal if present" in new Setup {
+        EnvironmentAwareThirdPartyApplicationConnectorMock.Subordinate.GetAppsForResponsibleIndividualOrAdmin.thenReturnEmptyList(request)
+        EnvironmentAwareThirdPartyApplicationConnectorMock.Principal.GetAppsForResponsibleIndividualOrAdmin.thenReturn(request)(List(application))
+        await(fetcher.getAppsForResponsibleIndividualOrAdmin(request)) shouldBe List(application)
+      }
+
+      "return a combined list of applications from both envs" in new Setup {
+        EnvironmentAwareThirdPartyApplicationConnectorMock.Subordinate.GetAppsForResponsibleIndividualOrAdmin.thenReturn(request)(List(application2))
+        EnvironmentAwareThirdPartyApplicationConnectorMock.Principal.GetAppsForResponsibleIndividualOrAdmin.thenReturn(request)(List(application))
+        await(fetcher.getAppsForResponsibleIndividualOrAdmin(request)) should contain theSameElementsAs List(application, application2)
+      }
+    }
   }
 }

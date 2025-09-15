@@ -43,6 +43,7 @@ trait ThirdPartyApplicationConnector {
   def fetchApplication(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithCollaborators]]
   def fetchApplication(clientId: ClientId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithCollaborators]]
   def fetchApplicationsByUserIds(userIds: List[UserId])(implicit hc: HeaderCarrier): Future[List[ApplicationWithCollaborators]]
+  def getAppsForResponsibleIndividualOrAdmin(request: GetAppsForAdminOrRIRequest)(implicit hc: HeaderCarrier): Future[List[ApplicationWithCollaborators]]
 }
 
 abstract class AbstractThirdPartyApplicationConnector(implicit val ec: ExecutionContext) extends ThirdPartyApplicationConnector with RecordMetrics {
@@ -99,6 +100,13 @@ abstract class AbstractThirdPartyApplicationConnector(implicit val ec: Execution
     record {
       configureEbridgeIfRequired(http.post(url"$serviceBaseUrl/developer/applications"))
         .withBody(Json.toJson(CollaboratorUserIds(userIds)))
+        .execute[List[ApplicationWithCollaborators]]
+    }
+
+  def getAppsForResponsibleIndividualOrAdmin(req: GetAppsForAdminOrRIRequest)(implicit hc: HeaderCarrier): Future[List[ApplicationWithCollaborators]] =
+    record {
+      configureEbridgeIfRequired(http.post(url"$serviceBaseUrl/responsible-ind-or-admin/applications"))
+        .withBody(Json.toJson(req))
         .execute[List[ApplicationWithCollaborators]]
     }
 }
