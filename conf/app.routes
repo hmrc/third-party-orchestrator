@@ -23,3 +23,5 @@ POST        /environment/:environment/application/name/validate                 
 PATCH       /environment/:environment/application/:id                           uk.gov.hmrc.thirdpartyorchestrator.commands.applications.controllers.AppCmdController.dispatchToEnvironment(environment: Environment, id: ApplicationId)
 
 GET         /developer/:userId/applications                                     uk.gov.hmrc.thirdpartyorchestrator.controllers.ApplicationController.getApplicationsByCollaborator(userId: UserId)
+
+GET         /environment/:environment/query                                     uk.gov.hmrc.thirdpartyorchestrator.controllers.QueryController.queryEnv(environment: Environment)
