@@ -28,8 +28,6 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.query.domain.models.ParamNames
-import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models._
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.utils
 import uk.gov.hmrc.thirdpartyorchestrator.utils._
@@ -63,11 +61,6 @@ class QueryControllerISpec
     lazy val baseUrl               = s"http://localhost:$port"
 
     val wsClient           = app.injector.instanceOf[WSClient]
-    val requestorEmail     = "requestor@example.com".toLaxEmail
-    val newTeamMemberEmail = "newTeamMember@example.com".toLaxEmail
-    val newCollaborator    = Collaborators.Administrator(UserId.random, newTeamMemberEmail)
-    val cmd                = ApplicationCommands.AddCollaborator(Actors.AppCollaborator(requestorEmail), newCollaborator, instant)
-    val request            = DispatchRequest(cmd, Set.empty[LaxEmailAddress])
   }
 
   "QueryController" should {
