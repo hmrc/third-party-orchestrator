@@ -42,7 +42,7 @@ class ApplicationCommandConnectorISpec
     with ConfigBuilder
     with PrincipalAndSubordinateWireMockSetup
     with utils.FixedClock
-    with ApplicationTokenData
+    with ApplicationTokenFixtures
     with HttpClientV2Support {
 
   trait Setup {
@@ -73,7 +73,8 @@ class ApplicationCommandConnectorISpec
           blocked = false,
           ipAllowlist = IpAllowlist(),
           lastActionActor = ActorType.UNKNOWN,
-          deleteRestriction = DeleteRestriction.NoRestriction
+          deleteRestriction = DeleteRestriction.NoRestriction,
+          organisationId = None
         ),
         collaborators = Set.empty
       )

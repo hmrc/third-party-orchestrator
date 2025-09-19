@@ -31,8 +31,8 @@ class Module extends AbstractModule {
     bind(classOf[AppConfig]).asEagerSingleton()
     bind(classOf[ApiMetrics]).toProvider(classOf[ApiMetricsProvider])
 
-    bind(classOf[PrincipalThirdPartyApplicationConnector.Config]).toProvider(classOf[PrincipalThirdPartyApplicationConnectorConfigProvider])
-    bind(classOf[SubordinateThirdPartyApplicationConnector.Config]).toProvider(classOf[SubordinateThirdPartyApplicationConnectorConfigProvider])
+    bind(classOf[PrincipalThirdPartyApplicationConnector.Config]).toProvider(classOf[PrincipalThirdPartyApplicationConnectorConfigProvider]).asEagerSingleton()
+    bind(classOf[SubordinateThirdPartyApplicationConnector.Config]).toProvider(classOf[SubordinateThirdPartyApplicationConnectorConfigProvider]).asEagerSingleton()
 
     bind(classOf[ThirdPartyApplicationConnector]).annotatedWith(named("subordinate")).to(classOf[SubordinateThirdPartyApplicationConnector])
     bind(classOf[ThirdPartyApplicationConnector]).annotatedWith(named("principal")).to(classOf[PrincipalThirdPartyApplicationConnector])

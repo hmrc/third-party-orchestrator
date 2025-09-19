@@ -24,9 +24,9 @@ import uk.gov.hmrc.http._
 import uk.gov.hmrc.http.client.{HttpClientV2, RequestBuilder}
 import uk.gov.hmrc.play.http.metrics.common._
 
-import uk.gov.hmrc.thirdpartyorchestrator.utils.EbridgeConfigurator
 import uk.gov.hmrc.apiplatform.modules.applications.query.domain.models.ApplicationQuery
 import uk.gov.hmrc.apiplatform.modules.applications.query.domain.services.QueryParamsToQueryStringMap
+import uk.gov.hmrc.thirdpartyorchestrator.utils.EbridgeConfigurator
 
 trait QueryConnector {
   def query(qry: ApplicationQuery)(implicit hc: HeaderCarrier): Future[HttpResponse]
@@ -46,7 +46,7 @@ abstract class AbstractQueryConnector(implicit val ec: ExecutionContext) extends
 
   override def query(qry: Map[String, Seq[String]])(implicit hc: HeaderCarrier): Future[HttpResponse] = {
     val simplifiedQry = qry.map {
-      case (k,vs) => k -> vs.mkString
+      case (k, vs) => k -> vs.mkString
     }
     configureEbridgeIfRequired(
       http.get(url"${serviceBaseUrl}/query?$simplifiedQry")

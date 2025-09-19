@@ -26,4 +26,5 @@ class AppConfig @Inject() (config: Configuration) extends ServicesConfig(config)
 
   val appName: String        = config.get[String]("appName")
   val thirdPartyDeveloperUrl = baseUrl("third-party-developer")
+  val inPairedEnvironment    = config.get[Boolean]("inPairedEnvironment")
 }

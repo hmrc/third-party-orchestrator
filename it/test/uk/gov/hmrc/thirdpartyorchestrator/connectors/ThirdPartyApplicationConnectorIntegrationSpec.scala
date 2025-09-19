@@ -220,7 +220,7 @@ class ThirdPartyApplicationConnectorIntegrationSpec extends BaseConnectorIntegra
             aResponse()
               .withStatus(OK)
               .withHeader(HeaderNames.CONTENT_TYPE, "application/json")
-              .withBody(s"[${getBody}]")
+              .withBody(s"[${getBody()}]")
           )
       )
 

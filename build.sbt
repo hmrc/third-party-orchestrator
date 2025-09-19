@@ -25,6 +25,7 @@ lazy val microservice = Project(appName, file("."))
     scalacOptions += "-Wconf:src=routes/.*:s"
   )
   .settings(
+    Test / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-eT"),
     Test / unmanagedSourceDirectories += baseDirectory.value / "shared-test"
   )
   .settings(ScoverageSettings())
@@ -45,11 +46,7 @@ lazy val it = (project in file("it"))
   .dependsOn(microservice % "test->test")
   .settings(DefaultBuildSettings.itSettings())
   .settings(
-    name := "integration-tests",
     Test / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-eT"),
-    headerSettings(Test) ++ automateHeaderSettings(Test),
-    inConfig(Test)(BloopDefaults.configSettings),
-    addTestReportOption(Test, "int-test-reports")
   )
 
 commands ++= Seq(
