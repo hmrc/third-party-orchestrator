@@ -30,7 +30,7 @@ import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.{
   CreateApplicationRequest,
   GetAppsForAdminOrRIRequest
 }
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, UserId}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
 import uk.gov.hmrc.thirdpartyorchestrator.connectors.{
   EnvironmentAwareThirdPartyApplicationConnector,
   PrincipalThirdPartyApplicationConnector,
@@ -42,30 +42,6 @@ trait ThirdPartyApplicationConnectorMockModule extends MockitoSugar with Argumen
 
   trait AbstractThirdPartyApplicationMock {
     def aMock: ThirdPartyApplicationConnector
-
-    object FetchApplicationById {
-
-      def thenReturn(applicationId: ApplicationId)(application: Option[ApplicationWithCollaborators]) =
-        when(aMock.fetchApplication(eqTo(applicationId))(*)).thenReturn(successful(application))
-
-      def thenReturnNone(applicationId: ApplicationId) =
-        when(aMock.fetchApplication(eqTo(applicationId))(*)).thenReturn(successful(None))
-
-      def thenThrowException(applicationId: ApplicationId)(exception: Exception) =
-        when(aMock.fetchApplication(eqTo(applicationId))(*)).thenReturn(failed(exception))
-    }
-
-    object FetchApplicationByClientId {
-
-      def thenReturn(clientId: ClientId)(application: Option[ApplicationWithCollaborators]) =
-        when(aMock.fetchApplication(eqTo(clientId))(*)).thenReturn(successful(application))
-
-      def thenReturnNone(clientId: ClientId) =
-        when(aMock.fetchApplication(eqTo(clientId))(*)).thenReturn(successful(None))
-
-      def thenThrowException(clientId: ClientId)(exception: Exception) =
-        when(aMock.fetchApplication(eqTo(clientId))(*)).thenReturn(failed(exception))
-    }
 
     object FetchApplicationsByUserIds {
 

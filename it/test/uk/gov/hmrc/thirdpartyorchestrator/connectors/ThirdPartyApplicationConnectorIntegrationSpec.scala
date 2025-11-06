@@ -130,25 +130,6 @@ class ThirdPartyApplicationConnectorIntegrationSpec extends BaseConnectorIntegra
     }
   }
 
-  "fetchApplication" should {
-    "return the application" in new Setup {
-
-      stubFor(
-        get(urlPathEqualTo(s"/application/$applicationId"))
-          .willReturn(
-            aResponse()
-              .withStatus(OK)
-              .withHeader(HeaderNames.CONTENT_TYPE, "application/json")
-              .withBody(getBody(applicationId, clientId, userId1, userId2))
-          )
-      )
-
-      private val result = await(underTest.fetchApplication(applicationId))
-
-      result shouldBe Some(expectedApplication)
-    }
-  }
-
   "validateName" should {
     "pass for ChangeApplicationNameValidationRequest" in new Setup {
       val request: ApplicationNameValidationRequest       = ChangeApplicationNameValidationRequest("MyAppName", applicationId)
@@ -188,25 +169,6 @@ class ThirdPartyApplicationConnectorIntegrationSpec extends BaseConnectorIntegra
       private val result = await(underTest.fetchApplicationsByUserIds(List(userId1, userId2)))
 
       result shouldBe List(expectedApplication)
-    }
-  }
-
-  "fetchApplicationByClientId" should {
-    "return the application" in new Setup {
-      stubFor(
-        get(urlPathEqualTo("/application"))
-          .withQueryParam("clientId", equalTo(clientId.value))
-          .willReturn(
-            aResponse()
-              .withStatus(OK)
-              .withHeader(HeaderNames.CONTENT_TYPE, "application/json")
-              .withBody(getBody(applicationId, clientId, userId1, userId2))
-          )
-      )
-
-      private val result = await(underTest.fetchApplication(clientId))
-
-      result shouldBe Some(expectedApplication)
     }
   }
 

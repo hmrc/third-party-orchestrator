@@ -42,7 +42,7 @@ class ApplicationController @Inject() (
     applicationFetcher: ApplicationFetcher,
     cc: ControllerComponents
   )(implicit val ec: ExecutionContext
-  ) extends BackendController(cc) with JsonUtils with ApplicationLogger {
+  ) extends BackendController(cc) with JsonUtils with ApplicationLogger with WarnStillInUse {
 
   def create() = Action.async(parse.json) { implicit request =>
     withJsonBody[CreateApplicationRequest] { createApplicationRequest =>
@@ -71,17 +71,19 @@ class ApplicationController @Inject() (
       .map(response => Ok(Json.toJson(response))) recover recovery
   }
 
-  def queryDispatcher(): Action[AnyContent] = Action.async { implicit request =>
-    val queryBy = request.queryString.keys.toList.sorted
-    queryBy match {
-      case ("clientId" :: _) =>
-        val clientId = ClientId(request.queryString("clientId").head)
-        applicationService.fetchApplication(clientId).map {
-          case Some(response) => Ok(Json.toJson(response))
-          case None           => NotFound
-        }
-      case _                 =>
-        successful(BadRequest("Unknown query parameters"))
+  def queryDispatcher(): Action[AnyContent] = warnStillInUse("queryDispatcher") {
+    Action.async { implicit request =>
+      val queryBy = request.queryString.keys.toList.sorted
+      queryBy match {
+        case ("clientId" :: _) =>
+          val clientId = ClientId(request.queryString("clientId").head)
+          applicationService.fetchApplication(clientId).map {
+            case Some(response) => Ok(Json.toJson(response))
+            case None           => NotFound
+          }
+        case _                 =>
+          successful(BadRequest("Unknown query parameters"))
+      }
     }
   }
 
