@@ -78,7 +78,8 @@ class AppCmdControllerISpec
 
     "return 401 when Unauthorised is returned from connector" in new Setup {
       stubFor(Environment.SANDBOX)(
-        get(urlPathEqualTo(s"/application/$applicationId"))
+        get(urlPathEqualTo("/query"))
+          .withQueryParam("applicationId", equalTo(applicationId.toString))
           .willReturn(
             aResponse()
               .withStatus(OK)

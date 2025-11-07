@@ -26,6 +26,7 @@ import play.api.http.ContentTypes
 import play.api.http.HttpEntity.Strict
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, ControllerComponents, ResponseHeader, Result}
+import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
@@ -43,8 +44,12 @@ class QueryController @Inject() (
   )(implicit val ec: ExecutionContext
   ) extends BackendController(cc) with JsonUtils with ApplicationLogger {
 
-  private def getEnvironmentParameter(queryMap: Map[String, Seq[String]]): Option[String] = {
-    queryMap.get(ParamNames.Environment).flatMap(_.headOption)
+  private def getParam(queryMap: Map[String, Seq[String]])(paramName: String): Option[String] = {
+    queryMap.get(paramName).flatMap(_.headOption)
+  }
+
+  private def hasEnvParameter(params: Map[String, Seq[String]]) = {
+    getParam(params)(ParamNames.Environment).isDefined
   }
 
   def queryEnv(environment: Environment): Action[AnyContent] = Action.async { implicit request =>
@@ -52,7 +57,7 @@ class QueryController @Inject() (
     // Check there isn't an environment query param
     // And add one if we're not in a bridged deployment
     //
-    if (getEnvironmentParameter(request.queryString).isDefined) {
+    if (hasEnvParameter(request.queryString)) {
       successful(BadRequest(Json.toJson(JsErrorResponse("UNEXPECTED_PARAMETER", "Cannot provide an environment query parameter when using environment path parameter"))))
     } else {
       val effectiveQueryMap: Map[String, Seq[String]] =
@@ -61,27 +66,11 @@ class QueryController @Inject() (
         } else {
           request.queryString + (ParamNames.Environment -> Seq(s"$environment"))
         }
-      queryConnector(environment).query(effectiveQueryMap).map(convertToResult)
+      queryConnector(environment).query[HttpResponse](effectiveQueryMap).map(convertToResult)
     }
   }
 
-  // def query(): Action[AnyContent] = Action.async { implicit request =>
-  //   // 1 . If paginated query, we must have an environment (but we won't pass it down except in single environments (LOCAL/INT/STAGING))
-
-  //   // 2. If there is an environment query param this is a simple pass through (but we need to remove the environment param except in single environments (LOCAL/INT/STAGING))
-
-  //   // 3 .If there is no environment query param, should we query both environments and stitch the data together - for single app queries this is easier (slightly)
-  //   // but we cannot do paginated query
-
-  //   val envQuery: Option[String] = request.queryString.get("environment").flatMap(_.headOption)
-  //   envQuery.map(Environment(_)) match {
-  //     case None            => ??? // Stitch together
-  //     case Some(None)      => successful(BadRequest(s"${envQuery.get} is not a valid environment"))
-  //     case Some(Some(env)) => queryConnector(env).query(request.target.queryMap).map(convertToResult)
-  //   }
-  // }
-
-  private def convertToResult(resp: HttpResponse) = {
+  private def convertToResult(resp: HttpResponse): Result = {
     Result(ResponseHeader(resp.status), Strict(ByteString(resp.body), Some(ContentTypes.JSON)))
       .withHeaders(resp.headers.toSeq.map(a => (a._1, a._2.head)): _*)
   }

@@ -21,22 +21,26 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.HttpReads.Implicits._
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
 import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.GetAppsForAdminOrRIRequest
+import uk.gov.hmrc.apiplatform.modules.applications.query.domain.models.ApplicationQuery
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, UserId}
-import uk.gov.hmrc.thirdpartyorchestrator.connectors.EnvironmentAwareThirdPartyApplicationConnector
+import uk.gov.hmrc.thirdpartyorchestrator.connectors.{EnvironmentAwareQueryConnector, EnvironmentAwareThirdPartyApplicationConnector}
 import uk.gov.hmrc.thirdpartyorchestrator.utils.ApplicationLogger
 
 @Singleton
 class ApplicationFetcher @Inject() (
-    thirdPartyApplicationConnector: EnvironmentAwareThirdPartyApplicationConnector
+    thirdPartyApplicationConnector: EnvironmentAwareThirdPartyApplicationConnector,
+    queryConnector: EnvironmentAwareQueryConnector
   )(implicit ec: ExecutionContext
   ) extends ApplicationLogger {
 
   def fetchApplication(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithCollaborators]] = {
-    val subordinateApp: Future[Option[ApplicationWithCollaborators]] = thirdPartyApplicationConnector.subordinate.fetchApplication(applicationId) recover recoverWithDefault(None)
-    val principalApp: Future[Option[ApplicationWithCollaborators]]   = thirdPartyApplicationConnector.principal.fetchApplication(applicationId)
+    val qry                                                          = ApplicationQuery.ById(applicationId, Nil, false)
+    val subordinateApp: Future[Option[ApplicationWithCollaborators]] = queryConnector.subordinate.query[Option[ApplicationWithCollaborators]](qry) recover recoverWithDefault(None)
+    val principalApp: Future[Option[ApplicationWithCollaborators]]   = queryConnector.principal.query[Option[ApplicationWithCollaborators]](qry)
 
     for {
       subordinate <- subordinateApp
@@ -45,8 +49,9 @@ class ApplicationFetcher @Inject() (
   }
 
   def fetchApplication(clientId: ClientId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithCollaborators]] = {
-    val subordinateApp: Future[Option[ApplicationWithCollaborators]] = thirdPartyApplicationConnector.subordinate.fetchApplication(clientId) recover recoverWithDefault(None)
-    val principalApp: Future[Option[ApplicationWithCollaborators]]   = thirdPartyApplicationConnector.principal.fetchApplication(clientId)
+    val qry                                                          = ApplicationQuery.ByClientId(clientId, false, Nil, false)
+    val subordinateApp: Future[Option[ApplicationWithCollaborators]] = queryConnector.subordinate.query[Option[ApplicationWithCollaborators]](qry) recover recoverWithDefault(None)
+    val principalApp: Future[Option[ApplicationWithCollaborators]]   = queryConnector.principal.query[Option[ApplicationWithCollaborators]](qry)
 
     for {
       subordinate <- subordinateApp

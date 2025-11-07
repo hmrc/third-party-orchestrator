@@ -33,10 +33,12 @@ class EnvironmentApplicationController @Inject() (
     connector: EnvironmentAwareThirdPartyApplicationConnector,
     cc: ControllerComponents
   )(implicit val ec: ExecutionContext
-  ) extends BackendController(cc) with JsonUtils with ApplicationLogger {
+  ) extends BackendController(cc) with JsonUtils with ApplicationLogger with WarnStillInUse {
 
-  def searchApplications(environment: Environment): Action[AnyContent] = Action.async { implicit request =>
-    connector(environment).searchApplications(request.queryString).map(response => Ok(Json.toJson(response)))
+  def searchApplications(environment: Environment): Action[AnyContent] = warnStillInUse("searchApplications") {
+    Action.async { implicit request =>
+      connector(environment).searchApplications(request.queryString).map(response => Ok(Json.toJson(response)))
+    }
   }
 
   def validateName(environment: Environment): Action[JsValue] = Action.async(parse.json) { implicit request =>

@@ -19,7 +19,6 @@ package uk.gov.hmrc.thirdpartyorchestrator.connectors
 import javax.inject.{Inject, Named, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.http.client.{HttpClientV2, RequestBuilder}
 import uk.gov.hmrc.play.http.metrics.common._
@@ -29,8 +28,8 @@ import uk.gov.hmrc.apiplatform.modules.applications.query.domain.services.QueryP
 import uk.gov.hmrc.thirdpartyorchestrator.utils.EbridgeConfigurator
 
 trait QueryConnector {
-  def query(qry: ApplicationQuery)(implicit hc: HeaderCarrier): Future[HttpResponse]
-  def query(qry: Map[String, Seq[String]])(implicit hc: HeaderCarrier): Future[HttpResponse]
+  def query[T](qry: ApplicationQuery)(implicit hc: HeaderCarrier, rds: HttpReads[T]): Future[T]
+  def query[T](qry: Map[String, Seq[String]])(implicit hc: HeaderCarrier, rds: HttpReads[T]): Future[T]
 }
 
 abstract class AbstractQueryConnector(implicit val ec: ExecutionContext) extends QueryConnector with RecordMetrics {
@@ -44,18 +43,18 @@ abstract class AbstractQueryConnector(implicit val ec: ExecutionContext) extends
 
   protected def configureEbridgeIfRequired(requestBuilder: RequestBuilder): RequestBuilder
 
-  override def query(qry: Map[String, Seq[String]])(implicit hc: HeaderCarrier): Future[HttpResponse] = {
+  override def query[T](qry: Map[String, Seq[String]])(implicit hc: HeaderCarrier, rds: HttpReads[T]): Future[T] = {
     val simplifiedQry = qry.map {
       case (k, vs) => k -> vs.mkString
     }
     configureEbridgeIfRequired(
       http.get(url"${serviceBaseUrl}/query?$simplifiedQry")
-    ).execute[HttpResponse]
+    ).execute[T]
   }
 
-  override def query(qry: ApplicationQuery)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
+  override def query[T](qry: ApplicationQuery)(implicit hc: HeaderCarrier, rds: HttpReads[T]): Future[T] = {
     val params = QueryParamsToQueryStringMap.toQuery(qry)
-    query(params)
+    query[T](params)
   }
 }
 

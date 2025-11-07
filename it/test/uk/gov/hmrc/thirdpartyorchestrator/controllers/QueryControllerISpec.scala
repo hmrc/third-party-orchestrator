@@ -60,7 +60,7 @@ class QueryControllerISpec
     implicit val hc: HeaderCarrier = HeaderCarrier()
     lazy val baseUrl               = s"http://localhost:$port"
 
-    val wsClient           = app.injector.instanceOf[WSClient]
+    val wsClient = app.injector.instanceOf[WSClient]
   }
 
   "QueryController" should {
