@@ -25,3 +25,4 @@ PATCH       /environment/:environment/application/:id                           
 GET         /developer/:userId/applications                                     uk.gov.hmrc.thirdpartyorchestrator.controllers.ApplicationController.getApplicationsByCollaborator(userId: UserId)
 
 GET         /environment/:environment/query                                     uk.gov.hmrc.thirdpartyorchestrator.controllers.QueryController.queryEnv(environment: Environment)
+GET         /query                                                              uk.gov.hmrc.thirdpartyorchestrator.controllers.QueryController.query()
