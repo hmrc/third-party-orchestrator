@@ -51,21 +51,21 @@ class QueryController @Inject() (
     queryEnv(environment, request.queryString)
   }
 
+  private def buildEffectiveParams(inPairedEnvironment: Boolean, params: Map[String, Seq[String]], environment: Environment): Map[String, Seq[String]] =
+    if (inPairedEnvironment)
+      params
+    else
+      params + (ParamNames.Environment -> Seq(s"$environment"))
+
   private def queryEnv(environment: Environment, params: Map[String, Seq[String]])(implicit hc: HeaderCarrier): Future[Result] = {
-    def effectiveParams(inPairedEnvironment: Boolean): Map[String, Seq[String]] =
-      if (inPairedEnvironment) {
-        params
-      } else {
-        params + (ParamNames.Environment -> Seq(s"$environment"))
-      }
-    //
-    // Check there isn't an environment query param
-    // And add one if we're not in a bridged deployment
-    //
+    /*
+     * Check there isn't an environment query param
+     * And add one if we're not in a bridged deployment
+     */
     if (hasEnvParameter(params)) {
       successful(BadRequest(Json.toJson(JsErrorResponse("UNEXPECTED_PARAMETER", "Cannot provide an environment query parameter when using environment path parameter"))))
     } else {
-      queryConnector(environment).query[HttpResponse](effectiveParams(appConfig.inPairedEnvironment)).map(convertToResult)
+      queryConnector(environment).query[HttpResponse](buildEffectiveParams(appConfig.inPairedEnvironment, params, environment)).map(convertToResult)
     }
   }
 
@@ -81,7 +81,7 @@ class QueryController @Inject() (
     def isSingleAppQuery: Boolean   = hasParam(ParamNames.ApplicationId) || hasParam(ParamNames.ClientId) || hasParam(ParamNames.ServerToken)
 
     def handleFailure(response: HttpResponse): Result = {
-      logger.warn(s"Error occurred performing tpo query: ${response.status} ${response.body}")
+      logger.warn(s"Error occurred in Third Party Orchestrater calling one query endpoint: ${response.status} ${response.body}")
       Result(ResponseHeader(response.status), Strict(ByteString(response.body), Some(ContentTypes.JSON)))
         .withHeaders(response.headers.toSeq.map(a => (a._1, a._2.head)): _*)
     }
@@ -90,32 +90,36 @@ class QueryController @Inject() (
       oapp.fold(applicationNotFound)(app => Ok(Json.toJson(app)))
     }
 
-    def effectiveParams(environment: Environment): Map[String, Seq[String]] =
-      if (appConfig.inPairedEnvironment) params else params + (ParamNames.Environment -> Seq(s"$environment"))
-
     if (isPaginatedQuery) {
       successful(BadRequest(Json.toJson(JsErrorResponse("UNEXPECTED_PARAMETER", "Cannot request paginated queries across both environments"))))
 
     } else if (isSingleAppQuery) {
-      EitherT(queryConnector.principal.query[Either[HttpResponse, Option[QueriedApplication]]](effectiveParams(Environment.PRODUCTION)))
+      EitherT(queryConnector.principal.query[Either[HttpResponse, Option[QueriedApplication]]](buildEffectiveParams(appConfig.inPairedEnvironment, params, Environment.PRODUCTION)))
         .flatMap {
           _.fold(
-            EitherT(queryConnector.subordinate.query[Either[HttpResponse, Option[QueriedApplication]]](effectiveParams(Environment.SANDBOX)))
+            EitherT(queryConnector.subordinate.query[Either[HttpResponse, Option[QueriedApplication]]](buildEffectiveParams(
+              appConfig.inPairedEnvironment,
+              params,
+              Environment.SANDBOX
+            )))
           )(app => EitherT.rightT(Some(app)))
         }
         .fold(handleFailure, handleOption)
 
     } else { // not singleApp
-      val principalET   = EitherT(queryConnector.principal.query[Either[HttpResponse, List[QueriedApplication]]](effectiveParams(Environment.PRODUCTION)))
+      val principalET   =
+        EitherT(queryConnector.principal.query[Either[HttpResponse, List[QueriedApplication]]](buildEffectiveParams(appConfig.inPairedEnvironment, params, Environment.PRODUCTION)))
       val subordinateET =
-        EitherT(queryConnector.subordinate.query[Either[HttpResponse, List[QueriedApplication]]](effectiveParams(Environment.SANDBOX)) recover recoverWithDefault(Right(Nil)))
+        EitherT(queryConnector.subordinate.query[Either[HttpResponse, List[QueriedApplication]]](
+          buildEffectiveParams(appConfig.inPairedEnvironment, params, Environment.SANDBOX)
+        ) recover recoverWithDefault(Right(Nil)))
 
-      val etApps = for {
+      val appsET = for {
         principalApps   <- principalET
         subordinateApps <- subordinateET
       } yield principalApps ++ subordinateApps
 
-      etApps.fold(handleFailure, apps => Ok(Json.toJson(apps)))
+      appsET.fold(handleFailure, apps => Ok(Json.toJson(apps)))
     }
   }
 

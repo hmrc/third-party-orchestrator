@@ -33,13 +33,13 @@ import uk.gov.hmrc.thirdpartyorchestrator.mocks.connectors.QueryConnectorMockMod
 
 class QueryControllerSpec extends BaseControllerSpec with ApplicationWithCollaboratorsFixtures {
 
-  trait Setup extends QueryConnectorMockModule {
+  trait SetupPairedEnvironment extends QueryConnectorMockModule {
     val connectorMock = EnvironmentAwareQueryConnectorMock.instance
     val underTest     = new QueryController(connectorMock, appConfig, Helpers.stubControllerComponents())
     when(appConfig.inPairedEnvironment).thenReturn(true)
   }
 
-  trait SetupLocal extends QueryConnectorMockModule {
+  trait SetupSingleEnvironment extends QueryConnectorMockModule {
     val connectorMock = EnvironmentAwareQueryConnectorMock.instance
     val underTest     = new QueryController(connectorMock, appConfig, Helpers.stubControllerComponents())
     when(appConfig.inPairedEnvironment).thenReturn(false)
@@ -68,7 +68,7 @@ class QueryControllerSpec extends BaseControllerSpec with ApplicationWithCollabo
   }
 
   "queryEnv" should {
-    "issue query to the sandbox environment" in new Setup {
+    "issue query to the sandbox environment" in new SetupPairedEnvironment {
       SubordinateQueryConnectorMock.ByQueryParams.returns(asOkResponse(standardApp))
 
       val request = FakeRequest("GET", "/environment/SANDBOX/query")
@@ -78,7 +78,7 @@ class QueryControllerSpec extends BaseControllerSpec with ApplicationWithCollabo
       contentAsJson(result) shouldBe Json.toJson(List(standardApp))
     }
 
-    "issue query to the production environment" in new Setup {
+    "issue query to the production environment" in new SetupPairedEnvironment {
       PrincipalQueryConnectorMock.ByQueryParams.returns(asOkResponse(standardApp))
 
       val request = FakeRequest("GET", "/environment/PRODUCTION/query")
@@ -88,7 +88,7 @@ class QueryControllerSpec extends BaseControllerSpec with ApplicationWithCollabo
       contentAsJson(result) shouldBe Json.toJson(List(standardApp))
     }
 
-    "issue query testing effectiveParams as if in Staging or local env" in new SetupLocal {
+    "issue query testing effectiveParams as if in Staging or local env" in new SetupSingleEnvironment {
       PrincipalQueryConnectorMock.ByQueryParams.returnsFor(Map(ParamNames.Environment -> "PRODUCTION"), asOkResponse(standardApp))
 
       val request = FakeRequest("GET", "/environment/PRODUCTION/query")
@@ -98,7 +98,7 @@ class QueryControllerSpec extends BaseControllerSpec with ApplicationWithCollabo
       contentAsJson(result) shouldBe Json.toJson(List(standardApp))
     }
 
-    "fail when query params contain environment" in new Setup {
+    "fail when query params contain environment" in new SetupPairedEnvironment {
       val request = FakeRequest("GET", "/environment/PRODUCTION/query?environment=PRODUCTION")
       val result  = underTest.queryEnv(Environment.PRODUCTION)(request)
 
@@ -107,14 +107,14 @@ class QueryControllerSpec extends BaseControllerSpec with ApplicationWithCollabo
   }
 
   "query in general" should {
-    "when invalid environment param is specified return BAD_REQUEST" in new Setup {
+    "when invalid environment param is specified return BAD_REQUEST" in new SetupPairedEnvironment {
       val request = FakeRequest("GET", "/query?environment=BOBBINS")
       val result  = underTest.query()(request)
 
       ensureBadRequest(result, "INVALID_QUERY", "is not a valid environment")
     }
 
-    "when environment param is specified call queryEnv" in new Setup {
+    "when environment param is specified call queryEnv" in new SetupPairedEnvironment {
       PrincipalQueryConnectorMock.ByQueryParams.returns(asOkResponse(standardApp))
 
       val request = FakeRequest("GET", "/query?environment=PRODUCTION")
@@ -124,7 +124,7 @@ class QueryControllerSpec extends BaseControllerSpec with ApplicationWithCollabo
       contentAsJson(result) shouldBe Json.toJson(List(standardApp))
     }
 
-    "ensure paginated queries for both environments return BAD_REQUEST" in new Setup {
+    "ensure paginated queries for both environments return BAD_REQUEST" in new SetupPairedEnvironment {
       val request = FakeRequest("GET", "/query?pageNbr=1")
       val result  = underTest.query()(request)
 
@@ -141,7 +141,7 @@ class QueryControllerSpec extends BaseControllerSpec with ApplicationWithCollabo
       Right(Some(QueriedApplication(app)))
     }
 
-    "ensure single application queries for both environments return zero apps when not found" in new Setup {
+    "ensure single application queries for both environments return zero apps when not found" in new SetupPairedEnvironment {
       val request = FakeRequest("GET", s"/query?applicationId=$applicationIdOne")
       PrincipalQueryConnectorMock.ByQueryParams.returnsFor(Map(ParamNames.ApplicationId -> s"$applicationIdOne"), asNone())
       SubordinateQueryConnectorMock.ByQueryParams.returnsFor(Map(ParamNames.ApplicationId -> s"$applicationIdOne"), asNone())
@@ -151,7 +151,7 @@ class QueryControllerSpec extends BaseControllerSpec with ApplicationWithCollabo
       ensureNotFound(result, "APPLICATION_NOT_FOUND", "No application found for query")
     }
 
-    "ensure single application queries production only when app is found" in new Setup {
+    "ensure single application queries production only when app is found" in new SetupPairedEnvironment {
       val request = FakeRequest("GET", s"/query?applicationId=$applicationIdOne")
       PrincipalQueryConnectorMock.ByQueryParams.returnsFor(Map(ParamNames.ApplicationId -> s"$applicationIdOne"), asAnAppResponse(standardApp))
 
@@ -161,7 +161,7 @@ class QueryControllerSpec extends BaseControllerSpec with ApplicationWithCollabo
       contentAsJson(result) shouldBe Json.toJson(standardApp)
     }
 
-    "ensure single application queries both environments when app is found in sandbox" in new Setup {
+    "ensure single application queries both environments when app is found in sandbox" in new SetupPairedEnvironment {
       val request = FakeRequest("GET", s"/query?applicationId=$applicationIdOne")
       PrincipalQueryConnectorMock.ByQueryParams.returnsFor(Map(ParamNames.ApplicationId -> s"$applicationIdOne"), asNone())
       SubordinateQueryConnectorMock.ByQueryParams.returnsFor(Map(ParamNames.ApplicationId -> s"$applicationIdOne"), asAnAppResponse(standardApp))
@@ -182,7 +182,7 @@ class QueryControllerSpec extends BaseControllerSpec with ApplicationWithCollabo
       Right(apps.toList.map(QueriedApplication(_)))
     }
 
-    "ensure open ended application queries for both environments return empty list when not found" in new Setup {
+    "ensure open ended application queries for both environments return empty list when not found" in new SetupPairedEnvironment {
       val request = FakeRequest("GET", s"/query?userId=$userIdOne")
       PrincipalQueryConnectorMock.ByQueryParams.returnsFor(Map(ParamNames.UserId -> s"$userIdOne"), asEmptyList())
       SubordinateQueryConnectorMock.ByQueryParams.returnsFor(Map(ParamNames.UserId -> s"$userIdOne"), asEmptyList())
@@ -193,7 +193,7 @@ class QueryControllerSpec extends BaseControllerSpec with ApplicationWithCollabo
       contentAsJson(result) shouldBe JsArray(Nil)
     }
 
-    "ensure open ended application queries production only when app is found" in new Setup {
+    "ensure open ended application queries production only when app is found" in new SetupPairedEnvironment {
       val request = FakeRequest("GET", s"/query?userId=$userIdOne")
       PrincipalQueryConnectorMock.ByQueryParams.returnsFor(Map(ParamNames.UserId -> s"$userIdOne"), asAppsResponse(standardApp))
       SubordinateQueryConnectorMock.ByQueryParams.returnsFor(Map(ParamNames.UserId -> s"$userIdOne"), asAppsResponse(standardApp2))
@@ -204,7 +204,7 @@ class QueryControllerSpec extends BaseControllerSpec with ApplicationWithCollabo
       contentAsJson(result) shouldBe Json.toJson(List(standardApp, standardApp2))
     }
 
-    "ensure open ended application queries both environments and survives a sandbox failure" in new Setup {
+    "ensure open ended application queries both environments and survives a sandbox failure" in new SetupPairedEnvironment {
       val request = FakeRequest("GET", s"/query?userId=$userIdOne")
       PrincipalQueryConnectorMock.ByQueryParams.returnsFor(Map(ParamNames.UserId -> s"$userIdOne"), asAppsResponse(standardApp, standardApp2))
       SubordinateQueryConnectorMock.ByQueryParams.fails(new RuntimeException("Pretend we get a gateway exception"))
@@ -215,7 +215,7 @@ class QueryControllerSpec extends BaseControllerSpec with ApplicationWithCollabo
       contentAsJson(result) shouldBe Json.toJson(List(standardApp, standardApp2))
     }
 
-    "ensure open ended application queries both environments when app is found in sandbox" in new Setup {
+    "ensure open ended application queries both environments when app is found in sandbox" in new SetupPairedEnvironment {
       val request = FakeRequest("GET", s"/query?userId=$userIdOne")
       PrincipalQueryConnectorMock.ByQueryParams.returnsFor(Map(ParamNames.UserId -> s"$userIdOne"), asEmptyList())
       SubordinateQueryConnectorMock.ByQueryParams.returnsFor(Map(ParamNames.UserId -> s"$userIdOne"), asAppsResponse(standardApp, standardApp2))
