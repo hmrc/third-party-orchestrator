@@ -25,7 +25,7 @@ import uk.gov.hmrc.play.http.metrics.common._
 
 import uk.gov.hmrc.apiplatform.modules.applications.query.domain.models.ApplicationQuery
 import uk.gov.hmrc.apiplatform.modules.applications.query.domain.services.QueryParamsToQueryStringMap
-import uk.gov.hmrc.thirdpartyorchestrator.utils.EbridgeConfigurator
+import uk.gov.hmrc.thirdpartyorchestrator.utils.{ApplicationLogger, EbridgeConfigurator}
 
 trait QueryConnector {
   def query[T](qry: ApplicationQuery)(implicit hc: HeaderCarrier, rds: HttpReads[T]): Future[T]
@@ -79,7 +79,7 @@ class SubordinateQueryConnector @Inject() (
     val http: HttpClientV2,
     val apiMetrics: ApiMetrics
   )(implicit override val ec: ExecutionContext
-  ) extends AbstractQueryConnector {
+  ) extends AbstractQueryConnector with ApplicationLogger {
 
   val serviceBaseUrl: String = config.serviceBaseUrl
 

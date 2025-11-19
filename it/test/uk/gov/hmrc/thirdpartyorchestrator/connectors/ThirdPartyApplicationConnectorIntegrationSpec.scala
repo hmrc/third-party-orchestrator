@@ -33,7 +33,7 @@ import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.{
   ChangeApplicationNameValidationRequest,
   GetAppsForAdminOrRIRequest
 }
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, LaxEmailAddress, UserId}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, LaxEmailAddress}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartyorchestrator.utils.{TestData, WireMockExtensions}
 
@@ -152,26 +152,6 @@ class ThirdPartyApplicationConnectorIntegrationSpec extends BaseConnectorIntegra
     }
   }
 
-  "fetchApplicationsByUserIds" should {
-    "return the applications" in new Setup {
-
-      stubFor(
-        post(urlPathEqualTo(s"/developer/applications"))
-          .withJsonRequestBody(CollaboratorUserIds(List(userId1, userId2)))
-          .willReturn(
-            aResponse()
-              .withStatus(OK)
-              .withHeader(HeaderNames.CONTENT_TYPE, "application/json")
-              .withBody(s"[${getBody(applicationId, clientId, userId1, userId2)}]")
-          )
-      )
-
-      private val result = await(underTest.fetchApplicationsByUserIds(List(userId1, userId2)))
-
-      result shouldBe List(expectedApplication)
-    }
-  }
-
   "getAppsForResponsibleIndividualOrAdmin" should {
     "return the applications" in new Setup {
       val request = GetAppsForAdminOrRIRequest(LaxEmailAddress("a@example.com"))
@@ -213,10 +193,6 @@ class ThirdPartyApplicationConnectorIntegrationSpec extends BaseConnectorIntegra
 
   private def paginatedBody(apps: ApplicationWithCollaborators*) = {
     Json.toJson(PaginatedApplications(apps.toList, 1, Int.MaxValue, apps.size, apps.size)).toString
-  }
-
-  private def getBody(applicationId: ApplicationId, clientId: ClientId, userId1: UserId, userId2: UserId) = {
-    Json.toJson(standardApp).toString
   }
 
   private def getBody() = {

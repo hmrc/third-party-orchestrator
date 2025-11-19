@@ -30,7 +30,6 @@ import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.{
   CreateApplicationRequest,
   GetAppsForAdminOrRIRequest
 }
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
 import uk.gov.hmrc.thirdpartyorchestrator.connectors.{
   EnvironmentAwareThirdPartyApplicationConnector,
   PrincipalThirdPartyApplicationConnector,
@@ -42,18 +41,6 @@ trait ThirdPartyApplicationConnectorMockModule extends MockitoSugar with Argumen
 
   trait AbstractThirdPartyApplicationMock {
     def aMock: ThirdPartyApplicationConnector
-
-    object FetchApplicationsByUserIds {
-
-      def thenReturn(userIds: List[UserId])(applications: List[ApplicationWithCollaborators]) =
-        when(aMock.fetchApplicationsByUserIds(eqTo(userIds))(*)).thenReturn(successful(applications))
-
-      def thenReturnEmptyList(userIds: List[UserId]) =
-        when(aMock.fetchApplicationsByUserIds(eqTo(userIds))(*)).thenReturn(successful(List.empty))
-
-      def thenThrowException(userIds: List[UserId])(exception: Exception) =
-        when(aMock.fetchApplicationsByUserIds(eqTo(userIds))(*)).thenReturn(failed(exception))
-    }
 
     object SearchApplications {
 
