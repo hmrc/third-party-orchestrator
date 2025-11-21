@@ -24,7 +24,8 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.{Application, Configuration, Mode}
 import play.mvc.Http.HeaderNames
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.HttpReads.Implicits._
+import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, ApplicationWithCollaboratorsFixtures}
 import uk.gov.hmrc.apiplatform.modules.applications.query.domain.models.ApplicationQuery
@@ -59,7 +60,6 @@ class QueryConnectorIntegrationSpec extends BaseConnectorIntegrationSpec
 
   "query" should {
     "return the application by id" in new Setup {
-
       stubFor(
         get(urlPathEqualTo("/query"))
           .withQueryParam("applicationId", equalTo(applicationId.toString))
@@ -74,6 +74,38 @@ class QueryConnectorIntegrationSpec extends BaseConnectorIntegrationSpec
       private val result = await(underTest.query[Option[ApplicationWithCollaborators]](ApplicationQuery.ById(applicationId, Nil, false)))
 
       result shouldBe Some(expectedApplication)
+    }
+
+    "handle not found" in new Setup {
+      stubFor(
+        get(urlPathEqualTo("/query"))
+          .withQueryParam("applicationId", equalTo(applicationId.toString))
+          .willReturn(
+            aResponse()
+              .withStatus(NOT_FOUND)
+              .withHeader(HeaderNames.CONTENT_TYPE, "application/json")
+          )
+      )
+
+      private val result = await(underTest.query[Option[ApplicationWithCollaborators]](ApplicationQuery.ById(applicationId, Nil, false)))
+
+      result shouldBe None
+    }
+
+    "handle bad request" in new Setup {
+      stubFor(
+        get(urlPathEqualTo("/query"))
+          .withQueryParam("applicationId", equalTo(applicationId.toString))
+          .willReturn(
+            aResponse()
+              .withStatus(BAD_REQUEST)
+              .withHeader(HeaderNames.CONTENT_TYPE, "application/json")
+          )
+      )
+
+      intercept[UpstreamErrorResponse] {
+        await(underTest.query[Option[ApplicationWithCollaborators]](ApplicationQuery.ById(applicationId, Nil, false)))
+      }
     }
 
     "return the application by clientId" in new Setup {

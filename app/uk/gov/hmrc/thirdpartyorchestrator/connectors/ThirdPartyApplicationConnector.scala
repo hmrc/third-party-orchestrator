@@ -40,7 +40,6 @@ trait ThirdPartyApplicationConnector {
   def create(req: CreateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationWithCollaborators]
   def searchApplications(queryString: Map[String, Seq[String]])(implicit hc: HeaderCarrier): Future[PaginatedApplications]
   def validateName(request: ApplicationNameValidationRequest)(implicit hc: HeaderCarrier): Future[Option[ApplicationNameValidationResult]]
-  def fetchApplicationsByUserIds(userIds: List[UserId])(implicit hc: HeaderCarrier): Future[List[ApplicationWithCollaborators]]
   def getAppsForResponsibleIndividualOrAdmin(request: GetAppsForAdminOrRIRequest)(implicit hc: HeaderCarrier): Future[List[ApplicationWithCollaborators]]
 }
 
@@ -78,13 +77,6 @@ abstract class AbstractThirdPartyApplicationConnector(implicit val ec: Execution
           .withBody(Json.toJson(request))
       )
         .execute[Option[ApplicationNameValidationResult]]
-    }
-
-  def fetchApplicationsByUserIds(userIds: List[UserId])(implicit hc: HeaderCarrier): Future[List[ApplicationWithCollaborators]] =
-    record {
-      configureEbridgeIfRequired(http.post(url"$serviceBaseUrl/developer/applications"))
-        .withBody(Json.toJson(CollaboratorUserIds(userIds)))
-        .execute[List[ApplicationWithCollaborators]]
     }
 
   def getAppsForResponsibleIndividualOrAdmin(req: GetAppsForAdminOrRIRequest)(implicit hc: HeaderCarrier): Future[List[ApplicationWithCollaborators]] =
