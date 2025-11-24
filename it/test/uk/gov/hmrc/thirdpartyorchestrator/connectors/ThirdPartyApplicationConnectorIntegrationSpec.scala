@@ -19,6 +19,7 @@ package uk.gov.hmrc.thirdpartyorchestrator.connectors
 import com.github.tomakehurst.wiremock.client.WireMock._
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 
+import play.api.http.ContentTypes
 import play.api.http.Status._
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
@@ -70,7 +71,7 @@ class ThirdPartyApplicationConnectorIntegrationSpec extends BaseConnectorIntegra
           .willReturn(
             aResponse()
               .withStatus(OK)
-              .withHeader(HeaderNames.CONTENT_TYPE, "application/json")
+              .withHeader(HeaderNames.CONTENT_TYPE, ContentTypes.JSON)
               .withBody(Json.toJson(standardApp).toString())
           )
       )
@@ -103,7 +104,7 @@ class ThirdPartyApplicationConnectorIntegrationSpec extends BaseConnectorIntegra
           .willReturn(
             aResponse()
               .withStatus(OK)
-              .withHeader(HeaderNames.CONTENT_TYPE, "application/json")
+              .withHeader(HeaderNames.CONTENT_TYPE, ContentTypes.JSON)
               .withBody(paginatedBody(standardApp))
           )
       )
@@ -141,7 +142,7 @@ class ThirdPartyApplicationConnectorIntegrationSpec extends BaseConnectorIntegra
           .willReturn(
             aResponse()
               .withStatus(OK)
-              .withHeader(HeaderNames.CONTENT_TYPE, "application/json")
+              .withHeader(HeaderNames.CONTENT_TYPE, ContentTypes.JSON)
               .withJsonBody(expectedResult)
           )
       )
@@ -161,7 +162,7 @@ class ThirdPartyApplicationConnectorIntegrationSpec extends BaseConnectorIntegra
           .willReturn(
             aResponse()
               .withStatus(OK)
-              .withHeader(HeaderNames.CONTENT_TYPE, "application/json")
+              .withHeader(HeaderNames.CONTENT_TYPE, ContentTypes.JSON)
               .withBody(s"[${getBody()}]")
           )
       )
@@ -181,7 +182,7 @@ class ThirdPartyApplicationConnectorIntegrationSpec extends BaseConnectorIntegra
           .willReturn(
             aResponse()
               .withStatus(NO_CONTENT)
-              .withHeader(HeaderNames.CONTENT_TYPE, "application/json")
+              .withHeader(HeaderNames.CONTENT_TYPE, ContentTypes.JSON)
           )
       )
 

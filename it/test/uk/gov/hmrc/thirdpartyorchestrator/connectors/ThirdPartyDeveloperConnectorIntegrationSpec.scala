@@ -20,6 +20,7 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 
 import play.api.http.Status._
+import play.api.http.{ContentTypes, HeaderNames}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.{Application, Configuration, Mode}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -68,7 +69,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
           .willReturn(
             aResponse()
               .withStatus(OK)
-              .withHeader("Content-Type", "application/json")
+              .withHeader(HeaderNames.CONTENT_TYPE, ContentTypes.JSON)
               .withBody(s"""{
                            |  "sessionId": "$sessionId",
                            |  "loggedInState": "LOGGED_IN",
@@ -106,7 +107,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
           .willReturn(
             aResponse()
               .withStatus(OK)
-              .withHeader("Content-Type", "application/json")
+              .withHeader(HeaderNames.CONTENT_TYPE, ContentTypes.JSON)
               .withBody(s"""{
                            |  "userId": "$userId",
                            |  "email": "${userEmail.text}",
@@ -142,7 +143,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
           .willReturn(
             aResponse()
               .withStatus(OK)
-              .withHeader("Content-Type", "application/json")
+              .withHeader(HeaderNames.CONTENT_TYPE, ContentTypes.JSON)
               .withBody(s"""
                            |[
                            |  {

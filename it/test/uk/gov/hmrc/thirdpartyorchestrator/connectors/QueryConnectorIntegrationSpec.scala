@@ -19,6 +19,7 @@ package uk.gov.hmrc.thirdpartyorchestrator.connectors
 import com.github.tomakehurst.wiremock.client.WireMock._
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 
+import play.api.http.ContentTypes
 import play.api.http.Status._
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
@@ -66,7 +67,7 @@ class QueryConnectorIntegrationSpec extends BaseConnectorIntegrationSpec
           .willReturn(
             aResponse()
               .withStatus(OK)
-              .withHeader(HeaderNames.CONTENT_TYPE, "application/json")
+              .withHeader(HeaderNames.CONTENT_TYPE, ContentTypes.JSON)
               .withBody(getBody())
           )
       )
@@ -83,7 +84,7 @@ class QueryConnectorIntegrationSpec extends BaseConnectorIntegrationSpec
           .willReturn(
             aResponse()
               .withStatus(NOT_FOUND)
-              .withHeader(HeaderNames.CONTENT_TYPE, "application/json")
+              .withHeader(HeaderNames.CONTENT_TYPE, ContentTypes.JSON)
           )
       )
 
@@ -99,7 +100,7 @@ class QueryConnectorIntegrationSpec extends BaseConnectorIntegrationSpec
           .willReturn(
             aResponse()
               .withStatus(BAD_REQUEST)
-              .withHeader(HeaderNames.CONTENT_TYPE, "application/json")
+              .withHeader(HeaderNames.CONTENT_TYPE, ContentTypes.JSON)
           )
       )
 
@@ -115,12 +116,84 @@ class QueryConnectorIntegrationSpec extends BaseConnectorIntegrationSpec
           .willReturn(
             aResponse()
               .withStatus(OK)
-              .withHeader(HeaderNames.CONTENT_TYPE, "application/json")
+              .withHeader(HeaderNames.CONTENT_TYPE, ContentTypes.JSON)
               .withBody(getBody())
           )
       )
 
       private val result = await(underTest.query[Option[ApplicationWithCollaborators]](ApplicationQuery.ByClientId(clientId, false, Nil, false)))
+
+      result shouldBe Some(expectedApplication)
+    }
+  }
+
+  "postQuery" should {
+    "return the application by id" in new Setup {
+      stubFor(
+        post(urlPathEqualTo("/query"))
+          .withJsonRequestBody(Map("applicationId" -> List(applicationId.toString)))
+          .withHeader(HeaderNames.CONTENT_TYPE, equalTo(ContentTypes.JSON))
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withHeader(HeaderNames.CONTENT_TYPE, ContentTypes.JSON)
+              .withBody(getBody())
+          )
+      )
+
+      private val result = await(underTest.postQuery[Option[ApplicationWithCollaborators]](ApplicationQuery.ById(applicationId, Nil, false)))
+
+      result shouldBe Some(expectedApplication)
+    }
+
+    "handle not found" in new Setup {
+      stubFor(
+        post(urlPathEqualTo("/query"))
+          .withJsonRequestBody(Map("applicationId" -> List(applicationId.toString)))
+          .withHeader(HeaderNames.CONTENT_TYPE, equalTo(ContentTypes.JSON))
+          .willReturn(
+            aResponse()
+              .withStatus(NOT_FOUND)
+              .withHeader(HeaderNames.CONTENT_TYPE, ContentTypes.JSON)
+          )
+      )
+
+      private val result = await(underTest.postQuery[Option[ApplicationWithCollaborators]](ApplicationQuery.ById(applicationId, Nil, false)))
+
+      result shouldBe None
+    }
+
+    "handle bad request" in new Setup {
+      stubFor(
+        post(urlPathEqualTo("/query"))
+          .withJsonRequestBody(Map("applicationId" -> List(applicationId.toString)))
+          .withHeader(HeaderNames.CONTENT_TYPE, equalTo(ContentTypes.JSON))
+          .willReturn(
+            aResponse()
+              .withStatus(BAD_REQUEST)
+              .withHeader(HeaderNames.CONTENT_TYPE, ContentTypes.JSON)
+          )
+      )
+
+      intercept[UpstreamErrorResponse] {
+        await(underTest.postQuery[Option[ApplicationWithCollaborators]](ApplicationQuery.ById(applicationId, Nil, false)))
+      }
+    }
+
+    "return the application by clientId" in new Setup {
+      stubFor(
+        post(urlPathEqualTo("/query"))
+          .withJsonRequestBody(Map("clientId" -> List(clientId.toString)))
+          .withHeader(HeaderNames.CONTENT_TYPE, equalTo(ContentTypes.JSON))
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withHeader(HeaderNames.CONTENT_TYPE, ContentTypes.JSON)
+              .withBody(getBody())
+          )
+      )
+
+      private val result = await(underTest.postQuery[Option[ApplicationWithCollaborators]](ApplicationQuery.ByClientId(clientId, false, Nil, false)))
 
       result shouldBe Some(expectedApplication)
     }

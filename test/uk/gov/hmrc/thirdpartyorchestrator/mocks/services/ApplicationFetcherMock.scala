@@ -20,6 +20,8 @@ import scala.concurrent.Future.{failed, successful}
 
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
+import uk.gov.hmrc.http.UpstreamErrorResponse
+
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
 import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.GetAppsForAdminOrRIRequest
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, UserId}
@@ -32,23 +34,32 @@ trait ApplicationFetcherMockModule extends MockitoSugar with ArgumentMatchersSug
 
     object FetchApplication {
 
-      def thenReturn(applicationId: ApplicationId)(application: Option[ApplicationWithCollaborators]) =
-        when(aMock.fetchApplication(eqTo(applicationId))(*)).thenReturn(successful(application))
+      def thenReturn(applicationId: ApplicationId, application: ApplicationWithCollaborators) =
+        when(aMock.fetchApplication(eqTo(applicationId))(*)).thenReturn(successful(Some(application)))
+
+      def thenReturnNone(applicationId: ApplicationId) =
+        when(aMock.fetchApplication(eqTo(applicationId))(*)).thenReturn(successful(None))
     }
 
     object FetchApplicationsByUserId {
 
-      def thenReturn(userIds: List[UserId])(applications: List[ApplicationWithCollaborators]) =
-        when(aMock.fetchApplicationsByUserIds(eqTo(userIds))(*)).thenReturn(successful(applications))
+      def thenReturn(userId: UserId, applications: ApplicationWithCollaborators*) =
+        when(aMock.fetchApplicationsByUserId(eqTo(userId))(*)).thenReturn(successful(applications.toList))
+
+      def thenFails(userId: UserId) =
+        when(aMock.fetchApplicationsByUserId(eqTo(userId))(*)).thenReturn(failed(UpstreamErrorResponse("some problem happened", 500)))
+    }
+
+    object FetchApplicationsByUserIds {
+
+      def thenReturn(userIds: List[UserId], applications: ApplicationWithCollaborators*) =
+        when(aMock.fetchApplicationsByUserIds(eqTo(userIds))(*)).thenReturn(successful(applications.toList))
     }
 
     object GetAppsForResponsibleIndividualOrAdmin {
 
-      def thenReturn(request: GetAppsForAdminOrRIRequest)(applications: List[ApplicationWithCollaborators]) =
-        when(aMock.getAppsForResponsibleIndividualOrAdmin(eqTo(request))(*)).thenReturn(successful(applications))
-
-      def thenReturnEmptyList(request: GetAppsForAdminOrRIRequest) =
-        when(aMock.getAppsForResponsibleIndividualOrAdmin(eqTo(request))(*)).thenReturn(successful(List.empty))
+      def thenReturn(request: GetAppsForAdminOrRIRequest, applications: ApplicationWithCollaborators*) =
+        when(aMock.getAppsForResponsibleIndividualOrAdmin(eqTo(request))(*)).thenReturn(successful(applications.toList))
 
       def thenThrowException(request: GetAppsForAdminOrRIRequest)(exception: Exception) =
         when(aMock.getAppsForResponsibleIndividualOrAdmin(eqTo(request))(*)).thenReturn(failed(exception))
@@ -56,8 +67,11 @@ trait ApplicationFetcherMockModule extends MockitoSugar with ArgumentMatchersSug
 
     object FetchApplicationByClientId {
 
-      def thenReturn(clientId: ClientId)(application: Option[ApplicationWithCollaborators]) =
-        when(aMock.fetchApplication(eqTo(clientId))(*)).thenReturn(successful(application))
+      def thenReturn(clientId: ClientId, application: ApplicationWithCollaborators) =
+        when(aMock.fetchApplication(eqTo(clientId))(*)).thenReturn(successful(Some(application)))
+
+      def thenReturnNone(clientId: ClientId) =
+        when(aMock.fetchApplication(eqTo(clientId))(*)).thenReturn(successful(None))
     }
   }
 
