@@ -63,41 +63,38 @@ trait QueryConnectorMockModule extends MockitoSugar with ArgumentMatchersSugar {
       }
     }
 
-    object Post {
+    object ByQueryPost {
 
-      object ByQuery {
-
-        def returnsFor[T](query: ApplicationQuery, results: T) = {
-          when(aMock.postQuery[T](eqTo(query))(*, *)).thenReturn(successful(results))
-        }
-
-        def failsFor[T](query: ApplicationQuery, err: Throwable) = {
-          when(aMock.postQuery[T](eqTo(query))(*, *)).thenReturn(failed(err))
-        }
-
-        def returns[T](results: T) = {
-          when(aMock.postQuery[T](*[ApplicationQuery])(*, *)).thenReturn(successful(results))
-        }
-
-        def fails[T](err: Throwable) = {
-          when(aMock.postQuery[T](*[ApplicationQuery])(*, *)).thenReturn(failed(err))
-        }
+      def returnsFor[T](query: ApplicationQuery, results: T) = {
+        when(aMock.postQuery[T](eqTo(query))(*, *)).thenReturn(successful(results))
       }
 
-      object ByQueryParams {
+      def failsFor[T](query: ApplicationQuery, err: Throwable) = {
+        when(aMock.postQuery[T](eqTo(query))(*, *)).thenReturn(failed(err))
+      }
 
-        def returns[T](results: T) = {
-          when(aMock.postQuery[T](*[Map[String, Seq[String]]])(*, *)).thenReturn(successful(results))
-        }
+      def returns[T](results: T) = {
+        when(aMock.postQuery[T](*[ApplicationQuery])(*, *)).thenReturn(successful(results))
+      }
 
-        def returnsFor[T](params: Map[String, String], results: T) = {
-          val matches = params.map { case (k, v) => k -> Seq(v) }
-          when(aMock.postQuery[T](eqTo(matches))(*, *)).thenReturn(successful(results))
-        }
+      def fails[T](err: Throwable) = {
+        when(aMock.postQuery[T](*[ApplicationQuery])(*, *)).thenReturn(failed(err))
+      }
+    }
 
-        def fails[T](err: Throwable) = {
-          when(aMock.postQuery[T](*[Map[String, Seq[String]]])(*, *)).thenReturn(failed(err))
-        }
+    object ByQueryParamsPost {
+
+      def returns[T](results: T) = {
+        when(aMock.postQuery[T](*[Map[String, Seq[String]]])(*, *)).thenReturn(successful(results))
+      }
+
+      def returnsFor[T](params: Map[String, String], results: T) = {
+        val matches = params.map { case (k, v) => k -> Seq(v) }
+        when(aMock.postQuery[T](eqTo(matches))(*, *)).thenReturn(successful(results))
+      }
+
+      def fails[T](err: Throwable) = {
+        when(aMock.postQuery[T](*[Map[String, Seq[String]]])(*, *)).thenReturn(failed(err))
       }
     }
   }

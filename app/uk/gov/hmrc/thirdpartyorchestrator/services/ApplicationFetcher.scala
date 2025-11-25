@@ -56,6 +56,16 @@ class ApplicationFetcher @Inject() (
     } yield principals ++ subordinates
   }
 
+  private def fetchMultipleAppsByPOST(qry: ApplicationQuery.GeneralOpenEndedApplicationQuery)(implicit hc: HeaderCarrier): Future[List[ApplicationWithCollaborators]] = {
+    val subordinateApps: Future[List[ApplicationWithCollaborators]] = queryConnector.subordinate.postQuery[List[ApplicationWithCollaborators]](qry) recover recoverWithDefault(Nil)
+    val principalApps: Future[List[ApplicationWithCollaborators]]   = queryConnector.principal.postQuery[List[ApplicationWithCollaborators]](qry)
+
+    for {
+      subordinates <- subordinateApps
+      principals   <- principalApps
+    } yield principals ++ subordinates
+  }
+
   def fetchApplication(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithCollaborators]] =
     fetchSingleApp(ApplicationQuery.ById(applicationId, Nil))
 
@@ -66,7 +76,7 @@ class ApplicationFetcher @Inject() (
     if (userIds.isEmpty)
       Future.successful(Nil)
     else
-      fetchMultipleApps(ApplicationQuery.GeneralOpenEndedApplicationQuery(List(UserIdsQP(userIds), ExcludeDeletedQP)))
+      fetchMultipleAppsByPOST(ApplicationQuery.GeneralOpenEndedApplicationQuery(List(UserIdsQP(userIds), ExcludeDeletedQP)))
   }
 
   def fetchApplicationsByUserId(userId: UserId)(implicit hc: HeaderCarrier): Future[List[ApplicationWithCollaborators]] =
