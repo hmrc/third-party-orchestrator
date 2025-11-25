@@ -20,6 +20,7 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 
 import play.api.http.Status._
+import play.api.http.{ContentTypes, HeaderNames}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.libs.ws.{WSClient, WSResponse}
@@ -72,7 +73,7 @@ class AppCmdControllerISpec
     "return 400 when payload is valid json but not valid object" in new Setup {
       // Property "command" must be a valid ApplicationCommand
       val body                 = Json.toJson("""{"command":"somecommand", "verifiedCollaboratorsToNotify":[]  }""").toString()
-      val response: WSResponse = await(wsClient.url(s"$baseUrl/applications/$applicationId/dispatch").withHttpHeaders(("content-type", "application/json")).patch(body))
+      val response: WSResponse = await(wsClient.url(s"$baseUrl/applications/$applicationId/dispatch").withHttpHeaders((HeaderNames.CONTENT_TYPE, ContentTypes.JSON)).patch(body))
       response.status shouldBe BAD_REQUEST
     }
 
@@ -83,7 +84,7 @@ class AppCmdControllerISpec
           .willReturn(
             aResponse()
               .withStatus(OK)
-              .withHeader("Content-Type", "application/json")
+              .withHeader(HeaderNames.CONTENT_TYPE, ContentTypes.JSON)
               .withBody(Json.toJson(standardApp.inSandbox().withId(applicationId)).toString())
           )
       )
@@ -97,7 +98,7 @@ class AppCmdControllerISpec
       )
 
       val body                 = Json.toJson(request).toString()
-      val response: WSResponse = await(wsClient.url(s"$baseUrl/applications/$applicationId/dispatch").withHttpHeaders(("content-type", "application/json")).patch(body))
+      val response: WSResponse = await(wsClient.url(s"$baseUrl/applications/$applicationId/dispatch").withHttpHeaders((HeaderNames.CONTENT_TYPE, ContentTypes.JSON)).patch(body))
       response.status shouldBe UNAUTHORIZED
     }
   }

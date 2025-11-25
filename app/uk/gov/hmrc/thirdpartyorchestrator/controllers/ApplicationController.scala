@@ -52,7 +52,7 @@ class ApplicationController @Inject() (
   }
 
   def getApplication(applicationId: ApplicationId): Action[AnyContent] = Action.async { implicit request =>
-    applicationService.fetchApplication(applicationId).map {
+    applicationFetcher.fetchApplication(applicationId).map {
       case Some(response) => Ok(Json.toJson(response))
       case None           => NotFound
     }
@@ -67,7 +67,7 @@ class ApplicationController @Inject() (
   }
 
   def getApplicationsByCollaborator(userId: UserId): Action[AnyContent] = Action.async { implicit request =>
-    applicationService.fetchApplicationsByUserIds(List(userId))
+    applicationFetcher.fetchApplicationsByUserId(userId)
       .map(response => Ok(Json.toJson(response))) recover recovery
   }
 
@@ -77,7 +77,7 @@ class ApplicationController @Inject() (
       queryBy match {
         case ("clientId" :: _) =>
           val clientId = ClientId(request.queryString("clientId").head)
-          applicationService.fetchApplication(clientId).map {
+          applicationFetcher.fetchApplication(clientId).map {
             case Some(response) => Ok(Json.toJson(response))
             case None           => NotFound
           }
