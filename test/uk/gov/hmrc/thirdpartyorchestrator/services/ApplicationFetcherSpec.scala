@@ -25,7 +25,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, ApplicationWithCollaboratorsFixtures}
 import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.GetAppsForAdminOrRIRequest
 import uk.gov.hmrc.apiplatform.modules.applications.query.domain.models.ApplicationQuery
-import uk.gov.hmrc.apiplatform.modules.applications.query.domain.models.Param.{ExcludeDeletedQP, UserIdsQP}
+import uk.gov.hmrc.apiplatform.modules.applications.query.domain.models.Param.{ExcludeDeletedQP, UserIdQP, UserIdsQP}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, LaxEmailAddress, UserId}
 import uk.gov.hmrc.thirdpartyorchestrator.mocks.connectors._
 import uk.gov.hmrc.thirdpartyorchestrator.utils.AsyncHmrcSpec
@@ -34,28 +34,28 @@ class ApplicationFetcherSpec extends AsyncHmrcSpec with ApplicationWithCollabora
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
+  val userIds: List[UserId]                      = List(userIdOne, userIdTwo)
+  val application: ApplicationWithCollaborators  = standardApp
+  val clientId: ClientId                         = application.clientId
+  val applicationId: ApplicationId               = application.id
+  val application2: ApplicationWithCollaborators = standardApp.withId(applicationIdTwo)
+  val exception                                  = new RuntimeException("error")
+  val userId: UserId                             = UserId.random
+
   trait Setup extends ThirdPartyApplicationConnectorMockModule with QueryConnectorMockModule with MockitoSugar
       with ArgumentMatchersSugar {
-
-    val userIds: List[UserId]                      = List(userIdOne, userIdTwo)
-    val application: ApplicationWithCollaborators  = standardApp
-    val clientId: ClientId                         = application.clientId
-    val applicationId: ApplicationId               = application.id
-    val application2: ApplicationWithCollaborators = standardApp.withId(applicationIdTwo)
-    val exception                                  = new RuntimeException("error")
 
     val fetcher = new ApplicationFetcher(
       EnvironmentAwareThirdPartyApplicationConnectorMock.instance,
       EnvironmentAwareQueryConnectorMock.instance
     )
 
-    val appIdQuery    = ApplicationQuery.ById(applicationId, Nil, false)
-    val clientIdQuery = ApplicationQuery.ByClientId(clientId, false, Nil, false)
-    val userIdQuery   = ApplicationQuery.GeneralOpenEndedApplicationQuery(List(UserIdsQP(userIds), ExcludeDeletedQP))
   }
 
   "ApplicationFetcher" when {
     "fetchApplication is called" should {
+      val appIdQuery = ApplicationQuery.ById(applicationId, Nil, false)
+
       "return None if absent from principal and subordinate" in new Setup {
         EnvironmentAwareQueryConnectorMock.Principal.ByQuery.returnsFor[Option[ApplicationWithCollaborators]](appIdQuery, None)
         EnvironmentAwareQueryConnectorMock.Subordinate.ByQuery.returnsFor[Option[ApplicationWithCollaborators]](appIdQuery, None)
@@ -93,6 +93,8 @@ class ApplicationFetcherSpec extends AsyncHmrcSpec with ApplicationWithCollabora
     }
 
     "fetchApplicationByClientIdId is called" should {
+      val clientIdQuery = ApplicationQuery.ByClientId(clientId, false, Nil, false)
+
       "return None if absent from principal and subordinate" in new Setup {
         EnvironmentAwareQueryConnectorMock.Principal.ByQuery.returnsFor[Option[ApplicationWithCollaborators]](clientIdQuery, None)
         EnvironmentAwareQueryConnectorMock.Subordinate.ByQuery.returnsFor[Option[ApplicationWithCollaborators]](clientIdQuery, None)
@@ -129,36 +131,69 @@ class ApplicationFetcherSpec extends AsyncHmrcSpec with ApplicationWithCollabora
       }
     }
 
-    "fetchApplicationsByUserIds is called" should {
-
-      "return Empty List if given an empty list of user ids" in new Setup {
-        await(fetcher.fetchApplicationsByUserIds(List.empty)) shouldBe List.empty
-      }
+    "fetchApplicationsByUserId is called" should {
+      val userIdQuery = ApplicationQuery.GeneralOpenEndedApplicationQuery(List(UserIdQP(userId), ExcludeDeletedQP))
 
       "return Empty List if absent from principal and subordinate" in new Setup {
         EnvironmentAwareQueryConnectorMock.Subordinate.ByQuery.returnsFor(userIdQuery, Nil)
         EnvironmentAwareQueryConnectorMock.Principal.ByQuery.returnsFor(userIdQuery, Nil)
 
-        await(fetcher.fetchApplicationsByUserIds(userIds)) shouldBe List.empty
+        await(fetcher.fetchApplicationsByUserId(userId)) shouldBe List.empty
       }
 
       "return an application from subordinate if present" in new Setup {
         EnvironmentAwareQueryConnectorMock.Subordinate.ByQuery.returnsFor(userIdQuery, List(application))
         EnvironmentAwareQueryConnectorMock.Principal.ByQuery.returnsFor(userIdQuery, Nil)
 
-        await(fetcher.fetchApplicationsByUserIds(userIds)) shouldBe List(application)
+        await(fetcher.fetchApplicationsByUserId(userId)) shouldBe List(application)
       }
 
       "return an application from principal if present" in new Setup {
         EnvironmentAwareQueryConnectorMock.Subordinate.ByQuery.returnsFor(userIdQuery, Nil)
         EnvironmentAwareQueryConnectorMock.Principal.ByQuery.returnsFor(userIdQuery, List(application))
 
-        await(fetcher.fetchApplicationsByUserIds(userIds)) shouldBe List(application)
+        await(fetcher.fetchApplicationsByUserId(userId)) shouldBe List(application)
       }
 
       "return a combined list of applications from both envs" in new Setup {
         EnvironmentAwareQueryConnectorMock.Subordinate.ByQuery.returnsFor(userIdQuery, List(application2))
         EnvironmentAwareQueryConnectorMock.Principal.ByQuery.returnsFor(userIdQuery, List(application))
+
+        await(fetcher.fetchApplicationsByUserId(userId)) should contain theSameElementsAs List(application, application2)
+      }
+    }
+
+    "fetchApplicationsByUserIds is called" should {
+      val userIdsQuery = ApplicationQuery.GeneralOpenEndedApplicationQuery(List(UserIdsQP(userIds), ExcludeDeletedQP))
+
+      "return Empty List if given an empty list of user ids" in new Setup {
+        await(fetcher.fetchApplicationsByUserIds(List.empty)) shouldBe List.empty
+      }
+
+      "return Empty List if absent from principal and subordinate" in new Setup {
+        EnvironmentAwareQueryConnectorMock.Subordinate.ByQueryPost.returnsFor(userIdsQuery, Nil)
+        EnvironmentAwareQueryConnectorMock.Principal.ByQueryPost.returnsFor(userIdsQuery, Nil)
+
+        await(fetcher.fetchApplicationsByUserIds(userIds)) shouldBe List.empty
+      }
+
+      "return an application from subordinate if present" in new Setup {
+        EnvironmentAwareQueryConnectorMock.Subordinate.ByQueryPost.returnsFor(userIdsQuery, List(application))
+        EnvironmentAwareQueryConnectorMock.Principal.ByQueryPost.returnsFor(userIdsQuery, Nil)
+
+        await(fetcher.fetchApplicationsByUserIds(userIds)) shouldBe List(application)
+      }
+
+      "return an application from principal if present" in new Setup {
+        EnvironmentAwareQueryConnectorMock.Subordinate.ByQueryPost.returnsFor(userIdsQuery, Nil)
+        EnvironmentAwareQueryConnectorMock.Principal.ByQueryPost.returnsFor(userIdsQuery, List(application))
+
+        await(fetcher.fetchApplicationsByUserIds(userIds)) shouldBe List(application)
+      }
+
+      "return a combined list of applications from both envs" in new Setup {
+        EnvironmentAwareQueryConnectorMock.Subordinate.ByQueryPost.returnsFor(userIdsQuery, List(application2))
+        EnvironmentAwareQueryConnectorMock.Principal.ByQueryPost.returnsFor(userIdsQuery, List(application))
 
         await(fetcher.fetchApplicationsByUserIds(userIds)) should contain theSameElementsAs List(application, application2)
       }

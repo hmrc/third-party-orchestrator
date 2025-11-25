@@ -24,7 +24,7 @@ import uk.gov.hmrc.http.UpstreamErrorResponse
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
 import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.CreateApplicationRequest
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, LaxEmailAddress, UserId}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, LaxEmailAddress}
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.thirdpartyorchestrator.services.ApplicationService
 
@@ -39,24 +39,6 @@ trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar {
 
   def fetchApplicationsForEmailFails() =
     when(applicationServiceMock.fetchApplicationsForEmails(*)(*)).thenReturn(failed(UpstreamErrorResponse("some problem happened", 500)))
-
-  def fetchApplicationsForUserIdReturns(userId: UserId, returns: ApplicationWithCollaborators) =
-    when(applicationServiceMock.fetchApplicationsByUserIds(eqTo(List(userId)))(*)).thenReturn(successful(List(returns)))
-
-  def fetchApplicationsForUserIdFails() =
-    when(applicationServiceMock.fetchApplicationsByUserIds(*)(*)).thenReturn(failed(UpstreamErrorResponse("some problem happened", 500)))
-
-  def fetchApplicationByIdReturns(applicationId: ApplicationId, returns: ApplicationWithCollaborators) =
-    when(applicationServiceMock.fetchApplication(eqTo(applicationId))(*)).thenReturn(successful(Some(returns)))
-
-  def fetchApplicationByIdNotFound(applicationId: ApplicationId) =
-    when(applicationServiceMock.fetchApplication(eqTo(applicationId))(*)).thenReturn(successful(None))
-
-  def fetchApplicationByClientIdReturns(clientId: ClientId, returns: ApplicationWithCollaborators) =
-    when(applicationServiceMock.fetchApplication(eqTo(clientId))(*)).thenReturn(successful(Some(returns)))
-
-  def fetchApplicationByClientIdNotFound(clientId: ClientId) =
-    when(applicationServiceMock.fetchApplication(eqTo(clientId))(*)).thenReturn(successful(None))
 
   def fetchVerifiedCollaboratorsForApplicationReturns(applicationId: ApplicationId, returns: Set[User]) =
     when(applicationServiceMock.fetchVerifiedCollaboratorsForApplication(eqTo(applicationId))(*)).thenReturn(successful(Right(returns)))

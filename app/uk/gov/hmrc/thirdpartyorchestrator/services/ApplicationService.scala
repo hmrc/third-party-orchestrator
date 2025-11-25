@@ -23,7 +23,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
 import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.CreateApplicationRequest
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, LaxEmailAddress, UserId}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, LaxEmailAddress}
 import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.thirdpartyorchestrator.connectors.{EnvironmentAwareThirdPartyApplicationConnector, ThirdPartyDeveloperConnector}
@@ -40,25 +40,11 @@ class ApplicationService @Inject() (
     thirdPartyApplicationConnector(request.environment).create(request)
   }
 
-  def fetchApplication(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithCollaborators]] = {
-    applicationFetcher.fetchApplication(applicationId)
-  }
-
-  def fetchApplication(clientId: ClientId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithCollaborators]] = {
-    applicationFetcher.fetchApplication(clientId)
-  }
-
   def fetchApplicationsForEmails(emails: List[LaxEmailAddress])(implicit hc: HeaderCarrier): Future[List[ApplicationWithCollaborators]] = {
     for {
       developers              <- thirdPartyDeveloperConnector.fetchDevelopers(emails)
       verifiedDeveloperUserIds = developers.filter(_.verified).map(_.userId)
       applications            <- applicationFetcher.fetchApplicationsByUserIds(verifiedDeveloperUserIds)
-    } yield applications
-  }
-
-  def fetchApplicationsByUserIds(userIds: List[UserId])(implicit hc: HeaderCarrier): Future[List[ApplicationWithCollaborators]] = {
-    for {
-      applications <- applicationFetcher.fetchApplicationsByUserIds(userIds)
     } yield applications
   }
 

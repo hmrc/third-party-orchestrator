@@ -65,10 +65,8 @@ class AppCmdControllerSpec extends AsyncHmrcSpec with FixedClock with Applicatio
 
   "AppCmdController" when {
     "calling dispatch" should {
-      import cats.syntax.option._
-
       "dont preprocess or dispatch command when the app does not exist" in new Setup {
-        ApplicationFetcherMock.FetchApplication.thenReturn(productionApplicationId)(None)
+        ApplicationFetcherMock.FetchApplication.thenReturnNone(productionApplicationId)
 
         val cmd: ApplicationCommands.AddCollaborator = ApplicationCommands.AddCollaborator(Actors.AppCollaborator(adminEmail), developerAsCollaborator, instant)
         val request: FakeRequest[JsValue]            =
@@ -81,12 +79,11 @@ class AppCmdControllerSpec extends AsyncHmrcSpec with FixedClock with Applicatio
       }
 
       "dispatch a command when the app exists in sandbox" in new Setup {
-        ApplicationFetcherMock.FetchApplication.thenReturn(sandboxApplicationId)(sandboxApplication.some)
+        ApplicationFetcherMock.FetchApplication.thenReturn(sandboxApplicationId, sandboxApplication)
 
         CommandConnectorMocks.Sandbox.IssueCommand.Dispatch.succeedsWith(sandboxApplication)
 
         val cmd: ApplicationCommands.AddCollaborator = ApplicationCommands.AddCollaborator(Actors.AppCollaborator(adminEmail), developerAsCollaborator, instant)
-        println(Json.toJson[ApplicationCommand](cmd))
         val inboundDispatchRequest: DispatchRequest  = DispatchRequest(cmd, verifiedEmails)
         val request: FakeRequest[JsValue]            = FakeRequest("PATCH", s"/applications/${sandboxApplicationId}/dispatch").withBody(Json.toJson(inboundDispatchRequest))
 
@@ -97,7 +94,7 @@ class AppCmdControllerSpec extends AsyncHmrcSpec with FixedClock with Applicatio
       }
 
       "dispatch a command when the app exists in production" in new Setup {
-        ApplicationFetcherMock.FetchApplication.thenReturn(productionApplicationId)(productionApplication.some)
+        ApplicationFetcherMock.FetchApplication.thenReturn(productionApplicationId, productionApplication)
 
         CommandConnectorMocks.Prod.IssueCommand.Dispatch.succeedsWith(productionApplication)
 
@@ -112,7 +109,7 @@ class AppCmdControllerSpec extends AsyncHmrcSpec with FixedClock with Applicatio
       }
 
       "dispatch a command and handle command failure" in new Setup {
-        ApplicationFetcherMock.FetchApplication.thenReturn(productionApplicationId)(productionApplication.some)
+        ApplicationFetcherMock.FetchApplication.thenReturn(productionApplicationId, productionApplication)
 
         CommandConnectorMocks.Prod.IssueCommand.Dispatch.failsWith(CommandFailures.ActorIsNotACollaboratorOnApp)
 

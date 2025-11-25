@@ -19,6 +19,8 @@ package uk.gov.hmrc.thirdpartyorchestrator.connectors
 import javax.inject.{Inject, Named, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
+import play.api.http.ContentTypes
+import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.http.client.{HttpClientV2, RequestBuilder}
 import uk.gov.hmrc.play.http.metrics.common._
@@ -29,7 +31,10 @@ import uk.gov.hmrc.thirdpartyorchestrator.utils.{ApplicationLogger, EbridgeConfi
 
 trait QueryConnector {
   def query[T](qry: ApplicationQuery)(implicit hc: HeaderCarrier, rds: HttpReads[T]): Future[T]
+  def postQuery[T](qry: ApplicationQuery)(implicit hc: HeaderCarrier, rds: HttpReads[T]): Future[T]
+
   def query[T](qry: Map[String, Seq[String]])(implicit hc: HeaderCarrier, rds: HttpReads[T]): Future[T]
+  def postQuery[T](qry: Map[String, Seq[String]])(implicit hc: HeaderCarrier, rds: HttpReads[T]): Future[T]
 }
 
 abstract class AbstractQueryConnector(implicit val ec: ExecutionContext) extends QueryConnector with RecordMetrics {
@@ -48,13 +53,28 @@ abstract class AbstractQueryConnector(implicit val ec: ExecutionContext) extends
       case (k, vs) => k -> vs.mkString
     }
     configureEbridgeIfRequired(
-      http.get(url"${serviceBaseUrl}/query?$simplifiedQry")
+      http
+        .get(url"${serviceBaseUrl}/query?$simplifiedQry")
     ).execute[T]
   }
 
   override def query[T](qry: ApplicationQuery)(implicit hc: HeaderCarrier, rds: HttpReads[T]): Future[T] = {
     val params = QueryParamsToQueryStringMap.toQuery(qry)
     query[T](params)
+  }
+
+  override def postQuery[T](qry: Map[String, Seq[String]])(implicit hc: HeaderCarrier, rds: HttpReads[T]): Future[T] = {
+    configureEbridgeIfRequired(
+      http
+        .post(url"${serviceBaseUrl}/query")
+        .setHeader(play.api.http.HeaderNames.CONTENT_TYPE -> ContentTypes.JSON)
+        .withBody[JsValue](Json.toJson(qry))
+    ).execute[T]
+  }
+
+  override def postQuery[T](qry: ApplicationQuery)(implicit hc: HeaderCarrier, rds: HttpReads[T]): Future[T] = {
+    val params = QueryParamsToQueryStringMap.toQuery(qry)
+    postQuery[T](params)
   }
 }
 

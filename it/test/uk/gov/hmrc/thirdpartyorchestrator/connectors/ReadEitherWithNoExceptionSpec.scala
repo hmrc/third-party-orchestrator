@@ -20,8 +20,8 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 
 import play.api._
-import play.api.http.HeaderNames
 import play.api.http.Status.BAD_REQUEST
+import play.api.http.{ContentTypes, HeaderNames}
 import play.api.inject.guice.GuiceApplicationBuilder
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
@@ -61,7 +61,7 @@ class ReadEitherWithNoExceptionSpec
           .willReturn(
             aResponse()
               .withStatus(BAD_REQUEST)
-              .withHeader(HeaderNames.CONTENT_TYPE, "application/json")
+              .withHeader(HeaderNames.CONTENT_TYPE, ContentTypes.JSON)
               .withBody("""{"code":"BANG", "message": "boom"}""")
           )
       )

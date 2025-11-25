@@ -20,6 +20,7 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 
 import play.api.http.Status._
+import play.api.http.{ContentTypes, HeaderNames}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.libs.ws.{WSClient, WSResponse}
@@ -72,7 +73,7 @@ class QueryControllerISpec
           .willReturn(
             aResponse()
               .withStatus(OK)
-              .withHeader("Content-Type", "application/json")
+              .withHeader(HeaderNames.CONTENT_TYPE, ContentTypes.JSON)
               .withBody(Json.toJson(standardApp.inSandbox().withId(applicationId)).toString())
           )
       )
@@ -80,7 +81,7 @@ class QueryControllerISpec
       val response: WSResponse = await(
         wsClient
           .url(s"$baseUrl/environment/SANDBOX/query")
-          .withHttpHeaders(("content-type", "application/json"))
+          .withHttpHeaders((HeaderNames.CONTENT_TYPE, ContentTypes.JSON))
           .withQueryStringParameters((ParamNames.ApplicationId -> s"$applicationId"))
           .get()
       )

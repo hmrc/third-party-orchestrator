@@ -38,10 +38,10 @@ class ApplicationControllerSpec extends BaseControllerSpec with Matchers {
 
   trait Setup
       extends ApplicationServiceMock
+      with ApplicationFetcherMockModule
       with UserBuilder
       with LocalUserIdTracker
-      with TestData
-      with ApplicationFetcherMockModule {
+      with TestData {
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
@@ -65,17 +65,17 @@ class ApplicationControllerSpec extends BaseControllerSpec with Matchers {
     }
   }
 
-  "getApplication" should {
+  "fetchApplication" should {
     "return 200 if successful" in new Setup {
       val appRequest = FakeRequest("GET", s"/applications/${applicationId}")
-      fetchApplicationByIdReturns(applicationId, application)
+      ApplicationFetcherMock.FetchApplication.thenReturn(applicationId, application)
       val result     = controller.getApplication(applicationId)(appRequest)
       status(result) shouldBe Status.OK
     }
 
     "return 404 if application not found" in new Setup {
       val appRequest = FakeRequest("GET", s"/applications/${applicationId}")
-      fetchApplicationByIdNotFound(applicationId)
+      ApplicationFetcherMock.FetchApplication.thenReturnNone(applicationId)
       val result     = controller.getApplication(applicationId)(appRequest)
       status(result) shouldBe Status.NOT_FOUND
     }
@@ -84,14 +84,14 @@ class ApplicationControllerSpec extends BaseControllerSpec with Matchers {
   "queryDispatcher" should {
     "return 200 if get application by client id is successful" in new Setup {
       val appRequest = FakeRequest("GET", s"/applications?clientId=${clientId}")
-      fetchApplicationByClientIdReturns(clientId, application)
+      ApplicationFetcherMock.FetchApplicationByClientId.thenReturn(clientId, application)
       val result     = controller.queryDispatcher()(appRequest)
       status(result) shouldBe Status.OK
     }
 
     "return 404 if get application by client id is not found" in new Setup {
       val appRequest = FakeRequest("GET", s"/applications?clientId=${clientId}")
-      fetchApplicationByClientIdNotFound(clientId)
+      ApplicationFetcherMock.FetchApplicationByClientId.thenReturnNone(clientId)
       val result     = controller.queryDispatcher()(appRequest)
       status(result) shouldBe Status.NOT_FOUND
     }
@@ -156,7 +156,7 @@ class ApplicationControllerSpec extends BaseControllerSpec with Matchers {
     "return the applications if successful" in new Setup {
       val appRequest = FakeRequest("GET", s"/developer/$userIdOne/applications")
 
-      fetchApplicationsForUserIdReturns(userIdOne, application)
+      ApplicationFetcherMock.FetchApplicationsByUserId.thenReturn(userIdOne, application)
 
       val result = controller.getApplicationsByCollaborator(userIdOne)(appRequest)
 
@@ -167,7 +167,7 @@ class ApplicationControllerSpec extends BaseControllerSpec with Matchers {
     "return 500 if service call failed" in new Setup {
       val appRequest = FakeRequest("GET", s"/developer/$userIdOne/applications")
 
-      fetchApplicationsForUserIdFails()
+      ApplicationFetcherMock.FetchApplicationsByUserId.thenFails(userIdOne)
 
       val result = controller.getApplicationsByCollaborator(userIdOne)(appRequest)
 
@@ -182,14 +182,14 @@ class ApplicationControllerSpec extends BaseControllerSpec with Matchers {
       .withHeaders((HeaderNames.CONTENT_TYPE, ContentTypes.JSON))
 
     "return 200 if successful" in new Setup {
-      ApplicationFetcherMock.GetAppsForResponsibleIndividualOrAdmin.thenReturn(request)(List(application))
+      ApplicationFetcherMock.GetAppsForResponsibleIndividualOrAdmin.thenReturn(request, application)
 
       val result = controller.getAppsForResponsibleIndividualOrAdmin()(fakeRequest)
       status(result) shouldBe Status.OK
     }
 
     "return 200 if empty list returned" in new Setup {
-      ApplicationFetcherMock.GetAppsForResponsibleIndividualOrAdmin.thenReturnEmptyList(request)
+      ApplicationFetcherMock.GetAppsForResponsibleIndividualOrAdmin.thenReturn(request)
 
       val result = controller.getAppsForResponsibleIndividualOrAdmin()(fakeRequest)
       status(result) shouldBe Status.OK
