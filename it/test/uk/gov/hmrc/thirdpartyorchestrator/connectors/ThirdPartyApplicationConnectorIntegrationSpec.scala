@@ -192,6 +192,15 @@ class ThirdPartyApplicationConnectorIntegrationSpec extends BaseConnectorIntegra
     }
   }
 
+  "fetchApplicationsByAnswer" should {
+    val questionType = "vat-registration-number"
+    "returns status" in new Setup {
+      stubFor(get(urlPathEqualTo(s"/submissions/answers/$questionType")).willReturn(aResponse().withStatus(OK)))
+      val result = await(underTest.fetchApplicationsByAnswer(questionType))
+      result.status shouldBe OK
+    }
+  }
+
   private def paginatedBody(apps: ApplicationWithCollaborators*) = {
     Json.toJson(PaginatedApplications(apps.toList, 1, Int.MaxValue, apps.size, apps.size)).toString
   }

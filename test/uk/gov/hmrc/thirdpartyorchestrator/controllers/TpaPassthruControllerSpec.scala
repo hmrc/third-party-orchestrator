@@ -81,4 +81,30 @@ class TpaPassthruControllerSpec extends BaseControllerSpec with Matchers {
     }
   }
 
+  "fetchAnswers" should {
+    val questionType = "vat-registration-number"
+    val request      = FakeRequest("GET", s"/submissions/answers/${questionType}")
+
+    "return 200 if successful in fetching answers" in new Setup {
+      PrincipalThirdPartyApplicationConnectorMock.FetchAnswers.succeedsWith(questionType)
+
+      val result = controller.fetchAnswers(questionType)(request)
+      status(result) shouldBe Status.OK
+    }
+
+    "return 500 if bad request returned from connector" in new Setup {
+      PrincipalThirdPartyApplicationConnectorMock.FetchAnswers.failsWithStatus(questionType, BAD_REQUEST)
+
+      val result = controller.fetchAnswers(questionType)(request)
+      status(result) shouldBe Status.INTERNAL_SERVER_ERROR
+    }
+
+    "return 500 if internal server error returned from connector" in new Setup {
+      PrincipalThirdPartyApplicationConnectorMock.FetchAnswers.failsWithStatus(questionType, INTERNAL_SERVER_ERROR)
+
+      val result = controller.fetchAnswers(questionType)(request)
+      status(result) shouldBe Status.INTERNAL_SERVER_ERROR
+    }
+  }
+
 }
