@@ -35,11 +35,19 @@ class TpaPassthruController @Inject() (
 
   def verifyUplift(verificationCode: String) = Action.async { implicit request =>
     principalTpaConnector.verify(verificationCode)
-      .map(_ match {
+      .map {
         case HttpResponse(NO_CONTENT, _, _)    => NoContent
         case HttpResponse(BAD_REQUEST, msg, _) => BadRequest(msg)
         case HttpResponse(status, body, _)     => asJson(new RuntimeException(s"Got unexpected status $status and body $body"))
         case _                                 => asJson(new RuntimeException("Unexpected error when verifying uplift"))
-      })
+      }
+  }
+
+  def fetchAnswers(questionType: String) = Action.async { implicit request =>
+    principalTpaConnector.fetchApplicationsByAnswer(questionType).map {
+      case HttpResponse(OK, msg, _)      => Ok(msg)
+      case HttpResponse(status, body, _) => asJson(new RuntimeException(s"Got unexpected status $status and body $body"))
+      case _                             => asJson(new RuntimeException("Unexpected error when getting submission answers"))
+    }
   }
 }

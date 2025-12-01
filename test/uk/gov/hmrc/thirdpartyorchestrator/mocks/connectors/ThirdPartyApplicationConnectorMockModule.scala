@@ -103,6 +103,17 @@ trait ThirdPartyApplicationConnectorMockModule extends MockitoSugar with Argumen
         when(aMock.verify(eqTo(verifyCode))(*)).thenReturn(successful(HttpResponse(status, "", Map.empty)))
       }
     }
+
+    object FetchAnswers {
+
+      def succeedsWith(questionType: String) = {
+        when(aMock.fetchApplicationsByAnswer(eqTo(questionType))(*)).thenReturn(successful(HttpResponse(Status.OK, "", Map.empty)))
+      }
+
+      def failsWithStatus(questionType: String, status: Int) = {
+        when(aMock.fetchApplicationsByAnswer(eqTo(questionType))(*)).thenReturn(successful(HttpResponse(status, "", Map.empty)))
+      }
+    }
   }
 
   object EnvironmentAwareThirdPartyApplicationConnectorMock {

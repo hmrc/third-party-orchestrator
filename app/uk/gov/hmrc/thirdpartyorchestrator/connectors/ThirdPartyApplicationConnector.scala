@@ -21,12 +21,12 @@ import scala.concurrent.{ExecutionContext, Future}
 
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.http.HttpReads.Implicits._
+import uk.gov.hmrc.http._
 import uk.gov.hmrc.http.client.{HttpClientV2, RequestBuilder}
-import uk.gov.hmrc.http.{StringContextOps, _}
 import uk.gov.hmrc.play.http.metrics.common._
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, PaginatedApplications}
-import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.{CreateApplicationRequest, _}
+import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
 import uk.gov.hmrc.thirdpartyorchestrator.utils.EbridgeConfigurator
 
@@ -112,6 +112,10 @@ class PrincipalThirdPartyApplicationConnector @Inject() (
       http.post(url"$serviceBaseUrl/verify-uplift/$verificationCode")
         .execute[HttpResponse]
     }
+
+  def fetchApplicationsByAnswer(questionType: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = record {
+    http.get(url"$serviceBaseUrl/submissions/answers/$questionType").execute[HttpResponse]
+  }
 }
 
 object SubordinateThirdPartyApplicationConnector {
