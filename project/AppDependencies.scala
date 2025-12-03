@@ -7,7 +7,7 @@ object AppDependencies {
   private val tpdDomainVersion  = "0.14.0"
   
   private val appEventVersion  = "0.90.0" // Ensure this version of the application-events library uses the appDomainVersion above
-  private val appDomainVersion = "0.94.0"
+  private val appDomainVersion = "0.95.0"
 
   def apply(): Seq[ModuleID] = compileDeps ++ testDeps
 

@@ -24,7 +24,7 @@ import scala.util.control.NonFatal
 import cats.data.EitherT
 import org.apache.pekko.util.ByteString
 
-import play.api.http.ContentTypes
+import play.api.http.HeaderNames
 import play.api.http.HttpEntity.Strict
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent, ControllerComponents, ResponseHeader, Result}
@@ -75,6 +75,38 @@ class QueryController @Inject() (
       default
   }
 
+  private def getContentType(response: HttpResponse): Option[String] = {
+    response.headers.find(_._1 == HeaderNames.CONTENT_TYPE).flatMap(_._2.headOption)
+  }
+
+  private def processResponseHeaders(responseHeaders: Map[String, Seq[String]]): Map[String, String] = {
+    responseHeaders
+      .filterNot(h => h._1 == HeaderNames.CONTENT_TYPE || h._1 == HeaderNames.CONTENT_LENGTH)
+      .map(kv => kv._1 -> kv._2.headOption.getOrElse(""))
+  }
+
+  private def convertToResult(response: HttpResponse): Result = {
+    Result(ResponseHeader(response.status, processResponseHeaders(response.headers)), Strict(ByteString(response.body), getContentType(response)))
+  }
+
+  private def getParam(queryMap: Map[String, Seq[String]])(paramName: String): Option[String] = {
+    queryMap.get(paramName).flatMap(_.headOption)
+  }
+
+  private def hasParameter(params: Map[String, Seq[String]])(paramName: String) = {
+    getParam(params)(paramName).isDefined
+  }
+
+  private def hasEnvParameter(params: Map[String, Seq[String]]) = hasParameter(params)(ParamNames.Environment)
+
+  private def asBody(errorCode: String, message: Json.JsValueWrapper): JsObject =
+    Json.obj(
+      "code"    -> errorCode.toString,
+      "message" -> message
+    )
+
+  private val applicationNotFound = NotFound(asBody("APPLICATION_NOT_FOUND", "No application found for query"))
+
   private def queryBothEnvironments(params: Map[String, Seq[String]])(implicit hc: HeaderCarrier): Future[Result] = {
     def hasParam: String => Boolean = hasParameter(params) _
     def isPaginatedQuery: Boolean   = hasParam(ParamNames.PageNbr) || hasParam(ParamNames.PageSize)
@@ -82,8 +114,7 @@ class QueryController @Inject() (
 
     def handleFailure(response: HttpResponse): Result = {
       logger.warn(s"Error occurred in Third Party Orchestrater calling one query endpoint: ${response.status} ${response.body}")
-      Result(ResponseHeader(response.status), Strict(ByteString(response.body), Some(ContentTypes.JSON)))
-        .withHeaders(response.headers.toSeq.map(a => (a._1, a._2.head)): _*)
+      convertToResult(response)
     }
 
     def handleOption(oapp: Option[QueriedApplication]): Result = {
@@ -135,26 +166,4 @@ class QueryController @Inject() (
     }
   }
 
-  private def convertToResult(resp: HttpResponse): Result = {
-    Result(ResponseHeader(resp.status), Strict(ByteString(resp.body), Some(ContentTypes.JSON)))
-      .withHeaders(resp.headers.toSeq.map(a => (a._1, a._2.head)): _*)
-  }
-
-  private def getParam(queryMap: Map[String, Seq[String]])(paramName: String): Option[String] = {
-    queryMap.get(paramName).flatMap(_.headOption)
-  }
-
-  private def hasParameter(params: Map[String, Seq[String]])(paramName: String) = {
-    getParam(params)(paramName).isDefined
-  }
-
-  private def hasEnvParameter(params: Map[String, Seq[String]]) = hasParameter(params)(ParamNames.Environment)
-
-  private def asBody(errorCode: String, message: Json.JsValueWrapper): JsObject =
-    Json.obj(
-      "code"    -> errorCode.toString,
-      "message" -> message
-    )
-
-  private val applicationNotFound = NotFound(asBody("APPLICATION_NOT_FOUND", "No application found for query"))
 }
