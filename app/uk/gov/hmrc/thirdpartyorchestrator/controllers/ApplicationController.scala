@@ -51,10 +51,12 @@ class ApplicationController @Inject() (
     }
   }
 
-  def getApplication(applicationId: ApplicationId): Action[AnyContent] = Action.async { implicit request =>
-    applicationFetcher.fetchApplication(applicationId).map {
-      case Some(response) => Ok(Json.toJson(response))
-      case None           => NotFound
+  def getApplication(applicationId: ApplicationId): Action[AnyContent] = warnStillInUse("getApplication") {
+    Action.async { implicit request =>
+      applicationFetcher.fetchApplication(applicationId).map {
+        case Some(response) => Ok(Json.toJson(response))
+        case None           => NotFound
+      }
     }
   }
 
@@ -66,9 +68,11 @@ class ApplicationController @Inject() (
     }
   }
 
-  def getApplicationsByCollaborator(userId: UserId): Action[AnyContent] = Action.async { implicit request =>
-    applicationFetcher.fetchApplicationsByUserId(userId)
-      .map(response => Ok(Json.toJson(response))) recover recovery
+  def getApplicationsByCollaborator(userId: UserId): Action[AnyContent] = warnStillInUse("getApplicationsByCollaborator") {
+    Action.async { implicit request =>
+      applicationFetcher.fetchApplicationsByUserId(userId)
+        .map(response => Ok(Json.toJson(response))) recover recovery
+    }
   }
 
   def queryDispatcher(): Action[AnyContent] = warnStillInUse("queryDispatcher") {
