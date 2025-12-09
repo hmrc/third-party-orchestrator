@@ -128,15 +128,22 @@ class QueryController @Inject() (
       successful(BadRequest(Json.toJson(JsErrorResponse("UNEXPECTED_PARAMETER", "Cannot request paginated queries across both environments"))))
 
     } else if (isSingleAppQuery) {
-      EitherT(queryConnector.principal.query[Either[HttpResponse, Option[QueriedApplication]]](buildEffectiveParams(appConfig.inPairedEnvironment, params, Environment.PRODUCTION)))
+
+      def call(env: Environment): EitherT[Future, HttpResponse, Option[QueriedApplication]] = {
+        def transform404(response: HttpResponse): EitherT[Future, HttpResponse, Option[QueriedApplication]] = {
+          if (response.status == 404) {
+            EitherT.pure(None)
+          } else {
+            EitherT.leftT(response)
+          }
+        }
+        EitherT(queryConnector(env).query[Either[HttpResponse, QueriedApplication]](buildEffectiveParams(appConfig.inPairedEnvironment, params, env)))
+          .biflatMap[HttpResponse, Option[QueriedApplication]](transform404, app => EitherT.fromEither((Right(Some(app)))))
+      }
+
+      call(Environment.PRODUCTION)
         .flatMap {
-          _.fold(
-            EitherT(queryConnector.subordinate.query[Either[HttpResponse, Option[QueriedApplication]]](buildEffectiveParams(
-              appConfig.inPairedEnvironment,
-              params,
-              Environment.SANDBOX
-            )))
-          )(app => EitherT.rightT(Some(app)))
+          _.fold(call(Environment.SANDBOX))(app => EitherT.rightT(Some(app)))
         }
         .fold(handleFailure, handleOption)
 
