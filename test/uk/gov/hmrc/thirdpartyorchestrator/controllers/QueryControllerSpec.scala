@@ -134,11 +134,11 @@ class QueryControllerSpec extends BaseControllerSpec with ApplicationWithCollabo
 
   "query for single app queries" should {
     def asNone(): Either[HttpResponse, Option[QueriedApplication]] = {
-      Right(None)
+      Left(HttpResponse(404, "Blah"))
     }
 
-    def asAnAppResponse(app: ApplicationWithCollaborators): Either[HttpResponse, Option[QueriedApplication]] = {
-      Right(Some(QueriedApplication(app)))
+    def asAnAppResponse(app: ApplicationWithCollaborators): Either[HttpResponse, QueriedApplication] = {
+      Right(QueriedApplication(app))
     }
 
     "ensure single application queries for both environments return zero apps when not found" in new SetupPairedEnvironment {
@@ -193,7 +193,7 @@ class QueryControllerSpec extends BaseControllerSpec with ApplicationWithCollabo
       contentAsJson(result) shouldBe JsArray(Nil)
     }
 
-    "ensure open ended application queries production only when app is found" in new SetupPairedEnvironment {
+    "ensure open ended application queries both environments even if no apps are found in production" in new SetupPairedEnvironment {
       val request = FakeRequest("GET", s"/query?userId=$userIdOne")
       PrincipalQueryConnectorMock.ByQueryParams.returnsFor(Map(ParamNames.UserId -> s"$userIdOne"), asAppsResponse(standardApp))
       SubordinateQueryConnectorMock.ByQueryParams.returnsFor(Map(ParamNames.UserId -> s"$userIdOne"), asAppsResponse(standardApp2))
