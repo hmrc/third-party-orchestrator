@@ -76,17 +76,20 @@ class QueryController @Inject() (
   }
 
   private def getContentType(response: HttpResponse): Option[String] = {
-    response.headers.find(_._1 == HeaderNames.CONTENT_TYPE).flatMap(_._2.headOption)
+    response.headers.find(_._1.equalsIgnoreCase(HeaderNames.CONTENT_TYPE)).flatMap(_._2.headOption)
   }
 
   private def processResponseHeaders(responseHeaders: Map[String, Seq[String]]): Map[String, String] = {
     responseHeaders
-      .filterNot(h => h._1 == HeaderNames.CONTENT_TYPE || h._1 == HeaderNames.CONTENT_LENGTH)
+      .filterNot(h => h._1.equalsIgnoreCase(HeaderNames.CONTENT_TYPE) || h._1.equalsIgnoreCase(HeaderNames.CONTENT_LENGTH))
       .map(kv => kv._1 -> kv._2.headOption.getOrElse(""))
   }
 
   private def convertToResult(response: HttpResponse): Result = {
-    Result(ResponseHeader(response.status, processResponseHeaders(response.headers)), Strict(ByteString(response.body), getContentType(response)))
+    Result(
+      header = ResponseHeader(response.status, processResponseHeaders(response.headers)),
+      body = Strict(ByteString(response.body), getContentType(response))
+    )
   }
 
   private def getParam(queryMap: Map[String, Seq[String]])(paramName: String): Option[String] = {
