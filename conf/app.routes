@@ -1,28 +1,28 @@
 # microservice specific routes
 
-POST        /application                                                        uk.gov.hmrc.thirdpartyorchestrator.controllers.ApplicationController.create()
+POST         /application                                               uk.gov.hmrc.thirdpartyorchestrator.controllers.ApplicationController.create()
 
-POST        /verify-uplift/:verificationCode                                    uk.gov.hmrc.thirdpartyorchestrator.controllers.TpaPassthruController.verifyUplift(verificationCode: String)
-
-POST        /session/validate                                                   uk.gov.hmrc.thirdpartyorchestrator.controllers.SessionController.getDeveloperForSession()
-GET         /applications                                                       uk.gov.hmrc.thirdpartyorchestrator.controllers.ApplicationController.queryDispatcher()
-GET         /applications/:id                                                   uk.gov.hmrc.thirdpartyorchestrator.controllers.ApplicationController.getApplication(id: ApplicationId)
-GET         /applications/:id/developers                                        uk.gov.hmrc.thirdpartyorchestrator.controllers.ApplicationController.getVerifiedDevelopersForApplication(id: ApplicationId)
-POST        /responsible-ind-or-admin/applications                              uk.gov.hmrc.thirdpartyorchestrator.controllers.ApplicationController.getAppsForResponsibleIndividualOrAdmin()
+POST         /verify-uplift/:verificationCode                           uk.gov.hmrc.thirdpartyorchestrator.controllers.TpaPassthruController.verifyUplift(verificationCode: String)
+GET          /submissions/answers/:questionType                         uk.gov.hmrc.thirdpartyorchestrator.controllers.TpaPassthruController.fetchAnswers(questionType:String)
+POST         /session/validate                                          uk.gov.hmrc.thirdpartyorchestrator.controllers.SessionController.getDeveloperForSession()
+GET          /applications                                              uk.gov.hmrc.thirdpartyorchestrator.controllers.ApplicationController.queryDispatcher()
+GET          /applications/:id                                          uk.gov.hmrc.thirdpartyorchestrator.controllers.ApplicationController.getApplication(id: ApplicationId)
+GET          /applications/:id/developers                               uk.gov.hmrc.thirdpartyorchestrator.controllers.ApplicationController.getVerifiedDevelopersForApplication(id: ApplicationId)
+POST         /responsible-ind-or-admin/applications                     uk.gov.hmrc.thirdpartyorchestrator.controllers.ApplicationController.getAppsForResponsibleIndividualOrAdmin()
 
 # deprecated
-PATCH       /applications/:id/dispatch                                          uk.gov.hmrc.thirdpartyorchestrator.commands.applications.controllers.AppCmdController.dispatch(id: ApplicationId)
+PATCH        /applications/:id/dispatch                                 uk.gov.hmrc.thirdpartyorchestrator.commands.applications.controllers.AppCmdController.dispatch(id: ApplicationId)
 
-PATCH       /applications/:id                                                   uk.gov.hmrc.thirdpartyorchestrator.commands.applications.controllers.AppCmdController.dispatch(id: ApplicationId)
+PATCH        /applications/:id                                          uk.gov.hmrc.thirdpartyorchestrator.commands.applications.controllers.AppCmdController.dispatch(id: ApplicationId)
 
-POST        /developer/applications                                             uk.gov.hmrc.thirdpartyorchestrator.controllers.ApplicationController.getApplicationsByEmail()
+POST         /developer/applications                                    uk.gov.hmrc.thirdpartyorchestrator.controllers.ApplicationController.getApplicationsByEmail()
 
-GET         /environment/:environment/applications                              uk.gov.hmrc.thirdpartyorchestrator.controllers.EnvironmentApplicationController.searchApplications(environment: Environment)
-POST        /environment/:environment/application/name/validate                 uk.gov.hmrc.thirdpartyorchestrator.controllers.EnvironmentApplicationController.validateName(environment: Environment)
+GET          /environment/:environment/applications                     uk.gov.hmrc.thirdpartyorchestrator.controllers.EnvironmentApplicationController.searchApplications(environment: Environment)
+POST         /environment/:environment/application/name/validate        uk.gov.hmrc.thirdpartyorchestrator.controllers.EnvironmentApplicationController.validateName(environment: Environment)
 
-PATCH       /environment/:environment/application/:id                           uk.gov.hmrc.thirdpartyorchestrator.commands.applications.controllers.AppCmdController.dispatchToEnvironment(environment: Environment, id: ApplicationId)
+PATCH        /environment/:environment/application/:id                  uk.gov.hmrc.thirdpartyorchestrator.commands.applications.controllers.AppCmdController.dispatchToEnvironment(environment: Environment, id: ApplicationId)
 
-GET         /developer/:userId/applications                                     uk.gov.hmrc.thirdpartyorchestrator.controllers.ApplicationController.getApplicationsByCollaborator(userId: UserId)
+GET          /developer/:userId/applications                            uk.gov.hmrc.thirdpartyorchestrator.controllers.ApplicationController.getApplicationsByCollaborator(userId: UserId)
 
 GET         /environment/:environment/query                                     uk.gov.hmrc.thirdpartyorchestrator.controllers.QueryController.queryEnv(environment: Environment)
 GET         /query                                                              uk.gov.hmrc.thirdpartyorchestrator.controllers.QueryController.query()
