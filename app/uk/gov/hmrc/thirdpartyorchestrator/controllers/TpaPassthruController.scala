@@ -39,7 +39,6 @@ class TpaPassthruController @Inject() (
         case HttpResponse(NO_CONTENT, _, _)    => NoContent
         case HttpResponse(BAD_REQUEST, msg, _) => BadRequest(msg)
         case HttpResponse(status, body, _)     => asJson(new RuntimeException(s"Got unexpected status $status and body $body"))
-        case _                                 => asJson(new RuntimeException("Unexpected error when verifying uplift"))
       }
   }
 
@@ -47,7 +46,6 @@ class TpaPassthruController @Inject() (
     principalTpaConnector.fetchApplicationsByAnswer(questionType).map {
       case HttpResponse(OK, msg, _)      => Ok(msg)
       case HttpResponse(status, body, _) => asJson(new RuntimeException(s"Got unexpected status $status and body $body"))
-      case _                             => asJson(new RuntimeException("Unexpected error when getting submission answers"))
     }
   }
 }
