@@ -38,6 +38,7 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartyorchestrator.config.AppConfig
 import uk.gov.hmrc.thirdpartyorchestrator.connectors.{EnvironmentAwareQueryConnector, ReadEitherWithNoException}
 import uk.gov.hmrc.thirdpartyorchestrator.utils.ApplicationLogger
+import play.api.http.ContentTypes
 
 @Singleton()
 class QueryController @Inject() (
@@ -65,7 +66,9 @@ class QueryController @Inject() (
     if (hasEnvParameter(params)) {
       successful(BadRequest(Json.toJson(JsErrorResponse("UNEXPECTED_PARAMETER", "Cannot provide an environment query parameter when using environment path parameter"))))
     } else {
-      queryConnector(environment).query[HttpResponse](buildEffectiveParams(appConfig.inPairedEnvironment, params, environment)).map(convertToResult)
+      queryConnector(environment).queryStream(buildEffectiveParams(appConfig.inPairedEnvironment, params, environment)).map( stream => 
+        Ok.streamed(stream, None, Some("application/stream+json"))
+      )
     }
   }
 
