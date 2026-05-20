@@ -38,7 +38,6 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartyorchestrator.config.AppConfig
 import uk.gov.hmrc.thirdpartyorchestrator.connectors.{EnvironmentAwareQueryConnector, ReadEitherWithNoException}
 import uk.gov.hmrc.thirdpartyorchestrator.utils.ApplicationLogger
-import play.api.http.ContentTypes
 
 @Singleton()
 class QueryController @Inject() (
@@ -66,9 +65,13 @@ class QueryController @Inject() (
     if (hasEnvParameter(params)) {
       successful(BadRequest(Json.toJson(JsErrorResponse("UNEXPECTED_PARAMETER", "Cannot provide an environment query parameter when using environment path parameter"))))
     } else {
-      queryConnector(environment).queryStream(buildEffectiveParams(appConfig.inPairedEnvironment, params, environment)).map( stream => 
-        Ok.streamed(stream, None, Some("application/stream+json"))
-      )
+      if (params.contains(ParamNames.Streamed)) {
+        queryConnector(environment).queryStream(buildEffectiveParams(appConfig.inPairedEnvironment, params, environment)).map(stream =>
+          Ok.chunked(stream, Some("application/stream+json"))
+        )
+      } else {
+        queryConnector(environment).query[HttpResponse](buildEffectiveParams(appConfig.inPairedEnvironment, params, environment)).map(convertToResult)
+      }
     }
   }
 
@@ -168,15 +171,19 @@ class QueryController @Inject() (
   }
 
   def query(): Action[AnyContent] = Action.async { implicit request =>
-    val envParam = getParam(request.queryString)(ParamNames.Environment)
+    val envParam      = getParam(request.queryString)(ParamNames.Environment)
+    val streamedParam = getParam(request.queryString)(ParamNames.Streamed)
 
-    if (envParam.isDefined) {
+    if (envParam.isEmpty) {
+      if (streamedParam.isDefined) {
+        successful(BadRequest(Json.toJson(JsErrorResponse("INVALID_QUERY", s"Cannot request streamed result from both environments"))))
+      } else {
+        queryBothEnvironments(request.queryString)
+      }
+    } else /*if (envParam.isDefined)*/ {
       Environment(envParam.get).fold(
         successful(BadRequest(Json.toJson(JsErrorResponse("INVALID_QUERY", s"${envParam.get} is not a valid environment"))))
       )(env => queryEnv(env, request.queryString.-(ParamNames.Environment)))
-    } else {
-      queryBothEnvironments(request.queryString)
     }
   }
-
 }

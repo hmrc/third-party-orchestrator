@@ -19,6 +19,10 @@ package uk.gov.hmrc.thirdpartyorchestrator.connectors
 import javax.inject.{Inject, Named, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
+import org.apache.pekko.stream.Materializer
+import org.apache.pekko.stream.scaladsl.Source
+import org.apache.pekko.util.ByteString
+
 import play.api.http.ContentTypes
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.http._
@@ -28,17 +32,14 @@ import uk.gov.hmrc.play.http.metrics.common._
 import uk.gov.hmrc.apiplatform.modules.applications.query.domain.models.ApplicationQuery
 import uk.gov.hmrc.apiplatform.modules.applications.query.domain.services.QueryParamsToQueryStringMap
 import uk.gov.hmrc.thirdpartyorchestrator.utils.{ApplicationLogger, EbridgeConfigurator}
-import org.apache.pekko.stream.scaladsl.Source
-import org.apache.pekko.stream.Materializer
-import org.apache.pekko.util.ByteString
 
 trait QueryConnector {
   def query[T](qry: ApplicationQuery)(implicit hc: HeaderCarrier, rds: HttpReads[T]): Future[T]
-  def queryStream(qry: ApplicationQuery)(implicit hc: HeaderCarrier): Future[Source[ByteString,_]]
+  def queryStream(qry: ApplicationQuery)(implicit hc: HeaderCarrier): Future[Source[ByteString, _]]
   def postQuery[T](qry: ApplicationQuery)(implicit hc: HeaderCarrier, rds: HttpReads[T]): Future[T]
 
   def query[T](qry: Map[String, Seq[String]])(implicit hc: HeaderCarrier, rds: HttpReads[T]): Future[T]
-  def queryStream(qry: Map[String, Seq[String]])(implicit hc: HeaderCarrier): Future[Source[ByteString,_]]
+  def queryStream(qry: Map[String, Seq[String]])(implicit hc: HeaderCarrier): Future[Source[ByteString, _]]
   def postQuery[T](qry: Map[String, Seq[String]])(implicit hc: HeaderCarrier, rds: HttpReads[T]): Future[T]
 }
 
@@ -63,7 +64,7 @@ abstract class AbstractQueryConnector(implicit val ec: ExecutionContext, val mat
     ).execute[T]
   }
 
-  override def queryStream(qry: Map[String, Seq[String]])(implicit hc: HeaderCarrier): Future[Source[ByteString,_]] = {
+  override def queryStream(qry: Map[String, Seq[String]])(implicit hc: HeaderCarrier): Future[Source[ByteString, _]] = {
     val simplifiedQry = qry.map {
       case (k, vs) => k -> vs.mkString
     }
@@ -72,7 +73,7 @@ abstract class AbstractQueryConnector(implicit val ec: ExecutionContext, val mat
       http
         .get(url"${serviceBaseUrl}/query?$simplifiedQry")
     )
-    .stream[Source[ByteString,_]]
+      .stream[Source[ByteString, _]]
   }
 
   override def query[T](qry: ApplicationQuery)(implicit hc: HeaderCarrier, rds: HttpReads[T]): Future[T] = {
@@ -80,7 +81,7 @@ abstract class AbstractQueryConnector(implicit val ec: ExecutionContext, val mat
     query[T](params)
   }
 
-  override def queryStream(qry: ApplicationQuery)(implicit hc: HeaderCarrier): Future[Source[ByteString,_]] = {
+  override def queryStream(qry: ApplicationQuery)(implicit hc: HeaderCarrier): Future[Source[ByteString, _]] = {
     val params = QueryParamsToQueryStringMap.toQuery(qry)
     queryStream(params)
   }
@@ -106,7 +107,8 @@ class PrincipalQueryConnector @Inject() (
     val config: PrincipalThirdPartyApplicationConnector.Config,
     val http: HttpClientV2,
     val apiMetrics: ApiMetrics
-  )(implicit override val ec: ExecutionContext, mat: Materializer
+  )(implicit override val ec: ExecutionContext,
+    mat: Materializer
   ) extends AbstractQueryConnector {
 
   val serviceBaseUrl = config.serviceBaseUrl
@@ -120,7 +122,8 @@ class SubordinateQueryConnector @Inject() (
     val config: SubordinateThirdPartyApplicationConnector.Config,
     val http: HttpClientV2,
     val apiMetrics: ApiMetrics
-  )(implicit override val ec: ExecutionContext, mat: Materializer
+  )(implicit override val ec: ExecutionContext,
+    mat: Materializer
   ) extends AbstractQueryConnector with ApplicationLogger {
 
   val serviceBaseUrl: String = config.serviceBaseUrl
