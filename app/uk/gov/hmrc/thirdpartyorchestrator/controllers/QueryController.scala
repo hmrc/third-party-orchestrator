@@ -27,7 +27,7 @@ import org.apache.pekko.util.ByteString
 import play.api.http.HeaderNames
 import play.api.http.HttpEntity.Strict
 import play.api.libs.json._
-import play.api.mvc.{Action, AnyContent, ControllerComponents, ResponseHeader, Result}
+import play.api.mvc._
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
@@ -38,8 +38,6 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartyorchestrator.config.AppConfig
 import uk.gov.hmrc.thirdpartyorchestrator.connectors.{EnvironmentAwareQueryConnector, ReadEitherWithNoException}
 import uk.gov.hmrc.thirdpartyorchestrator.utils.ApplicationLogger
-import play.api.mvc.Accepting
-import play.api.mvc.Request
 
 @Singleton()
 class QueryController @Inject() (
@@ -72,7 +70,7 @@ class QueryController @Inject() (
       val effectiveParams = buildEffectiveParams(appConfig.inPairedEnvironment, params, environment)
 
       render.async {
-        case Accepts.Json()        => 
+        case Accepts.Json() =>
           queryConnector(environment).query[HttpResponse](effectiveParams).map(convertToResult)
 
         case AcceptsStreamedJson() =>
@@ -179,14 +177,12 @@ class QueryController @Inject() (
   }
 
   def query(): Action[AnyContent] = Action.async { implicit request =>
-    val envParam      = getParam(request.queryString)(ParamNames.Environment)
-    val streamedParam = getParam(request.queryString)(ParamNames.Streamed)
+    val envParam = getParam(request.queryString)(ParamNames.Environment)
 
     if (envParam.isEmpty) {
-      if (streamedParam.isDefined) {
-        successful(BadRequest(Json.toJson(JsErrorResponse("INVALID_QUERY", s"Cannot request streamed result from both environments"))))
-      } else {
-        queryBothEnvironments(request.queryString)
+      render.async {
+        case Accepts.Json()        => queryBothEnvironments(request.queryString)
+        case AcceptsStreamedJson() => successful(BadRequest(Json.toJson(JsErrorResponse("INVALID_QUERY", s"Cannot request streamed result from both environments"))))
       }
     } else /*if (envParam.isDefined)*/ {
       Environment(envParam.get).fold(

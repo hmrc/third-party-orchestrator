@@ -25,6 +25,7 @@ import org.apache.pekko.util.ByteString
 
 import play.api.http.ContentTypes
 import play.api.libs.json.{JsValue, Json}
+import play.mvc.Http
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.http.client.{HttpClientV2, RequestBuilder}
 import uk.gov.hmrc.play.http.metrics.common._
@@ -32,7 +33,6 @@ import uk.gov.hmrc.play.http.metrics.common._
 import uk.gov.hmrc.apiplatform.modules.applications.query.domain.models.ApplicationQuery
 import uk.gov.hmrc.apiplatform.modules.applications.query.domain.services.QueryParamsToQueryStringMap
 import uk.gov.hmrc.thirdpartyorchestrator.utils.{ApplicationLogger, EbridgeConfigurator}
-import play.mvc.Http
 
 trait QueryConnector {
   def query[T](qry: ApplicationQuery)(implicit hc: HeaderCarrier, rds: HttpReads[T]): Future[T]
