@@ -38,6 +38,8 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartyorchestrator.config.AppConfig
 import uk.gov.hmrc.thirdpartyorchestrator.connectors.{EnvironmentAwareQueryConnector, ReadEitherWithNoException}
 import uk.gov.hmrc.thirdpartyorchestrator.utils.ApplicationLogger
+import play.api.mvc.Accepting
+import play.api.mvc.Request
 
 @Singleton()
 class QueryController @Inject() (
@@ -46,6 +48,8 @@ class QueryController @Inject() (
     cc: ControllerComponents
   )(implicit val ec: ExecutionContext
   ) extends BackendController(cc) with JsonUtils with ApplicationLogger with ReadEitherWithNoException {
+
+  private lazy val AcceptsStreamedJson = Accepting("application/stream+json")
 
   def queryEnv(environment: Environment): Action[AnyContent] = Action.async { implicit request =>
     queryEnv(environment, request.queryString)
@@ -57,7 +61,7 @@ class QueryController @Inject() (
     else
       params + (ParamNames.Environment -> Seq(s"$environment"))
 
-  private def queryEnv(environment: Environment, params: Map[String, Seq[String]])(implicit hc: HeaderCarrier): Future[Result] = {
+  private def queryEnv(environment: Environment, params: Map[String, Seq[String]])(implicit request: Request[_]): Future[Result] = {
     /*
      * Check there isn't an environment query param
      * And add one if we're not in a bridged deployment
@@ -65,12 +69,16 @@ class QueryController @Inject() (
     if (hasEnvParameter(params)) {
       successful(BadRequest(Json.toJson(JsErrorResponse("UNEXPECTED_PARAMETER", "Cannot provide an environment query parameter when using environment path parameter"))))
     } else {
-      if (params.contains(ParamNames.Streamed)) {
-        queryConnector(environment).queryStream(buildEffectiveParams(appConfig.inPairedEnvironment, params, environment)).map(stream =>
-          Ok.chunked(stream, Some("application/stream+json"))
-        )
-      } else {
-        queryConnector(environment).query[HttpResponse](buildEffectiveParams(appConfig.inPairedEnvironment, params, environment)).map(convertToResult)
+      val effectiveParams = buildEffectiveParams(appConfig.inPairedEnvironment, params, environment)
+
+      render.async {
+        case Accepts.Json()        => 
+          queryConnector(environment).query[HttpResponse](effectiveParams).map(convertToResult)
+
+        case AcceptsStreamedJson() =>
+          queryConnector(environment).queryStream(effectiveParams).map { stream =>
+            Ok.chunked(stream, Some("application/stream+json"))
+          }
       }
     }
   }

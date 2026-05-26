@@ -32,6 +32,7 @@ import uk.gov.hmrc.play.http.metrics.common._
 import uk.gov.hmrc.apiplatform.modules.applications.query.domain.models.ApplicationQuery
 import uk.gov.hmrc.apiplatform.modules.applications.query.domain.services.QueryParamsToQueryStringMap
 import uk.gov.hmrc.thirdpartyorchestrator.utils.{ApplicationLogger, EbridgeConfigurator}
+import play.mvc.Http
 
 trait QueryConnector {
   def query[T](qry: ApplicationQuery)(implicit hc: HeaderCarrier, rds: HttpReads[T]): Future[T]
@@ -72,6 +73,7 @@ abstract class AbstractQueryConnector(implicit val ec: ExecutionContext, val mat
     configureEbridgeIfRequired(
       http
         .get(url"${serviceBaseUrl}/query?$simplifiedQry")
+        .setHeader(Http.HeaderNames.ACCEPT -> "application/stream+json")
     )
       .stream[Source[ByteString, _]]
   }
