@@ -62,7 +62,9 @@ abstract class AbstractQueryConnector(implicit val ec: ExecutionContext, val mat
     configureEbridgeIfRequired(
       http
         .get(url"${serviceBaseUrl}/query?$simplifiedQry")
-    ).execute[T]
+    )
+    .setHeader(play.api.http.HeaderNames.CONTENT_TYPE -> ContentTypes.JSON)
+    .execute[T]
   }
 
   override def queryStream(qry: Map[String, Seq[String]])(implicit hc: HeaderCarrier): Future[Source[ByteString, _]] = {
@@ -73,9 +75,9 @@ abstract class AbstractQueryConnector(implicit val ec: ExecutionContext, val mat
     configureEbridgeIfRequired(
       http
         .get(url"${serviceBaseUrl}/query?${simplifiedQry}")
-        .setHeader(Http.HeaderNames.ACCEPT -> "application/stream+json")
     )
-      .stream[Source[ByteString, _]]
+    .setHeader(Http.HeaderNames.ACCEPT -> "application/stream+json")
+    .stream[Source[ByteString, _]]
   }
 
   override def query[T](qry: ApplicationQuery)(implicit hc: HeaderCarrier, rds: HttpReads[T]): Future[T] = {
@@ -92,9 +94,10 @@ abstract class AbstractQueryConnector(implicit val ec: ExecutionContext, val mat
     configureEbridgeIfRequired(
       http
         .post(url"${serviceBaseUrl}/query")
-        .setHeader(play.api.http.HeaderNames.CONTENT_TYPE -> ContentTypes.JSON)
         .withBody[JsValue](Json.toJson(qry))
-    ).execute[T]
+    )
+    .setHeader(play.api.http.HeaderNames.CONTENT_TYPE -> ContentTypes.JSON)
+    .execute[T]
   }
 
   override def postQuery[T](qry: ApplicationQuery)(implicit hc: HeaderCarrier, rds: HttpReads[T]): Future[T] = {
