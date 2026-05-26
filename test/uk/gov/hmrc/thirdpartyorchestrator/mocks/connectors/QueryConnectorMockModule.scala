@@ -77,12 +77,6 @@ trait QueryConnectorMockModule extends MockitoSugar with ArgumentMatchersSugar {
       def returns(apps: ApplicationWithCollaborators*)(implicit writes: Writes[QueriedApplication]) = {
         when(aMock.queryStream(*[Map[String, Seq[String]]])(*)).thenReturn(successful(asStreamOfByteStrings(apps.map(QueriedApplication(_)))))
       }
-      // def returns(apps: ApplicationWithSubscriptions*)(implicit writes: Writes[QueriedApplication]) = {
-      //   when(aMock.queryStream(*[Map[String, Seq[String]]])(*)).thenReturn(successful(asStreamOfByteStrings(apps.map(QueriedApplication(_)))))
-      // }
-      // def returns(apps: ApplicationWithSubscriptionFields*)(implicit writes: Writes[QueriedApplication]) = {
-      //   when(aMock.queryStream(*[Map[String, Seq[String]]])(*)).thenReturn(successful(asStreamOfByteStrings(apps.map(QueriedApplication(_)))))
-      // }
 
       def returnsFor(params: Map[String, String], apps: ApplicationWithCollaborators*)(implicit writes: Writes[QueriedApplication]) = {
         val matches = params.map { case (k, v) => k -> Seq(v) }

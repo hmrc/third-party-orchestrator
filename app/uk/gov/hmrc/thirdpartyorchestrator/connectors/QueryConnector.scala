@@ -72,7 +72,7 @@ abstract class AbstractQueryConnector(implicit val ec: ExecutionContext, val mat
 
     configureEbridgeIfRequired(
       http
-        .get(url"${serviceBaseUrl}/query?$simplifiedQry")
+        .get(url"${serviceBaseUrl}/query?${simplifiedQry}")
         .setHeader(Http.HeaderNames.ACCEPT -> "application/stream+json")
     )
       .stream[Source[ByteString, _]]
