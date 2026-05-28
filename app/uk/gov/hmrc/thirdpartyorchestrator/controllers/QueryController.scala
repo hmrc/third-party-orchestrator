@@ -27,7 +27,7 @@ import org.apache.pekko.util.ByteString
 import play.api.http.HeaderNames
 import play.api.http.HttpEntity.Strict
 import play.api.libs.json._
-import play.api.mvc._
+import play.api.mvc.{Action, AnyContent, ControllerComponents, ResponseHeader, Result}
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
@@ -47,8 +47,6 @@ class QueryController @Inject() (
   )(implicit val ec: ExecutionContext
   ) extends BackendController(cc) with JsonUtils with ApplicationLogger with ReadEitherWithNoException {
 
-  private lazy val AcceptsStreamedJson = Accepting("application/stream+json")
-
   def queryEnv(environment: Environment): Action[AnyContent] = Action.async { implicit request =>
     queryEnv(environment, request.queryString)
   }
@@ -59,7 +57,7 @@ class QueryController @Inject() (
     else
       params + (ParamNames.Environment -> Seq(s"$environment"))
 
-  private def queryEnv(environment: Environment, params: Map[String, Seq[String]])(implicit request: Request[_]): Future[Result] = {
+  private def queryEnv(environment: Environment, params: Map[String, Seq[String]])(implicit hc: HeaderCarrier): Future[Result] = {
     /*
      * Check there isn't an environment query param
      * And add one if we're not in a bridged deployment
@@ -67,17 +65,7 @@ class QueryController @Inject() (
     if (hasEnvParameter(params)) {
       successful(BadRequest(Json.toJson(JsErrorResponse("UNEXPECTED_PARAMETER", "Cannot provide an environment query parameter when using environment path parameter"))))
     } else {
-      val effectiveParams = buildEffectiveParams(appConfig.inPairedEnvironment, params, environment)
-
-      render.async {
-        case Accepts.Json() =>
-          queryConnector(environment).query[HttpResponse](effectiveParams).map(convertToResult)
-
-        case AcceptsStreamedJson() =>
-          queryConnector(environment).queryStream(effectiveParams).map { stream =>
-            Ok.chunked(stream, Some("application/stream+json"))
-          }
-      }
+      queryConnector(environment).query[HttpResponse](buildEffectiveParams(appConfig.inPairedEnvironment, params, environment)).map(convertToResult)
     }
   }
 
@@ -179,15 +167,13 @@ class QueryController @Inject() (
   def query(): Action[AnyContent] = Action.async { implicit request =>
     val envParam = getParam(request.queryString)(ParamNames.Environment)
 
-    if (envParam.isEmpty) {
-      render.async {
-        case Accepts.Json()        => queryBothEnvironments(request.queryString)
-        case AcceptsStreamedJson() => successful(BadRequest(Json.toJson(JsErrorResponse("INVALID_QUERY", s"Cannot request streamed result from both environments"))))
-      }
-    } else /*if (envParam.isDefined)*/ {
+    if (envParam.isDefined) {
       Environment(envParam.get).fold(
         successful(BadRequest(Json.toJson(JsErrorResponse("INVALID_QUERY", s"${envParam.get} is not a valid environment"))))
       )(env => queryEnv(env, request.queryString.-(ParamNames.Environment)))
+    } else {
+      queryBothEnvironments(request.queryString)
     }
   }
+
 }
