@@ -42,6 +42,8 @@ class QueryControllerISpec
     with ApplicationWithCollaboratorsFixtures
     with utils.FixedClock {
 
+  val STREAMED_JSON = "application/stream+json"
+
   val stubConfig = Configuration(
     "microservice.services.third-party-application-principal.host"   -> WireMockHost,
     "microservice.services.third-party-application-principal.port"   -> WireMockPrincipalPort,
@@ -81,11 +83,36 @@ class QueryControllerISpec
       val response: WSResponse = await(
         wsClient
           .url(s"$baseUrl/environment/SANDBOX/query")
-          .withHttpHeaders((HeaderNames.CONTENT_TYPE, ContentTypes.JSON))
+          .withHttpHeaders((HeaderNames.ACCEPT, ContentTypes.JSON))
           .withQueryStringParameters((ParamNames.ApplicationId -> s"$applicationId"))
           .get()
       )
       response.status shouldBe OK
+      response.header(HeaderNames.CONTENT_TYPE) shouldBe Some(ContentTypes.JSON)
+    }
+
+    "return result passing environment down as query for streamed response" in new Setup {
+      stubFor(Environment.SANDBOX)(
+        get(urlPathEqualTo(s"/query"))
+          .withQueryParam(ParamNames.ApplicationId, equalTo(s"$applicationId"))
+          .withQueryParam(ParamNames.Environment, equalTo("SANDBOX"))
+          .withHeader(HeaderNames.ACCEPT, equalTo(STREAMED_JSON))
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withBody(Json.toJson(standardApp.inSandbox().withId(applicationId)).toString())
+          )
+      )
+
+      val response: WSResponse = await(
+        wsClient
+          .url(s"$baseUrl/environment/SANDBOX/query")
+          .withHttpHeaders((HeaderNames.ACCEPT, STREAMED_JSON))
+          .withQueryStringParameters((ParamNames.ApplicationId -> s"$applicationId"))
+          .get()
+      )
+      response.status shouldBe OK
+      response.header(HeaderNames.CONTENT_TYPE) shouldBe Some("application/stream+json")
     }
   }
 }

@@ -19,6 +19,7 @@ package uk.gov.hmrc.thirdpartyorchestrator.controllers
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
+import play.api.http.HeaderNames
 import play.api.libs.json.{JsArray, Json}
 import play.api.mvc.Result
 import play.api.test.Helpers._
@@ -225,5 +226,25 @@ class QueryControllerSpec extends BaseControllerSpec with ApplicationWithCollabo
       status(result) shouldBe OK
       contentAsJson(result) shouldBe Json.toJson(List(standardApp, standardApp2))
     }
+
+    "ensure open ended application queries for both environments fail if streamed is requested" in new SetupPairedEnvironment {
+      val request = FakeRequest("GET", s"/query?userId=$userIdOne").withHeaders(HeaderNames.ACCEPT -> "application/stream+json")
+
+      val result = underTest.query()(request)
+      await(result)
+
+      ensureBadRequest(result, "INVALID_QUERY", "Cannot request streamed result from both environments")
+    }
+
+    "ensure open ended application queries for one environment allows for streamed response" in new SetupPairedEnvironment {
+      val request = FakeRequest("GET", s"/query?environment=SANDBOX&userId=$userIdOne").withHeaders(HeaderNames.ACCEPT -> "application/stream+json")
+      SubordinateQueryConnectorMock.ByQueryStreamParams.returnsFor(Map(ParamNames.UserId -> s"$userIdOne"), standardApp, standardApp2)
+
+      val result = underTest.query()(request)
+
+      status(result) shouldBe OK
+      contentAsString(result) shouldBe Json.toJson(standardApp).toString + Json.toJson(standardApp2).toString
+    }
+
   }
 }
