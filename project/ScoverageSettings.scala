@@ -8,7 +8,8 @@ object ScoverageSettings {
       """uk\.gov\.hmrc\.BuildInfo""" ,
       """.*\.Routes""" ,
       """.*\.RoutesPrefix""" ,
-      """.*\.Reverse[^.]*"""
+      """.*\.Reverse[^.]*""",
+      """uk.gov.hmrc.thirdpartyorchestrator.binders"""
     ).mkString(";"),
     ScoverageKeys.coverageMinimumStmtTotal := 94,
     ScoverageKeys.coverageMinimumBranchTotal:= 89,

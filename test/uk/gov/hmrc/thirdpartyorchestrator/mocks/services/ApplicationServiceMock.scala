@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartyorchestrator.mocks.services
 
-import scala.concurrent.Future._
+import scala.concurrent.Future.*
 
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
@@ -32,17 +32,17 @@ trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar {
   val applicationServiceMock = mock[ApplicationService]
 
   def createApplicationReturns(appCreateRequest: CreateApplicationRequest, returns: ApplicationWithCollaborators) =
-    when(applicationServiceMock.createApplication(eqTo(appCreateRequest))(*)).thenReturn(successful(returns))
+    when(applicationServiceMock.createApplication(eqTo(appCreateRequest))(using *)).thenReturn(successful(returns))
 
   def fetchApplicationsForEmailReturns(emails: List[LaxEmailAddress], returns: ApplicationWithCollaborators) =
-    when(applicationServiceMock.fetchApplicationsForEmails(eqTo(emails))(*)).thenReturn(successful(List(returns)))
+    when(applicationServiceMock.fetchApplicationsForEmails(eqTo(emails))(using *)).thenReturn(successful(List(returns)))
 
   def fetchApplicationsForEmailFails() =
-    when(applicationServiceMock.fetchApplicationsForEmails(*)(*)).thenReturn(failed(UpstreamErrorResponse("some problem happened", 500)))
+    when(applicationServiceMock.fetchApplicationsForEmails(*)(using *)).thenReturn(failed(UpstreamErrorResponse("some problem happened", 500)))
 
   def fetchVerifiedCollaboratorsForApplicationReturns(applicationId: ApplicationId, returns: Set[User]) =
-    when(applicationServiceMock.fetchVerifiedCollaboratorsForApplication(eqTo(applicationId))(*)).thenReturn(successful(Right(returns)))
+    when(applicationServiceMock.fetchVerifiedCollaboratorsForApplication(eqTo(applicationId))(using *)).thenReturn(successful(Right(returns)))
 
   def fetchVerifiedCollaboratorsForApplicationNotFound(applicationId: ApplicationId) =
-    when(applicationServiceMock.fetchVerifiedCollaboratorsForApplication(eqTo(applicationId))(*)).thenReturn(successful(Left("Application not found")))
+    when(applicationServiceMock.fetchVerifiedCollaboratorsForApplication(eqTo(applicationId))(using *)).thenReturn(successful(Left("Application not found")))
 }

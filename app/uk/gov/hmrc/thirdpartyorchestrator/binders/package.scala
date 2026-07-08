@@ -16,13 +16,13 @@
 
 package uk.gov.hmrc.thirdpartyorchestrator
 
-import java.{util => ju}
+import java.util as ju
 import scala.util.Try
 
 import play.api.mvc.{PathBindable, QueryStringBindable}
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ClientSecret
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
 
 package object binders {
 

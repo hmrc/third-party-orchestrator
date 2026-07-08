@@ -16,16 +16,16 @@
 
 package uk.gov.hmrc.thirdpartyorchestrator.connectors
 
-import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.client.WireMock.*
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 
-import play.api.http.Status._
+import play.api.http.Status.*
 import play.api.http.{ContentTypes, HeaderNames}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.{Application, Configuration, Mode}
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, LaxEmailAddress, UserId}
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession, UserSessionId}
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
@@ -54,7 +54,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
     val userId             = UserId.random
     val userId2            = UserId.random
     val sessionId          = UserSessionId.random
-    val expectedSession    = UserSession(sessionId, LoggedInState.LOGGED_IN, buildUser(userEmail, "John", "Doe").copy(userId = userId))
+    val expectedSession    = UserSession(sessionId, LoggedInState.LoggedIn, buildUser(userEmail, "John", "Doe").copy(userId = userId))
     val expectedDeveloper  = buildUser(userEmail, "John", "Doe").copy(userId = userId, verified = true)
     val expectedDeveloper2 = buildUser(userEmail2, "Test", "User").copy(userId = userId2, verified = true)
 

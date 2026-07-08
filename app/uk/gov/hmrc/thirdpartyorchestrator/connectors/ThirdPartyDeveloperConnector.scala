@@ -20,10 +20,10 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 import play.api.libs.json.Json
-import uk.gov.hmrc.http.HttpReads.Implicits._
+import play.api.libs.ws.JsonBodyWritables
+import uk.gov.hmrc.http.HttpReads.Implicits.*
 import uk.gov.hmrc.http.client.HttpClientV2
-import uk.gov.hmrc.http.{StringContextOps, _}
-import uk.gov.hmrc.play.http.metrics.common._
+import uk.gov.hmrc.http.{StringContextOps, *}
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId}
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
@@ -34,22 +34,22 @@ import uk.gov.hmrc.thirdpartyorchestrator.config.AppConfig
 class ThirdPartyDeveloperConnector @Inject() (
     http: HttpClientV2,
     config: AppConfig,
-    val apiMetrics: ApiMetrics
+    val metrics: ConnectorMetrics
   )(implicit val ec: ExecutionContext
-  ) extends RecordMetrics {
+  ) extends JsonBodyWritables {
 
   lazy val serviceBaseUrl: String = config.thirdPartyDeveloperUrl
-  val api                         = API("third-party-developer")
+  val api                         = ApiName("third-party-developer")
 
   def fetchSession(userSessionId: UserSessionId)(implicit hc: HeaderCarrier): Future[Option[UserSession]] =
-    record {
+    metrics.record(api) {
       http
         .get(url"$serviceBaseUrl/session/$userSessionId")
         .execute[Option[UserSession]]
     }
 
   def fetchDeveloper(userId: UserId)(implicit hc: HeaderCarrier): Future[Option[User]] = {
-    record {
+    metrics.record(api) {
       val params = Seq("developerId" -> userId.toString())
       http
         .get(url"$serviceBaseUrl/developer?$params")
@@ -58,7 +58,7 @@ class ThirdPartyDeveloperConnector @Inject() (
   }
 
   def fetchDevelopers(emails: List[LaxEmailAddress])(implicit hc: HeaderCarrier): Future[List[User]] = {
-    record {
+    metrics.record(api) {
       http
         .post(url"$serviceBaseUrl/developers/get-by-emails")
         .withBody(Json.toJson(emails))

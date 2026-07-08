@@ -8,7 +8,7 @@ lazy val appName = "third-party-orchestrator"
 Global / bloopAggregateSourceDependencies := true
 Global / bloopExportJarClassifiers := Some(Set("sources"))
 
-ThisBuild / scalaVersion := "2.13.18"
+ThisBuild / scalaVersion := "3.3.7"
 ThisBuild / majorVersion := 0
 ThisBuild / libraryDependencySchemes += "org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always
 ThisBuild / semanticdbEnabled := true
@@ -19,10 +19,6 @@ lazy val microservice = Project(appName, file("."))
   .disablePlugins(JUnitXmlReportPlugin)
   .settings(
     libraryDependencies ++= AppDependencies(),
-    retrieveManaged := true,
-    // https://www.scala-lang.org/2021/01/12/configuring-and-suppressing-warnings.html
-    // suppress warnings in generated routes files
-    scalacOptions += "-Wconf:src=routes/.*:s"
   )
   .settings(
     Test / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-eT"),
@@ -31,13 +27,16 @@ lazy val microservice = Project(appName, file("."))
   .settings(ScoverageSettings())
   .settings(
     routesImport ++= Seq(
-      "uk.gov.hmrc.thirdpartyorchestrator.binders._",
-      "uk.gov.hmrc.apiplatform.modules.common.domain.models._"
+      "uk.gov.hmrc.thirdpartyorchestrator.binders.given",
+      "uk.gov.hmrc.thirdpartyorchestrator.binders.RouteModels.*",
+      "uk.gov.hmrc.thirdpartyorchestrator.binders.RouteModels.Conversions.given",
+      "uk.gov.hmrc.apiplatform.modules.common.domain.models.*"
     )
   )
   .settings(
     scalacOptions ++= Seq(
-      "-Wconf:cat=unused&src=views/.*\\.scala:s"
+      "-Wconf:src=routes/.*:s",
+      "-Wconf:msg=unused import&src=html/.*:s"
     )
   )
 

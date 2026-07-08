@@ -43,8 +43,8 @@ class SessionController @Inject() (
   def getDeveloperForSession(): Action[AnyContent] = Action.async { implicit request =>
     withJsonBodyFromAnyContent[SessionRequest] { sessionRequest =>
       sessionService.fetch(sessionRequest.sessionId).map {
-        case Some(session @ UserSession(_, LoggedInState.LOGGED_IN, _)) => Ok(Json.toJson(session.developer))
-        case _                                                          => NotFound("Unknown session id")
+        case Some(session @ UserSession(_, LoggedInState.LoggedIn, _)) => Ok(Json.toJson(session.developer))
+        case _                                                         => NotFound("Unknown session id")
       }
     }
   }

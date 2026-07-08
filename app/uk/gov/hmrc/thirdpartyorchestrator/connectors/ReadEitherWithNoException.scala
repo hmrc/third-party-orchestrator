@@ -17,17 +17,17 @@
 package uk.gov.hmrc.thirdpartyorchestrator.connectors
 
 import play.api.http.Status.OK
-import uk.gov.hmrc.http.HttpReads.Implicits._
+import uk.gov.hmrc.http.HttpReads.Implicits.*
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 
 trait ReadEitherWithNoException {
 
-  implicit def readEitherNoException[A: HttpReads]: HttpReads[Either[HttpResponse, A]] =
+  given readEitherNoException[A: HttpReads]: HttpReads[Either[HttpResponse, A]] =
     HttpReads[HttpResponse]
       .flatMap(x =>
         x.status match {
-          case OK         => HttpReads[A].map(y => Right(y)) // this delegates error handling to HttpReads[A]
-          case statusCode => HttpReads[HttpResponse].map(Left.apply)
+          case OK => HttpReads[A].map(y => Right(y)) // this delegates error handling to HttpReads[A]
+          case _  => HttpReads[HttpResponse].map(Left.apply)
         }
       )
 }

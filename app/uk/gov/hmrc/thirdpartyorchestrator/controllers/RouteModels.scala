@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,18 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.thirdpartyorchestrator.commands.applications.config
+package uk.gov.hmrc.thirdpartyorchestrator.controllers.binders
 
-import com.google.inject.AbstractModule
+import java.util.UUID
 
-import uk.gov.hmrc.thirdpartyorchestrator.commands.applications.connectors.*
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 
-class ConfigurationModule extends AbstractModule {
+object RouteModels {
+  type SimpleApplicationId = UUID
 
-  override def configure(): Unit = {
-    bind(classOf[PrincipalAppCmdConnector.Config]).toProvider(classOf[PrincipalAppCmdConnectorConfigProvider])
-    bind(classOf[SubordinateAppCmdConnector.Config]).toProvider(classOf[SubordinateAppCmdConnectorConfigProvider])
+  object Conversions {
+
+    given Conversion[SimpleApplicationId, ApplicationId] with
+      def apply(x: SimpleApplicationId): ApplicationId = ApplicationId(x)
   }
 }

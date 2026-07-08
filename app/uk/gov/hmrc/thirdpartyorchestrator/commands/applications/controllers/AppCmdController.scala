@@ -19,17 +19,19 @@ package uk.gov.hmrc.thirdpartyorchestrator.commands.applications.controllers
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
+import scala.reflect.ClassTag
 
 import cats.data.NonEmptyList
 import cats.implicits.catsStdInstancesForFuture
 
 import play.api.libs.json.{JsValue, Json, Reads}
-import play.api.mvc._
+import play.api.libs.ws.JsonBodyWritables
+import play.api.mvc.*
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
-import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models._
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, Environment}
-import uk.gov.hmrc.apiplatform.modules.common.domain.services.NonEmptyListFormatters._
+import uk.gov.hmrc.apiplatform.modules.common.domain.services.NonEmptyListFormatters.given
 import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
 import uk.gov.hmrc.thirdpartyorchestrator.commands.applications.connectors.EnvironmentAwareAppCmdConnector
 import uk.gov.hmrc.thirdpartyorchestrator.services.ApplicationFetcher
@@ -42,6 +44,7 @@ class AppCmdController @Inject() (
     cc: ControllerComponents
   )(implicit val ec: ExecutionContext
   ) extends BackendController(cc)
+    with JsonBodyWritables
     with ApplicationLogger {
 
   val E = EitherTHelper.make[NonEmptyList[CommandFailure]]
@@ -60,7 +63,7 @@ class AppCmdController @Inject() (
     commonDispatch(environment, id)
   }
 
-  private def commonDispatch(environment: Environment, id: ApplicationId)(implicit request: Request[JsValue], m: Manifest[DispatchRequest], reads: Reads[DispatchRequest])
+  private def commonDispatch(environment: Environment, id: ApplicationId)(implicit request: Request[JsValue], m: ClassTag[DispatchRequest], reads: Reads[DispatchRequest])
       : Future[Result] = {
     withJsonBody[DispatchRequest] { inboundDispatchRequest =>
       (

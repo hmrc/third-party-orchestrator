@@ -33,19 +33,19 @@ trait ThirdPartyDeveloperConnectorMockModule extends MockitoSugar with ArgumentM
     object FetchSession {
 
       def thenReturn(sessionId: UserSessionId)(session: Option[UserSession]) =
-        when(aMock.fetchSession(eqTo(sessionId))(*)).thenReturn(successful(session))
+        when(aMock.fetchSession(eqTo(sessionId))(using *)).thenReturn(successful(session))
     }
 
     object FetchDeveloper {
 
       def thenReturn(developerId: UserId)(developer: Option[User]) =
-        when(aMock.fetchDeveloper(eqTo(developerId))(*)).thenReturn(successful(developer))
+        when(aMock.fetchDeveloper(eqTo(developerId))(using *)).thenReturn(successful(developer))
     }
 
     object FetchDevelopers {
 
       def thenReturn(emails: List[LaxEmailAddress])(developers: List[User]) =
-        when(aMock.fetchDevelopers(eqTo(emails))(*)).thenReturn(successful(developers))
+        when(aMock.fetchDevelopers(eqTo(emails))(using *)).thenReturn(successful(developers))
     }
   }
 

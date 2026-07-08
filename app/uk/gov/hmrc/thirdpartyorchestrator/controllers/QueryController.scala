@@ -26,15 +26,15 @@ import org.apache.pekko.util.ByteString
 
 import play.api.http.HeaderNames
 import play.api.http.HttpEntity.Strict
-import play.api.libs.json._
-import play.api.mvc._
-import uk.gov.hmrc.http.HttpReads.Implicits._
+import play.api.libs.json.*
+import play.api.mvc.*
+import uk.gov.hmrc.http.HttpReads.Implicits.*
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.QueriedApplication
-import uk.gov.hmrc.apiplatform.modules.applications.query.domain.models.ParamNames
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.query.domain.models.ParamName
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
 import uk.gov.hmrc.thirdpartyorchestrator.config.AppConfig
 import uk.gov.hmrc.thirdpartyorchestrator.connectors.{EnvironmentAwareQueryConnector, ReadEitherWithNoException}
 import uk.gov.hmrc.thirdpartyorchestrator.utils.ApplicationLogger
@@ -53,13 +53,16 @@ class QueryController @Inject() (
     queryEnv(environment, request.queryString)
   }
 
-  private def buildEffectiveParams(inPairedEnvironment: Boolean, params: Map[String, Seq[String]], environment: Environment): Map[String, Seq[String]] =
-    if (inPairedEnvironment)
-      params
-    else
-      params + (ParamNames.Environment -> Seq(s"$environment"))
+  private def buildEffectiveParams(inPairedEnvironment: Boolean, params: Map[String, Seq[String]], environment: Environment): Map[String, String] =
+    (if (inPairedEnvironment)
+       params
+     else
+       params + (ParamName.Environment.text -> Seq(s"${environment.toString.toUpperCase}")))
+      .map {
+        case (k, vs) => k -> vs.mkString
+      }
 
-  private def queryEnv(environment: Environment, params: Map[String, Seq[String]])(implicit request: Request[_]): Future[Result] = {
+  private def queryEnv(environment: Environment, params: Map[String, Seq[String]])(implicit request: Request[?]): Future[Result] = {
     /*
      * Check there isn't an environment query param
      * And add one if we're not in a bridged deployment
@@ -104,15 +107,15 @@ class QueryController @Inject() (
     )
   }
 
-  private def getParam(queryMap: Map[String, Seq[String]])(paramName: String): Option[String] = {
-    queryMap.get(paramName).flatMap(_.headOption)
+  private def getParam(queryMap: Map[String, Seq[String]])(paramName: ParamName): Option[String] = {
+    queryMap.get(paramName.text).flatMap(_.headOption)
   }
 
-  private def hasParameter(params: Map[String, Seq[String]])(paramName: String) = {
+  private def hasParameter(params: Map[String, Seq[String]])(paramName: ParamName) = {
     getParam(params)(paramName).isDefined
   }
 
-  private def hasEnvParameter(params: Map[String, Seq[String]]) = hasParameter(params)(ParamNames.Environment)
+  private def hasEnvParameter(params: Map[String, Seq[String]]) = hasParameter(params)(ParamName.Environment)
 
   private def asBody(errorCode: String, message: Json.JsValueWrapper): JsObject =
     Json.obj(
@@ -123,9 +126,9 @@ class QueryController @Inject() (
   private val applicationNotFound = NotFound(asBody("APPLICATION_NOT_FOUND", "No application found for query"))
 
   private def queryBothEnvironments(params: Map[String, Seq[String]])(implicit hc: HeaderCarrier): Future[Result] = {
-    def hasParam: String => Boolean = hasParameter(params) _
-    def isPaginatedQuery: Boolean   = hasParam(ParamNames.PageNbr) || hasParam(ParamNames.PageSize)
-    def isSingleAppQuery: Boolean   = hasParam(ParamNames.ApplicationId) || hasParam(ParamNames.ClientId) || hasParam(ParamNames.ServerToken)
+    def hasParam: ParamName => Boolean = hasParameter(params)
+    def isPaginatedQuery: Boolean      = hasParam(ParamName.PageNbr) || hasParam(ParamName.PageSize)
+    def isSingleAppQuery: Boolean      = hasParam(ParamName.ApplicationId) || hasParam(ParamName.ClientId) || hasParam(ParamName.ServerToken)
 
     def handleFailure(response: HttpResponse): Result = {
       logger.warn(s"Error occurred in Third Party Orchestrater calling one query endpoint: ${response.status} ${response.body}")
@@ -153,18 +156,18 @@ class QueryController @Inject() (
           .biflatMap[HttpResponse, Option[QueriedApplication]](transform404, app => EitherT.fromEither((Right(Some(app)))))
       }
 
-      call(Environment.PRODUCTION)
+      call(Environment.Production)
         .flatMap {
-          _.fold(call(Environment.SANDBOX))(app => EitherT.rightT(Some(app)))
+          _.fold(call(Environment.Sandbox))(app => EitherT.rightT(Some(app)))
         }
         .fold(handleFailure, handleOption)
 
     } else { // not singleApp
       val principalET   =
-        EitherT(queryConnector.principal.query[Either[HttpResponse, List[QueriedApplication]]](buildEffectiveParams(appConfig.inPairedEnvironment, params, Environment.PRODUCTION)))
+        EitherT(queryConnector.principal.query[Either[HttpResponse, List[QueriedApplication]]](buildEffectiveParams(appConfig.inPairedEnvironment, params, Environment.Production)))
       val subordinateET =
         EitherT(queryConnector.subordinate.query[Either[HttpResponse, List[QueriedApplication]]](
-          buildEffectiveParams(appConfig.inPairedEnvironment, params, Environment.SANDBOX)
+          buildEffectiveParams(appConfig.inPairedEnvironment, params, Environment.Sandbox)
         ) recover recoverWithDefault(Right(Nil)))
 
       val appsET = for {
@@ -177,7 +180,7 @@ class QueryController @Inject() (
   }
 
   def query(): Action[AnyContent] = Action.async { implicit request =>
-    val envParam = getParam(request.queryString)(ParamNames.Environment)
+    val envParam = getParam(request.queryString)(ParamName.Environment)
 
     if (envParam.isEmpty) {
       render.async {
@@ -187,7 +190,7 @@ class QueryController @Inject() (
     } else /*if (envParam.isDefined)*/ {
       Environment(envParam.get).fold(
         successful(BadRequest(Json.toJson(JsErrorResponse("INVALID_QUERY", s"${envParam.get} is not a valid environment"))))
-      )(env => queryEnv(env, request.queryString.-(ParamNames.Environment)))
+      )(env => queryEnv(env, request.queryString.-(ParamName.Environment.text)))
     }
   }
 }

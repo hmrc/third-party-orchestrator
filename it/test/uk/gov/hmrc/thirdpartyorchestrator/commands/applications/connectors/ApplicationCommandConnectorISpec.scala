@@ -19,21 +19,23 @@ package uk.gov.hmrc.thirdpartyorchestrator.commands.applications.connectors
 import scala.concurrent.ExecutionContext.Implicits.global
 
 import cats.data.NonEmptyList
-import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.client.WireMock.*
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 
-import play.api.http.Status._
+import play.api.http.Status.*
+import play.api.libs.ws.JsonBodyWritables
 import uk.gov.hmrc.http.test.HttpClientV2Support
 import uk.gov.hmrc.http.{HeaderCarrier, InternalServerException, UnauthorizedException}
 
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
-import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models._
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.*
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.*
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
+import uk.gov.hmrc.apiplatform.modules.common.domain.services.NonEmptyListFormatters.given
 import uk.gov.hmrc.apiplatform.modules.common.utils
 import uk.gov.hmrc.thirdpartyorchestrator.commands.applications.domain.models.{AppCmdHandlerTypes, DispatchSuccessResult}
-import uk.gov.hmrc.thirdpartyorchestrator.utils._
+import uk.gov.hmrc.thirdpartyorchestrator.utils.*
 
 class ApplicationCommandConnectorISpec
     extends AsyncHmrcSpec
@@ -43,7 +45,8 @@ class ApplicationCommandConnectorISpec
     with PrincipalAndSubordinateWireMockSetup
     with utils.FixedClock
     with ApplicationTokenFixtures
-    with HttpClientV2Support {
+    with HttpClientV2Support
+    with JsonBodyWritables {
 
   trait Setup {
 
@@ -61,18 +64,18 @@ class ApplicationCommandConnectorISpec
           token = ApplicationTokenData.one,
           gatewayId = "gatewayId",
           name = ApplicationName("appName"),
-          deployedTo = Environment.PRODUCTION,
+          deployedTo = Environment.Production,
           description = Some("random description"),
           createdOn = instant,
           lastAccess = Some(instant),
           grantLength = GrantLength.EIGHTEEN_MONTHS,
           access = Access.Standard(),
-          state = ApplicationState(State.TESTING, None, None, None, updatedOn = instant),
-          rateLimitTier = RateLimitTier.BRONZE,
+          state = ApplicationState(State.Testing, None, None, None, updatedOn = instant),
+          rateLimitTier = RateLimitTier.Bronze,
           checkInformation = None,
           blocked = false,
           ipAllowlist = IpAllowlist(),
-          lastActionActor = ActorType.UNKNOWN,
+          lastActionActor = ActorType.Unknown,
           deleteRestriction = DeleteRestriction.NoRestriction,
           organisationId = None
         ),
@@ -119,7 +122,7 @@ class ApplicationCommandConnectorISpec
     "return success" in new CollaboratorSetup with PrincipalSetup {
       val response = anApplicationResponse()
 
-      stubFor(Environment.PRODUCTION)(
+      stubFor(Environment.Production)(
         patch(urlMatching(s".*/application/${applicationId.value}/dispatch"))
           .withJsonRequestBody(request)
           .willReturn(
@@ -135,10 +138,9 @@ class ApplicationCommandConnectorISpec
     }
 
     "return teamMember already exists response" in new CollaboratorSetup with PrincipalSetup {
-      import uk.gov.hmrc.apiplatform.modules.common.domain.services.NonEmptyListFormatters._
       val response = NonEmptyList.one[CommandFailure](CommandFailures.CollaboratorAlreadyExistsOnApp)
 
-      stubFor(Environment.PRODUCTION)(
+      stubFor(Environment.Production)(
         patch(urlMatching(s".*/application/${applicationId.value}/dispatch"))
           .withJsonRequestBody(request)
           .willReturn(
@@ -154,7 +156,7 @@ class ApplicationCommandConnectorISpec
     }
 
     "return unauthorised" in new CollaboratorSetup with PrincipalSetup {
-      stubFor(Environment.PRODUCTION)(
+      stubFor(Environment.Production)(
         patch(urlMatching(s".*/application/${applicationId.value}/dispatch"))
           .willReturn(
             aResponse()
@@ -169,7 +171,7 @@ class ApplicationCommandConnectorISpec
 
     "return for generic error" in new CollaboratorSetup with PrincipalSetup {
 
-      stubFor(Environment.PRODUCTION)(
+      stubFor(Environment.Production)(
         patch(urlMatching(s".*/application/${applicationId.value}/dispatch"))
           .withJsonRequestBody(request)
           .willReturn(
@@ -185,7 +187,7 @@ class ApplicationCommandConnectorISpec
 
     "handle TPA returning something we don't understand" in new CollaboratorSetup with PrincipalSetup {
 
-      stubFor(Environment.PRODUCTION)(
+      stubFor(Environment.Production)(
         patch(urlMatching(s".*/application/${applicationId.value}/dispatch"))
           .withJsonRequestBody(request)
           .willReturn(

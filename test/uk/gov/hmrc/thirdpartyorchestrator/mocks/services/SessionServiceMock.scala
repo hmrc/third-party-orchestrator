@@ -27,7 +27,7 @@ trait SessionServiceMock extends MockitoSugar with ArgumentMatchersSugar {
   val sessionServiceMock = mock[SessionService]
 
   private def fetchSessionById(sessionId: UserSessionId, returns: Option[UserSession]) =
-    when(sessionServiceMock.fetch(eqTo(sessionId))(*)).thenReturn(successful(returns))
+    when(sessionServiceMock.fetch(eqTo(sessionId))(using *)).thenReturn(successful(returns))
 
   def fetchSessionByIdReturns(sessionId: UserSessionId, returns: UserSession) =
     fetchSessionById(sessionId, Some(returns))

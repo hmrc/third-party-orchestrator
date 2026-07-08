@@ -27,7 +27,8 @@ import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.GetApp
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, UserId}
 import uk.gov.hmrc.thirdpartyorchestrator.services.ApplicationFetcher
 
-trait ApplicationFetcherMockModule extends MockitoSugar with ArgumentMatchersSugar {
+trait ApplicationFetcherMockModule {
+  self: MockitoSugar & ArgumentMatchersSugar =>
 
   trait AbstractApplicationFetcherMock {
     def aMock: ApplicationFetcher
@@ -35,43 +36,43 @@ trait ApplicationFetcherMockModule extends MockitoSugar with ArgumentMatchersSug
     object FetchApplication {
 
       def thenReturn(applicationId: ApplicationId, application: ApplicationWithCollaborators) =
-        when(aMock.fetchApplication(eqTo(applicationId))(*)).thenReturn(successful(Some(application)))
+        when(aMock.fetchApplication(eqTo(applicationId))(using *)).thenReturn(successful(Some(application)))
 
       def thenReturnNone(applicationId: ApplicationId) =
-        when(aMock.fetchApplication(eqTo(applicationId))(*)).thenReturn(successful(None))
+        when(aMock.fetchApplication(eqTo(applicationId))(using *)).thenReturn(successful(None))
     }
 
     object FetchApplicationsByUserId {
 
       def thenReturn(userId: UserId, applications: ApplicationWithCollaborators*) =
-        when(aMock.fetchApplicationsByUserId(eqTo(userId))(*)).thenReturn(successful(applications.toList))
+        when(aMock.fetchApplicationsByUserId(eqTo(userId))(using *)).thenReturn(successful(applications.toList))
 
       def thenFails(userId: UserId) =
-        when(aMock.fetchApplicationsByUserId(eqTo(userId))(*)).thenReturn(failed(UpstreamErrorResponse("some problem happened", 500)))
+        when(aMock.fetchApplicationsByUserId(eqTo(userId))(using *)).thenReturn(failed(UpstreamErrorResponse("some problem happened", 500)))
     }
 
     object FetchApplicationsByUserIds {
 
       def thenReturn(userIds: List[UserId], applications: ApplicationWithCollaborators*) =
-        when(aMock.fetchApplicationsByUserIds(eqTo(userIds))(*)).thenReturn(successful(applications.toList))
+        when(aMock.fetchApplicationsByUserIds(eqTo(userIds))(using *)).thenReturn(successful(applications.toList))
     }
 
     object GetAppsForResponsibleIndividualOrAdmin {
 
       def thenReturn(request: GetAppsForAdminOrRIRequest, applications: ApplicationWithCollaborators*) =
-        when(aMock.getAppsForResponsibleIndividualOrAdmin(eqTo(request))(*)).thenReturn(successful(applications.toList))
+        when(aMock.getAppsForResponsibleIndividualOrAdmin(eqTo(request))(using *)).thenReturn(successful(applications.toList))
 
       def thenThrowException(request: GetAppsForAdminOrRIRequest)(exception: Exception) =
-        when(aMock.getAppsForResponsibleIndividualOrAdmin(eqTo(request))(*)).thenReturn(failed(exception))
+        when(aMock.getAppsForResponsibleIndividualOrAdmin(eqTo(request))(using *)).thenReturn(failed(exception))
     }
 
     object FetchApplicationByClientId {
 
       def thenReturn(clientId: ClientId, application: ApplicationWithCollaborators) =
-        when(aMock.fetchApplication(eqTo(clientId))(*)).thenReturn(successful(Some(application)))
+        when(aMock.fetchApplication(eqTo(clientId))(using *)).thenReturn(successful(Some(application)))
 
       def thenReturnNone(clientId: ClientId) =
-        when(aMock.fetchApplication(eqTo(clientId))(*)).thenReturn(successful(None))
+        when(aMock.fetchApplication(eqTo(clientId))(using *)).thenReturn(successful(None))
     }
   }
 

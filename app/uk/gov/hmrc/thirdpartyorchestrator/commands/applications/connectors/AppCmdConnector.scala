@@ -19,11 +19,13 @@ package uk.gov.hmrc.thirdpartyorchestrator.commands.applications.connectors
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
+import play.api.libs.ws.JsonBodyWritables
 import uk.gov.hmrc.http.client.{HttpClientV2, RequestBuilder}
-import uk.gov.hmrc.http.{StringContextOps, _}
+import uk.gov.hmrc.http.{StringContextOps, *}
 
-import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models._
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.common.domain.services.NonEmptyListFormatters.given
 import uk.gov.hmrc.thirdpartyorchestrator.commands.applications.domain.models.{AppCmdHandlerTypes, DispatchSuccessResult}
 import uk.gov.hmrc.thirdpartyorchestrator.connectors.EnvironmentAware
 import uk.gov.hmrc.thirdpartyorchestrator.utils.{ApplicationLogger, EbridgeConfigurator}
@@ -39,9 +41,10 @@ trait AppCmdConnector {
 
 abstract private[commands] class AbstractAppCmdConnector
     extends AppCmdConnector
-    with ApplicationLogger {
+    with ApplicationLogger
+    with JsonBodyWritables {
 
-  implicit def ec: ExecutionContext
+  given ec: ExecutionContext
   val serviceBaseUrl: String
   def http: HttpClientV2
 
@@ -55,7 +58,6 @@ abstract private[commands] class AbstractAppCmdConnector
     )(implicit hc: HeaderCarrier
     ): AppCmdHandlerTypes.AppCmdResult = {
 
-    import uk.gov.hmrc.apiplatform.modules.common.domain.services.NonEmptyListFormatters._
     import play.api.libs.json._
     import uk.gov.hmrc.http.HttpReads.Implicits._
     import play.api.http.Status._
