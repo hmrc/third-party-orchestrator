@@ -6,19 +6,19 @@ import bloop.integrations.sbt.BloopDefaults
 lazy val appName = "third-party-orchestrator"
 
 Global / bloopAggregateSourceDependencies := true
-Global / bloopExportJarClassifiers := Some(Set("sources"))
+Global / bloopExportJarClassifiers        := Some(Set("sources"))
 
-ThisBuild / scalaVersion := "3.3.7"
-ThisBuild / majorVersion := 0
+ThisBuild / scalaVersion                                         := "3.3.7"
+ThisBuild / majorVersion                                         := 0
 ThisBuild / libraryDependencySchemes += "org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always
-ThisBuild / semanticdbEnabled := true
-ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
+ThisBuild / semanticdbEnabled                                    := true
+ThisBuild / semanticdbVersion                                    := scalafixSemanticdb.revision
 
 lazy val microservice = Project(appName, file("."))
   .enablePlugins(PlayScala, SbtDistributablesPlugin)
   .disablePlugins(JUnitXmlReportPlugin)
   .settings(
-    libraryDependencies ++= AppDependencies(),
+    libraryDependencies ++= AppDependencies()
   )
   .settings(
     Test / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-eT"),
@@ -45,7 +45,7 @@ lazy val it = (project in file("it"))
   .dependsOn(microservice % "test->test")
   .settings(DefaultBuildSettings.itSettings())
   .settings(
-    Test / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-eT"),
+    Test / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-eT")
   )
 
 commands ++= Seq(
@@ -53,7 +53,6 @@ commands ++= Seq(
   Command.command("fmtAll") { state => "scalafmtAll" :: "it/scalafmtAll" :: state },
   Command.command("fixAll") { state => "scalafixAll" :: "it/scalafixAll" :: state },
   Command.command("testAll") { state => "test" :: "it/test" :: state },
-
   Command.command("run-all-tests") { state => "testAll" :: state },
   Command.command("clean-and-test") { state => "cleanAll" :: "compile" :: "run-all-tests" :: state },
   Command.command("pre-commit") { state => "cleanAll" :: "fmtAll" :: "fixAll" :: "coverage" :: "testAll" :: "coverageOff" :: "coverageAggregate" :: state }
