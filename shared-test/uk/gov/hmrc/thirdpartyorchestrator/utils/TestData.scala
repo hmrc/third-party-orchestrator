@@ -31,6 +31,7 @@ trait TestData extends ApplicationWithCollaboratorsFixtures {
       description = None,
       environment = Environment.SANDBOX,
       collaborators = Set(admin),
-      subscriptions = None
+      subscriptions = None,
+      organisationId = None
     )
 }
