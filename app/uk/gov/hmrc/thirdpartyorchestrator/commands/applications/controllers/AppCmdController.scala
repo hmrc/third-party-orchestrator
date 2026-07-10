@@ -42,7 +42,7 @@ class AppCmdController @Inject() (
     val applicationService: ApplicationFetcher,
     cmdConnector: EnvironmentAwareAppCmdConnector,
     cc: ControllerComponents
-  )(implicit val ec: ExecutionContext
+  )(using ExecutionContext
   ) extends BackendController(cc)
     with JsonBodyWritables
     with ApplicationLogger {

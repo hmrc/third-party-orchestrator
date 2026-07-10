@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.thirdpartyorchestrator.services
 
-import scala.concurrent.ExecutionContext.Implicits.global
-
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
@@ -32,7 +30,7 @@ class SessionServiceSpec extends AsyncHmrcSpec {
 
   trait Setup extends ThirdPartyDeveloperConnectorMockModule with UserBuilder
       with LocalUserIdTracker {
-    implicit val hc: HeaderCarrier = HeaderCarrier()
+    given HeaderCarrier = HeaderCarrier()
 
     val underTest = new SessionService(ThirdPartyDeveloperConnectorMock.aMock)
 

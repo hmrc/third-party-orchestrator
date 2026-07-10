@@ -70,14 +70,14 @@ trait QueryConnectorMockModule extends MockitoSugar with ArgumentMatchersSugar {
 
     object ByQueryStreamParams {
 
-      private def asStreamOfByteStrings(apps: Seq[QueriedApplication])(implicit writes: Writes[QueriedApplication]): Source[ByteString, ?] =
+      private def asStreamOfByteStrings(apps: Seq[QueriedApplication])(using Writes[QueriedApplication]): Source[ByteString, ?] =
         Source(apps.map(a => ByteString(Json.toJson(a).toString)))
 
-      def returns(apps: ApplicationWithCollaborators*)(implicit writes: Writes[QueriedApplication]) = {
+      def returns(apps: ApplicationWithCollaborators*)(using Writes[QueriedApplication]) = {
         when(aMock.queryStream(*[Map[String, String]])(using *)).thenReturn(successful(asStreamOfByteStrings(apps.map(QueriedApplication(_)))))
       }
 
-      def returnsFor(params: Map[String, String], apps: ApplicationWithCollaborators*)(implicit writes: Writes[QueriedApplication]) = {
+      def returnsFor(params: Map[String, String], apps: ApplicationWithCollaborators*)(using Writes[QueriedApplication]) = {
         when(aMock.queryStream(eqTo(params))(using *)).thenReturn(successful(asStreamOfByteStrings(apps.map(QueriedApplication(_)))))
       }
     }

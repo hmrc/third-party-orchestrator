@@ -51,7 +51,7 @@ trait PrincipalAndSubordinateWireMockSetup extends BeforeAndAfterEach with Befor
 
   def stubForSandbox: MappingBuilder => StubMapping = stubFor(Environment.Sandbox)
 
-  implicit val hc: HeaderCarrier = HeaderCarrier()
+  given HeaderCarrier = HeaderCarrier()
 
   override def fakeApplication(): Application =
     GuiceApplicationBuilder()

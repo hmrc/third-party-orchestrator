@@ -47,7 +47,7 @@ class ReadEitherWithNoExceptionSpec
       .build()
 
   trait Setup {
-    implicit val hc: HeaderCarrier = HeaderCarrier()
+    given HeaderCarrier = HeaderCarrier()
 
     val applicationId: ApplicationId = ApplicationId.random
     val underTest: QueryConnector    = app.injector.instanceOf[PrincipalQueryConnector]

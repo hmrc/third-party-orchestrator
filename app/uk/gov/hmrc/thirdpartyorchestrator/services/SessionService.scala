@@ -17,7 +17,7 @@
 package uk.gov.hmrc.thirdpartyorchestrator.services
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -27,9 +27,8 @@ import uk.gov.hmrc.thirdpartyorchestrator.connectors.ThirdPartyDeveloperConnecto
 @Singleton
 class SessionService @Inject() (
     val thirdPartyDeveloperConnector: ThirdPartyDeveloperConnector
-  )(implicit val ec: ExecutionContext
   ) {
 
-  def fetch(sessionId: UserSessionId)(implicit hc: HeaderCarrier): Future[Option[UserSession]] =
+  def fetch(sessionId: UserSessionId)(using HeaderCarrier): Future[Option[UserSession]] =
     thirdPartyDeveloperConnector.fetchSession(sessionId)
 }

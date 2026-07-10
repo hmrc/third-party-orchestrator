@@ -52,7 +52,7 @@ class ThirdPartyApplicationConnectorIntegrationSpec extends BaseConnectorIntegra
       .build()
 
   trait Setup extends TestData {
-    implicit val hc: HeaderCarrier = HeaderCarrier()
+    given HeaderCarrier = HeaderCarrier()
 
     val userId1                      = userIdOne
     val userId2                      = userIdTwo

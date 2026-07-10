@@ -40,7 +40,7 @@ class TpaPassthruControllerSpec extends BaseControllerSpec with Matchers {
       with LocalUserIdTracker
       with TestData {
 
-    implicit val hc: HeaderCarrier = HeaderCarrier()
+    given HeaderCarrier = HeaderCarrier()
 
     val applicationId = ApplicationId.random
     val clientId      = ClientId.random

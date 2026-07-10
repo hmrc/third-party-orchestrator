@@ -46,7 +46,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
       .build()
 
   trait Setup extends UserBuilder with LocalUserIdTracker {
-    implicit val hc: HeaderCarrier = HeaderCarrier()
+    given HeaderCarrier = HeaderCarrier()
 
     val userEmail          = "thirdpartydeveloper@example.com".toLaxEmail
     val userEmail2         = "someone2@somewehere.com".toLaxEmail

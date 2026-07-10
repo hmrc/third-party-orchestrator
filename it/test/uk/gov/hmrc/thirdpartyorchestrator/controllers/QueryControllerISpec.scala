@@ -59,9 +59,9 @@ class QueryControllerISpec
       .build()
 
   trait Setup {
-    val applicationId              = standardApp.id
-    implicit val hc: HeaderCarrier = HeaderCarrier()
-    lazy val baseUrl               = s"http://localhost:$port"
+    val applicationId   = standardApp.id
+    given HeaderCarrier = HeaderCarrier()
+    lazy val baseUrl    = s"http://localhost:$port"
 
     val wsClient = app.injector.instanceOf[WSClient]
   }

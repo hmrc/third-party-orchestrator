@@ -38,7 +38,7 @@ class SessionControllerSpec extends BaseControllerSpec with Matchers {
   trait Setup
       extends SessionServiceMock with UserBuilder with LocalUserIdTracker {
 
-    implicit val hc: HeaderCarrier = HeaderCarrier()
+    given HeaderCarrier = HeaderCarrier()
 
     val userId     = UserId.random
     val sessionId  = UserSessionId.random

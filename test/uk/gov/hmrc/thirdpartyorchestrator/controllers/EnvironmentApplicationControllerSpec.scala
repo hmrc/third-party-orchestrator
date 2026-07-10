@@ -38,7 +38,7 @@ class EnvironmentApplicationControllerSpec extends BaseControllerSpec with Match
   trait Setup
       extends UserBuilder with LocalUserIdTracker with ApplicationWithCollaboratorsFixtures with ThirdPartyApplicationConnectorMockModule {
 
-    implicit val hc: HeaderCarrier = HeaderCarrier()
+    given HeaderCarrier = HeaderCarrier()
 
     val applicationId = ApplicationId.random
     val clientId      = ClientId.random

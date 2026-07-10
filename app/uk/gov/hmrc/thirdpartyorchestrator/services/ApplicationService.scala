@@ -33,14 +33,14 @@ class ApplicationService @Inject() (
     val thirdPartyDeveloperConnector: ThirdPartyDeveloperConnector,
     val applicationFetcher: ApplicationFetcher,
     val thirdPartyApplicationConnector: EnvironmentAwareThirdPartyApplicationConnector
-  )(implicit val ec: ExecutionContext
+  )(using ExecutionContext
   ) {
 
-  def createApplication(request: CreateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationWithCollaborators] = {
+  def createApplication(request: CreateApplicationRequest)(using HeaderCarrier): Future[ApplicationWithCollaborators] = {
     thirdPartyApplicationConnector(request.environment).create(request)
   }
 
-  def fetchApplicationsForEmails(emails: List[LaxEmailAddress])(implicit hc: HeaderCarrier): Future[List[ApplicationWithCollaborators]] = {
+  def fetchApplicationsForEmails(emails: List[LaxEmailAddress])(using HeaderCarrier): Future[List[ApplicationWithCollaborators]] = {
     for {
       developers              <- thirdPartyDeveloperConnector.fetchDevelopers(emails)
       verifiedDeveloperUserIds = developers.filter(_.verified).map(_.userId)
@@ -48,7 +48,7 @@ class ApplicationService @Inject() (
     } yield applications
   }
 
-  def fetchVerifiedCollaboratorsForApplication(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Either[String, Set[User]]] = {
+  def fetchVerifiedCollaboratorsForApplication(applicationId: ApplicationId)(using HeaderCarrier): Future[Either[String, Set[User]]] = {
     val E = EitherTHelper.make[String]
     (
       for {

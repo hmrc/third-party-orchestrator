@@ -32,7 +32,7 @@ import uk.gov.hmrc.thirdpartyorchestrator.utils.AsyncHmrcSpec
 
 class ApplicationFetcherSpec extends AsyncHmrcSpec with ApplicationWithCollaboratorsFixtures {
 
-  implicit val hc: HeaderCarrier = HeaderCarrier()
+  given HeaderCarrier = HeaderCarrier()
 
   val userIds: List[UserId]                      = List(userIdOne, userIdTwo)
   val application: ApplicationWithCollaborators  = standardApp

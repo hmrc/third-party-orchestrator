@@ -48,7 +48,7 @@ class QueryConnectorIntegrationSpec extends BaseConnectorIntegrationSpec
       .build()
 
   trait Setup extends TestData {
-    implicit val hc: HeaderCarrier = HeaderCarrier()
+    given HeaderCarrier = HeaderCarrier()
 
     val userId1                      = userIdOne
     val userId2                      = userIdTwo

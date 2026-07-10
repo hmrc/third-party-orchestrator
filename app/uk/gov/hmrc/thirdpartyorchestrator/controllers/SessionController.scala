@@ -28,14 +28,14 @@ import uk.gov.hmrc.thirdpartyorchestrator.services.SessionService
 
 object SessionController {
   case class SessionRequest(sessionId: UserSessionId)
-  implicit val formatSession: OFormat[SessionRequest] = Json.format[SessionRequest]
+  given OFormat[SessionRequest] = Json.format[SessionRequest]
 }
 
 @Singleton()
 class SessionController @Inject() (
     sessionService: SessionService,
     cc: ControllerComponents
-  )(implicit val ec: ExecutionContext
+  )(using ExecutionContext
   ) extends BackendController(cc) with JsonUtils {
 
   import SessionController._

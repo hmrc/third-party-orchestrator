@@ -35,20 +35,20 @@ class ThirdPartyDeveloperConnector @Inject() (
     http: HttpClientV2,
     config: AppConfig,
     val metrics: ConnectorMetrics
-  )(implicit val ec: ExecutionContext
+  )(using ExecutionContext
   ) extends JsonBodyWritables {
 
   lazy val serviceBaseUrl: String = config.thirdPartyDeveloperUrl
   val api                         = ApiName("third-party-developer")
 
-  def fetchSession(userSessionId: UserSessionId)(implicit hc: HeaderCarrier): Future[Option[UserSession]] =
+  def fetchSession(userSessionId: UserSessionId)(using HeaderCarrier): Future[Option[UserSession]] =
     metrics.record(api) {
       http
         .get(url"$serviceBaseUrl/session/$userSessionId")
         .execute[Option[UserSession]]
     }
 
-  def fetchDeveloper(userId: UserId)(implicit hc: HeaderCarrier): Future[Option[User]] = {
+  def fetchDeveloper(userId: UserId)(using HeaderCarrier): Future[Option[User]] = {
     metrics.record(api) {
       val params = Seq("developerId" -> userId.toString())
       http
@@ -57,7 +57,7 @@ class ThirdPartyDeveloperConnector @Inject() (
     }
   }
 
-  def fetchDevelopers(emails: List[LaxEmailAddress])(implicit hc: HeaderCarrier): Future[List[User]] = {
+  def fetchDevelopers(emails: List[LaxEmailAddress])(using HeaderCarrier): Future[List[User]] = {
     metrics.record(api) {
       http
         .post(url"$serviceBaseUrl/developers/get-by-emails")

@@ -37,16 +37,16 @@ import uk.gov.hmrc.thirdpartyorchestrator.utils.ApplicationLogger
 class ApplicationFetcher @Inject() (
     thirdPartyApplicationConnector: EnvironmentAwareThirdPartyApplicationConnector,
     queryConnector: EnvironmentAwareQueryConnector
-  )(implicit ec: ExecutionContext
+  )(using ExecutionContext
   ) extends ApplicationLogger {
 
-  private def fetchSingleApp(qry: SingleApplicationQuery)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithCollaborators]] = {
+  private def fetchSingleApp(qry: SingleApplicationQuery)(using HeaderCarrier): Future[Option[ApplicationWithCollaborators]] = {
     OptionT(queryConnector.principal.query[Option[ApplicationWithCollaborators]](qry))
       .orElseF(queryConnector.subordinate.query[Option[ApplicationWithCollaborators]](qry) recover recoverWithDefault(None))
       .value
   }
 
-  private def fetchMultipleApps(qry: ApplicationQuery.GeneralOpenEndedApplicationQuery)(implicit hc: HeaderCarrier): Future[List[ApplicationWithCollaborators]] = {
+  private def fetchMultipleApps(qry: ApplicationQuery.GeneralOpenEndedApplicationQuery)(using HeaderCarrier): Future[List[ApplicationWithCollaborators]] = {
     val subordinateApps: Future[List[ApplicationWithCollaborators]] = queryConnector.subordinate.query[List[ApplicationWithCollaborators]](qry) recover recoverWithDefault(Nil)
     val principalApps: Future[List[ApplicationWithCollaborators]]   = queryConnector.principal.query[List[ApplicationWithCollaborators]](qry)
 
@@ -56,7 +56,7 @@ class ApplicationFetcher @Inject() (
     } yield principals ++ subordinates
   }
 
-  private def fetchMultipleAppsByPOST(qry: ApplicationQuery.GeneralOpenEndedApplicationQuery)(implicit hc: HeaderCarrier): Future[List[ApplicationWithCollaborators]] = {
+  private def fetchMultipleAppsByPOST(qry: ApplicationQuery.GeneralOpenEndedApplicationQuery)(using HeaderCarrier): Future[List[ApplicationWithCollaborators]] = {
     val subordinateApps: Future[List[ApplicationWithCollaborators]] = queryConnector.subordinate.postQuery[List[ApplicationWithCollaborators]](qry) recover recoverWithDefault(Nil)
     val principalApps: Future[List[ApplicationWithCollaborators]]   = queryConnector.principal.postQuery[List[ApplicationWithCollaborators]](qry)
 
@@ -66,23 +66,23 @@ class ApplicationFetcher @Inject() (
     } yield principals ++ subordinates
   }
 
-  def fetchApplication(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithCollaborators]] =
+  def fetchApplication(applicationId: ApplicationId)(using HeaderCarrier): Future[Option[ApplicationWithCollaborators]] =
     fetchSingleApp(ApplicationQuery.ById(applicationId, Nil))
 
-  def fetchApplication(clientId: ClientId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithCollaborators]] =
+  def fetchApplication(clientId: ClientId)(using HeaderCarrier): Future[Option[ApplicationWithCollaborators]] =
     fetchSingleApp(ApplicationQuery.ByClientId(clientId, false, Nil))
 
-  def fetchApplicationsByUserIds(userIds: List[UserId])(implicit hc: HeaderCarrier): Future[List[ApplicationWithCollaborators]] = {
+  def fetchApplicationsByUserIds(userIds: List[UserId])(using HeaderCarrier): Future[List[ApplicationWithCollaborators]] = {
     if (userIds.isEmpty)
       Future.successful(Nil)
     else
       fetchMultipleAppsByPOST(ApplicationQuery.GeneralOpenEndedApplicationQuery(List(UserIdsQP(userIds), ExcludeDeletedQP)))
   }
 
-  def fetchApplicationsByUserId(userId: UserId)(implicit hc: HeaderCarrier): Future[List[ApplicationWithCollaborators]] =
+  def fetchApplicationsByUserId(userId: UserId)(using HeaderCarrier): Future[List[ApplicationWithCollaborators]] =
     fetchMultipleApps(ApplicationQueries.applicationsByUserId(userId, false))
 
-  def getAppsForResponsibleIndividualOrAdmin(request: GetAppsForAdminOrRIRequest)(implicit hc: HeaderCarrier): Future[List[ApplicationWithCollaborators]] = {
+  def getAppsForResponsibleIndividualOrAdmin(request: GetAppsForAdminOrRIRequest)(using HeaderCarrier): Future[List[ApplicationWithCollaborators]] = {
     if (request.adminOrRespIndEmail.text.nonEmpty) {
       val subordinateApp: Future[List[ApplicationWithCollaborators]] =
         thirdPartyApplicationConnector.subordinate.getAppsForResponsibleIndividualOrAdmin(request) recover recoverWithDefault(Nil)

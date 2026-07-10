@@ -33,17 +33,17 @@ import uk.gov.hmrc.thirdpartyorchestrator.utils.EbridgeConfigurator
 case class CollaboratorUserIds(userIds: List[UserId])
 
 object CollaboratorUserIds {
-  implicit val format: OFormat[CollaboratorUserIds] = Json.format[CollaboratorUserIds]
+  given OFormat[CollaboratorUserIds] = Json.format[CollaboratorUserIds]
 }
 
 trait ThirdPartyApplicationConnector {
-  def create(req: CreateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationWithCollaborators]
-  def searchApplications(queryString: Map[String, Seq[String]])(implicit hc: HeaderCarrier): Future[PaginatedApplications]
-  def validateName(request: ApplicationNameValidationRequest)(implicit hc: HeaderCarrier): Future[Option[ApplicationNameValidationResult]]
-  def getAppsForResponsibleIndividualOrAdmin(request: GetAppsForAdminOrRIRequest)(implicit hc: HeaderCarrier): Future[List[ApplicationWithCollaborators]]
+  def create(req: CreateApplicationRequest)(using HeaderCarrier): Future[ApplicationWithCollaborators]
+  def searchApplications(queryString: Map[String, Seq[String]])(using HeaderCarrier): Future[PaginatedApplications]
+  def validateName(request: ApplicationNameValidationRequest)(using HeaderCarrier): Future[Option[ApplicationNameValidationResult]]
+  def getAppsForResponsibleIndividualOrAdmin(request: GetAppsForAdminOrRIRequest)(using HeaderCarrier): Future[List[ApplicationWithCollaborators]]
 }
 
-abstract class AbstractThirdPartyApplicationConnector(implicit val ec: ExecutionContext) extends ThirdPartyApplicationConnector with JsonBodyWritables {
+abstract class AbstractThirdPartyApplicationConnector(using ExecutionContext) extends ThirdPartyApplicationConnector with JsonBodyWritables {
 
   protected val serviceBaseUrl: String
   val api = ApiName("third-party-application")
@@ -53,13 +53,13 @@ abstract class AbstractThirdPartyApplicationConnector(implicit val ec: Execution
 
   def configureEbridgeIfRequired(requestBuilder: RequestBuilder): RequestBuilder
 
-  override def create(req: CreateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationWithCollaborators] =
+  override def create(req: CreateApplicationRequest)(using HeaderCarrier): Future[ApplicationWithCollaborators] =
     configureEbridgeIfRequired(http
       .post(url"$serviceBaseUrl/application")
       .withBody(Json.toJson(req)))
       .execute[ApplicationWithCollaborators]
 
-  def searchApplications(queryString: Map[String, Seq[String]])(implicit hc: HeaderCarrier): Future[PaginatedApplications] =
+  def searchApplications(queryString: Map[String, Seq[String]])(using HeaderCarrier): Future[PaginatedApplications] =
     metrics.record(api) {
       val queryStringFirstVal: Seq[(String, String)] = queryString.map {
         case (k, vs) => (k, vs.head)
@@ -69,7 +69,7 @@ abstract class AbstractThirdPartyApplicationConnector(implicit val ec: Execution
         .execute[PaginatedApplications]
     }
 
-  def validateName(request: ApplicationNameValidationRequest)(implicit hc: HeaderCarrier): Future[Option[ApplicationNameValidationResult]] =
+  def validateName(request: ApplicationNameValidationRequest)(using HeaderCarrier): Future[Option[ApplicationNameValidationResult]] =
     metrics.record(api) {
       configureEbridgeIfRequired(
         http.post(url"$serviceBaseUrl/application/name/validate")
@@ -78,7 +78,7 @@ abstract class AbstractThirdPartyApplicationConnector(implicit val ec: Execution
         .execute[Option[ApplicationNameValidationResult]]
     }
 
-  def getAppsForResponsibleIndividualOrAdmin(req: GetAppsForAdminOrRIRequest)(implicit hc: HeaderCarrier): Future[List[ApplicationWithCollaborators]] =
+  def getAppsForResponsibleIndividualOrAdmin(req: GetAppsForAdminOrRIRequest)(using HeaderCarrier): Future[List[ApplicationWithCollaborators]] =
     metrics.record(api) {
       configureEbridgeIfRequired(http.post(url"$serviceBaseUrl/responsible-ind-or-admin/applications"))
         .withBody(Json.toJson(req))
@@ -99,20 +99,20 @@ class PrincipalThirdPartyApplicationConnector @Inject() (
     val config: PrincipalThirdPartyApplicationConnector.Config,
     val http: HttpClientV2,
     val metrics: ConnectorMetrics
-  )(implicit override val ec: ExecutionContext
+  )(using ExecutionContext
   ) extends AbstractThirdPartyApplicationConnector {
 
   val serviceBaseUrl = config.serviceBaseUrl
 
   def configureEbridgeIfRequired(requestBuilder: RequestBuilder): RequestBuilder = requestBuilder
 
-  def verify(verificationCode: String)(implicit hc: HeaderCarrier): Future[HttpResponse] =
+  def verify(verificationCode: String)(using HeaderCarrier): Future[HttpResponse] =
     metrics.record(api) {
       http.post(url"$serviceBaseUrl/verify-uplift/$verificationCode")
         .execute[HttpResponse]
     }
 
-  def fetchApplicationsByAnswer(questionType: String)(implicit hc: HeaderCarrier): Future[HttpResponse] =
+  def fetchApplicationsByAnswer(questionType: String)(using HeaderCarrier): Future[HttpResponse] =
     metrics.record(api) {
       http.get(url"$serviceBaseUrl/submissions/answers/$questionType").execute[HttpResponse]
     }
@@ -134,7 +134,7 @@ class SubordinateThirdPartyApplicationConnector @Inject() (
     val config: SubordinateThirdPartyApplicationConnector.Config,
     val http: HttpClientV2,
     val metrics: ConnectorMetrics
-  )(implicit override val ec: ExecutionContext
+  )(using ExecutionContext
   ) extends AbstractThirdPartyApplicationConnector {
 
   val serviceBaseUrl: String = config.serviceBaseUrl

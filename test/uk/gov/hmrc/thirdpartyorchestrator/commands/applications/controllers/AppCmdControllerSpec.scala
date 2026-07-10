@@ -45,9 +45,9 @@ class AppCmdControllerSpec extends AsyncHmrcSpec with FixedClock with Applicatio
       extends ApplicationFetcherMockModule
       with CommandConnectorMockModule {
 
-    implicit val headerCarrier: HeaderCarrier = HeaderCarrier()
-    val clientId: ClientId                    = clientIdTwo
-    val sandboxApplicationId: ApplicationId   = applicationIdTwo
+    given HeaderCarrier                     = HeaderCarrier()
+    val clientId: ClientId                  = clientIdTwo
+    val sandboxApplicationId: ApplicationId = applicationIdTwo
 
     val sandboxApplication: ApplicationWithCollaborators = standardApp.withEnvironment(Environment.Sandbox)
     val productionApplicationId: ApplicationId           = applicationIdOne

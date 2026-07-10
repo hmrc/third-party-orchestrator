@@ -50,9 +50,9 @@ class ApplicationCommandConnectorISpec
 
   trait Setup {
 
-    implicit val hc: HeaderCarrier = HeaderCarrier()
-    val apiKeyTest                 = "5bb51bca-8f97-4f2b-aee4-81a4a70a42d3"
-    val bearer                     = "TestBearerToken"
+    given HeaderCarrier = HeaderCarrier()
+    val apiKeyTest      = "5bb51bca-8f97-4f2b-aee4-81a4a70a42d3"
+    val bearer          = "TestBearerToken"
 
     val applicationId = ApplicationId.random
     val clientId      = ApplicationTokenData.one.clientId

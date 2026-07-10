@@ -44,7 +44,7 @@ class QueryController @Inject() (
     queryConnector: EnvironmentAwareQueryConnector,
     appConfig: AppConfig,
     cc: ControllerComponents
-  )(implicit val ec: ExecutionContext
+  )(using ExecutionContext
   ) extends BackendController(cc) with JsonUtils with ApplicationLogger with ReadEitherWithNoException {
 
   private lazy val AcceptsStreamedJson = Accepting("application/stream+json")
@@ -62,7 +62,7 @@ class QueryController @Inject() (
         case (k, vs) => k -> vs.mkString
       }
 
-  private def queryEnv(environment: Environment, params: Map[String, Seq[String]])(implicit request: Request[?]): Future[Result] = {
+  private def queryEnv(environment: Environment, params: Map[String, Seq[String]])(using request: Request[?]): Future[Result] = {
     /*
      * Check there isn't an environment query param
      * And add one if we're not in a bridged deployment
@@ -125,7 +125,7 @@ class QueryController @Inject() (
 
   private val applicationNotFound = NotFound(asBody("APPLICATION_NOT_FOUND", "No application found for query"))
 
-  private def queryBothEnvironments(params: Map[String, Seq[String]])(implicit hc: HeaderCarrier): Future[Result] = {
+  private def queryBothEnvironments(params: Map[String, Seq[String]])(using HeaderCarrier): Future[Result] = {
     def hasParam: ParamName => Boolean = hasParameter(params)
     def isPaginatedQuery: Boolean      = hasParam(ParamName.PageNbr) || hasParam(ParamName.PageSize)
     def isSingleAppQuery: Boolean      = hasParam(ParamName.ApplicationId) || hasParam(ParamName.ClientId) || hasParam(ParamName.ServerToken)
