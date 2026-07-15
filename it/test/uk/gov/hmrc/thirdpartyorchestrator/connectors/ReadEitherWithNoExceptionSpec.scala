@@ -16,14 +16,14 @@
 
 package uk.gov.hmrc.thirdpartyorchestrator.connectors
 
-import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.client.WireMock.*
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 
-import play.api._
+import play.api.*
 import play.api.http.Status.BAD_REQUEST
 import play.api.http.{ContentTypes, HeaderNames}
 import play.api.inject.guice.GuiceApplicationBuilder
-import uk.gov.hmrc.http.HttpReads.Implicits._
+import uk.gov.hmrc.http.HttpReads.Implicits.*
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
@@ -47,7 +47,7 @@ class ReadEitherWithNoExceptionSpec
       .build()
 
   trait Setup {
-    implicit val hc: HeaderCarrier = HeaderCarrier()
+    given HeaderCarrier = HeaderCarrier()
 
     val applicationId: ApplicationId = ApplicationId.random
     val underTest: QueryConnector    = app.injector.instanceOf[PrincipalQueryConnector]

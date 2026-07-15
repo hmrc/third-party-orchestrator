@@ -33,7 +33,7 @@ import uk.gov.hmrc.thirdpartyorchestrator.utils.ApplicationLogger
 case class ApplicationsByRequest(emails: List[LaxEmailAddress])
 
 object ApplicationsByRequest {
-  implicit val format: OFormat[ApplicationsByRequest] = Json.format[ApplicationsByRequest]
+  given OFormat[ApplicationsByRequest] = Json.format[ApplicationsByRequest]
 }
 
 @Singleton()
@@ -41,7 +41,7 @@ class ApplicationController @Inject() (
     applicationService: ApplicationService,
     applicationFetcher: ApplicationFetcher,
     cc: ControllerComponents
-  )(implicit val ec: ExecutionContext
+  )(using ExecutionContext
   ) extends BackendController(cc) with JsonUtils with ApplicationLogger with WarnStillInUse {
 
   def create() = Action.async(parse.json) { implicit request =>

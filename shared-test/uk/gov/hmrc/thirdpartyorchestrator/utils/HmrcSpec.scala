@@ -16,8 +16,10 @@
 
 package uk.gov.hmrc.thirdpartyorchestrator.utils
 
+import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
+
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
 
 import uk.gov.hmrc.apiplatform.modules.common.utils
 
-abstract class AsyncHmrcSpec extends utils.HmrcSpec with DefaultAwaitTimeout with FutureAwaits {}
+abstract class AsyncHmrcSpec extends utils.HmrcSpec with DefaultAwaitTimeout with FutureAwaits with MockitoSugar with ArgumentMatchersSugar {}

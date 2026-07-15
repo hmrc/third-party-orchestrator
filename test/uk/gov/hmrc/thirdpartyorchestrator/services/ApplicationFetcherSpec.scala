@@ -27,12 +27,12 @@ import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.GetApp
 import uk.gov.hmrc.apiplatform.modules.applications.query.domain.models.ApplicationQuery
 import uk.gov.hmrc.apiplatform.modules.applications.query.domain.models.Param.{ExcludeDeletedQP, UserIdQP, UserIdsQP}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, LaxEmailAddress, UserId}
-import uk.gov.hmrc.thirdpartyorchestrator.mocks.connectors._
+import uk.gov.hmrc.thirdpartyorchestrator.mocks.connectors.*
 import uk.gov.hmrc.thirdpartyorchestrator.utils.AsyncHmrcSpec
 
 class ApplicationFetcherSpec extends AsyncHmrcSpec with ApplicationWithCollaboratorsFixtures {
 
-  implicit val hc: HeaderCarrier = HeaderCarrier()
+  given HeaderCarrier = HeaderCarrier()
 
   val userIds: List[UserId]                      = List(userIdOne, userIdTwo)
   val application: ApplicationWithCollaborators  = standardApp

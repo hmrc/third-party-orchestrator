@@ -16,14 +16,16 @@
 
 package uk.gov.hmrc.thirdpartyorchestrator
 
-import java.{util => ju}
+import java.util as ju
 import scala.util.Try
 
 import play.api.mvc.{PathBindable, QueryStringBindable}
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ClientSecret
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
 
+// N.B. Lots commented out here until Play supports opaque types on the paths.
+//
 package object binders {
 
   // $COVERAGE-OFF$
@@ -37,16 +39,16 @@ package object binders {
       .toRight(s"Cannot accept $text as UserId")
   }
 
-  implicit def applicationIdPathBinder(implicit textBinder: PathBindable[String]): PathBindable[ApplicationId] = new PathBindable[ApplicationId] {
+  // implicit def applicationIdPathBinder(implicit textBinder: PathBindable[String]): PathBindable[ApplicationId] = new PathBindable[ApplicationId] {
 
-    override def bind(key: String, value: String): Either[String, ApplicationId] = {
-      textBinder.bind(key, value).flatMap(applicationIdFromString)
-    }
+  //   override def bind(key: String, value: String): Either[String, ApplicationId] = {
+  //     textBinder.bind(key, value).flatMap(applicationIdFromString)
+  //   }
 
-    override def unbind(key: String, applicationId: ApplicationId): String = {
-      applicationId.value.toString()
-    }
-  }
+  //   override def unbind(key: String, applicationId: ApplicationId): String = {
+  //     applicationId.value.toString()
+  //   }
+  // }
 
   implicit def applicationIdQueryStringBindable(implicit textBinder: QueryStringBindable[String]): QueryStringBindable[ApplicationId] = new QueryStringBindable[ApplicationId] {
 
@@ -59,16 +61,16 @@ package object binders {
     }
   }
 
-  implicit def userIdPathBinder(implicit textBinder: PathBindable[String]): PathBindable[UserId] = new PathBindable[UserId] {
+  // implicit def userIdPathBinder(implicit textBinder: PathBindable[String]): PathBindable[UserId] = new PathBindable[UserId] {
 
-    override def bind(key: String, value: String): Either[String, UserId] = {
-      textBinder.bind(key, value).flatMap(userIdFromString)
-    }
+  //   override def bind(key: String, value: String): Either[String, UserId] = {
+  //     textBinder.bind(key, value).flatMap(userIdFromString)
+  //   }
 
-    override def unbind(key: String, userId: UserId): String = {
-      userId.value.toString()
-    }
-  }
+  //   override def unbind(key: String, userId: UserId): String = {
+  //     userId.value.toString()
+  //   }
+  // }
 
   implicit def queryStringBindable(implicit textBinder: QueryStringBindable[String]): QueryStringBindable[UserId] = new QueryStringBindable[UserId] {
 
@@ -93,27 +95,27 @@ package object binders {
       .map(ClientSecret.Id(_))
   }
 
-  implicit def clientSecretIdPathBinder(implicit textBinder: PathBindable[String]): PathBindable[ClientSecret.Id] = new PathBindable[ClientSecret.Id] {
+  // implicit def clientSecretIdPathBinder(implicit textBinder: PathBindable[String]): PathBindable[ClientSecret.Id] = new PathBindable[ClientSecret.Id] {
 
-    override def bind(key: String, value: String): Either[String, ClientSecret.Id] = {
-      textBinder.bind(key, value).flatMap(clientSecretIdFromString(_))
-    }
+  //   override def bind(key: String, value: String): Either[String, ClientSecret.Id] = {
+  //     textBinder.bind(key, value).flatMap(clientSecretIdFromString(_))
+  //   }
 
-    override def unbind(key: String, clientSecretId: ClientSecret.Id): String = {
-      clientSecretId.value.toString()
-    }
-  }
+  //   override def unbind(key: String, clientSecretId: ClientSecret.Id): String = {
+  //     clientSecretId.value.toString()
+  //   }
+  // }
 
-  implicit def apiContextPathBinder(implicit textBinder: PathBindable[String]): PathBindable[ApiContext] = new PathBindable[ApiContext] {
+  // implicit def apiContextPathBinder(implicit textBinder: PathBindable[String]): PathBindable[ApiContext] = new PathBindable[ApiContext] {
 
-    override def bind(key: String, value: String): Either[String, ApiContext] = {
-      textBinder.bind(key, value).map(ApiContext(_))
-    }
+  //   override def bind(key: String, value: String): Either[String, ApiContext] = {
+  //     textBinder.bind(key, value).map(ApiContext(_))
+  //   }
 
-    override def unbind(key: String, apiContext: ApiContext): String = {
-      apiContext.value
-    }
-  }
+  //   override def unbind(key: String, apiContext: ApiContext): String = {
+  //     apiContext.value
+  //   }
+  // }
 
   implicit def apiContextQueryStringBindable(implicit textBinder: QueryStringBindable[String]): QueryStringBindable[ApiContext] = new QueryStringBindable[ApiContext] {
 
@@ -133,16 +135,16 @@ package object binders {
     }
   }
 
-  implicit def apiVersionPathBinder(implicit textBinder: PathBindable[String]): PathBindable[ApiVersionNbr] = new PathBindable[ApiVersionNbr] {
+  // implicit def apiVersionPathBinder(implicit textBinder: PathBindable[String]): PathBindable[ApiVersionNbr] = new PathBindable[ApiVersionNbr] {
 
-    override def bind(key: String, value: String): Either[String, ApiVersionNbr] = {
-      textBinder.bind(key, value).map(ApiVersionNbr(_))
-    }
+  //   override def bind(key: String, value: String): Either[String, ApiVersionNbr] = {
+  //     textBinder.bind(key, value).map(ApiVersionNbr(_))
+  //   }
 
-    override def unbind(key: String, apiVersion: ApiVersionNbr): String = {
-      apiVersion.value
-    }
-  }
+  //   override def unbind(key: String, apiVersion: ApiVersionNbr): String = {
+  //     apiVersion.value
+  //   }
+  // }
 
   implicit def apiVersionQueryStringBindable(implicit textBinder: QueryStringBindable[String]): QueryStringBindable[ApiVersionNbr] = new QueryStringBindable[ApiVersionNbr] {
 
@@ -162,16 +164,16 @@ package object binders {
     }
   }
 
-  implicit def clientIdPathBinder(implicit textBinder: PathBindable[String]): PathBindable[ClientId] = new PathBindable[ClientId] {
+  // implicit def clientIdPathBinder(implicit textBinder: PathBindable[String]): PathBindable[ClientId] = new PathBindable[ClientId] {
 
-    override def bind(key: String, value: String): Either[String, ClientId] = {
-      textBinder.bind(key, value).map(ClientId(_))
-    }
+  //   override def bind(key: String, value: String): Either[String, ClientId] = {
+  //     textBinder.bind(key, value).map(ClientId(_))
+  //   }
 
-    override def unbind(key: String, clientId: ClientId): String = {
-      clientId.value
-    }
-  }
+  //   override def unbind(key: String, clientId: ClientId): String = {
+  //     clientId.value
+  //   }
+  // }
 
   implicit def clientIdQueryStringBindable(implicit textBinder: QueryStringBindable[String]): QueryStringBindable[ClientId] = new QueryStringBindable[ClientId] {
 

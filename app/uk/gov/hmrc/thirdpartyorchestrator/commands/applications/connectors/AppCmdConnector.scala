@@ -19,11 +19,13 @@ package uk.gov.hmrc.thirdpartyorchestrator.commands.applications.connectors
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
+import play.api.libs.ws.JsonBodyWritables
 import uk.gov.hmrc.http.client.{HttpClientV2, RequestBuilder}
-import uk.gov.hmrc.http.{StringContextOps, _}
+import uk.gov.hmrc.http.{StringContextOps, *}
 
-import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models._
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.common.domain.services.NonEmptyListFormatters.given
 import uk.gov.hmrc.thirdpartyorchestrator.commands.applications.domain.models.{AppCmdHandlerTypes, DispatchSuccessResult}
 import uk.gov.hmrc.thirdpartyorchestrator.connectors.EnvironmentAware
 import uk.gov.hmrc.thirdpartyorchestrator.utils.{ApplicationLogger, EbridgeConfigurator}
@@ -33,15 +35,15 @@ trait AppCmdConnector {
   def dispatch(
       applicationId: ApplicationId,
       dispatchRequest: DispatchRequest
-    )(implicit hc: HeaderCarrier
+    )(using HeaderCarrier
     ): AppCmdHandlerTypes.AppCmdResult
 }
 
-abstract private[commands] class AbstractAppCmdConnector
+abstract private[commands] class AbstractAppCmdConnector(using ExecutionContext)
     extends AppCmdConnector
-    with ApplicationLogger {
+    with ApplicationLogger
+    with JsonBodyWritables {
 
-  implicit def ec: ExecutionContext
   val serviceBaseUrl: String
   def http: HttpClientV2
 
@@ -52,15 +54,14 @@ abstract private[commands] class AbstractAppCmdConnector
   def dispatch(
       applicationId: ApplicationId,
       dispatchRequest: DispatchRequest
-    )(implicit hc: HeaderCarrier
+    )(using HeaderCarrier
     ): AppCmdHandlerTypes.AppCmdResult = {
 
-    import uk.gov.hmrc.apiplatform.modules.common.domain.services.NonEmptyListFormatters._
     import play.api.libs.json._
     import uk.gov.hmrc.http.HttpReads.Implicits._
     import play.api.http.Status._
 
-    def parseWithLogAndThrow[T](input: String)(implicit reads: Reads[T]): T = {
+    def parseWithLogAndThrow[T](input: String)(using Reads[T]): T = {
       Json.parse(input).validate[T] match {
         case JsSuccess(t, _) => t
         case JsError(err)    =>
@@ -95,7 +96,7 @@ abstract private[commands] class AbstractAppCmdConnector
 class SubordinateAppCmdConnector @Inject() (
     config: SubordinateAppCmdConnector.Config,
     val http: HttpClientV2
-  )(implicit override val ec: ExecutionContext
+  )(using ExecutionContext
   ) extends AbstractAppCmdConnector {
 
   import config._
@@ -119,7 +120,7 @@ object SubordinateAppCmdConnector {
 class PrincipalAppCmdConnector @Inject() (
     config: PrincipalAppCmdConnector.Config,
     val http: HttpClientV2
-  )(implicit val ec: ExecutionContext
+  )(using ExecutionContext
   ) extends AbstractAppCmdConnector {
 
   val serviceBaseUrl: String = config.baseUrl

@@ -22,15 +22,15 @@ import org.scalatest.matchers.should.Matchers
 
 import play.api.http.Status
 import play.api.libs.json.Json
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession, UserSessionId}
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
-import uk.gov.hmrc.thirdpartyorchestrator.controllers.SessionController._
+import uk.gov.hmrc.thirdpartyorchestrator.controllers.SessionController.*
 import uk.gov.hmrc.thirdpartyorchestrator.mocks.services.SessionServiceMock
 
 class SessionControllerSpec extends BaseControllerSpec with Matchers {
@@ -38,11 +38,11 @@ class SessionControllerSpec extends BaseControllerSpec with Matchers {
   trait Setup
       extends SessionServiceMock with UserBuilder with LocalUserIdTracker {
 
-    implicit val hc: HeaderCarrier = HeaderCarrier()
+    given HeaderCarrier = HeaderCarrier()
 
     val userId     = UserId.random
     val sessionId  = UserSessionId.random
-    val session    = UserSession(sessionId, LoggedInState.LOGGED_IN, buildUser(LaxEmailAddress("bob@example.com"), "Bob", "Fleming").copy(userId = userId))
+    val session    = UserSession(sessionId, LoggedInState.LoggedIn, buildUser(LaxEmailAddress("bob@example.com"), "Bob", "Fleming").copy(userId = userId))
     val controller = new SessionController(sessionServiceMock, Helpers.stubControllerComponents())
   }
 

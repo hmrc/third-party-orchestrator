@@ -33,9 +33,9 @@ class BaseControllerSpec
     extends AsyncHmrcSpec
     with GuiceOneAppPerSuite {
 
-  implicit val appConfig: AppConfig = mock[AppConfig]
+  given appConfig: AppConfig = mock[AppConfig]
 
-  implicit lazy val materializer: Materializer = app.materializer
+  given Materializer = app.materializer
 
   lazy val messagesApi: MessagesApi = app.injector.instanceOf[MessagesApi]
 

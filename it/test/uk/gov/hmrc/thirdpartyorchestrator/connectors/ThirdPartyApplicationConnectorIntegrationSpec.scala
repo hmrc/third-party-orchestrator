@@ -16,11 +16,11 @@
 
 package uk.gov.hmrc.thirdpartyorchestrator.connectors
 
-import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.client.WireMock.*
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 
 import play.api.http.ContentTypes
-import play.api.http.Status._
+import play.api.http.Status.*
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.{Application, Configuration, Mode}
@@ -52,7 +52,7 @@ class ThirdPartyApplicationConnectorIntegrationSpec extends BaseConnectorIntegra
       .build()
 
   trait Setup extends TestData {
-    implicit val hc: HeaderCarrier = HeaderCarrier()
+    given HeaderCarrier = HeaderCarrier()
 
     val userId1                      = userIdOne
     val userId2                      = userIdTwo

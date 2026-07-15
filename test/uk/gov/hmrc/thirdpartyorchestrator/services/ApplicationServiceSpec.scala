@@ -35,7 +35,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec {
       with TestData
       with ThirdPartyApplicationConnectorMockModule {
 
-    implicit val hc: HeaderCarrier = HeaderCarrier()
+    given HeaderCarrier = HeaderCarrier()
 
     val underTest = new ApplicationService(ThirdPartyDeveloperConnectorMock.aMock, ApplicationFetcherMock.aMock, EnvironmentAwareThirdPartyApplicationConnectorMock.instance)
 

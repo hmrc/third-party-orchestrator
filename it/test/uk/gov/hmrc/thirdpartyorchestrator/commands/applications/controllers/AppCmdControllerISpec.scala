@@ -16,23 +16,24 @@
 
 package uk.gov.hmrc.thirdpartyorchestrator.commands.applications.controllers
 
-import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.client.WireMock.*
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 
-import play.api.http.Status._
+import play.api.http.Status.*
 import play.api.http.{ContentTypes, HeaderNames}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
+import play.api.libs.ws.DefaultBodyWritables.writeableOf_String
 import play.api.libs.ws.{WSClient, WSResponse}
 import play.api.{Application, Configuration, Mode}
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
-import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models._
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.*
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.*
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
 import uk.gov.hmrc.apiplatform.modules.common.utils
-import uk.gov.hmrc.thirdpartyorchestrator.utils._
+import uk.gov.hmrc.thirdpartyorchestrator.utils.*
 
 class AppCmdControllerISpec
     extends AsyncHmrcSpec
@@ -57,9 +58,9 @@ class AppCmdControllerISpec
       .build()
 
   trait Setup {
-    val applicationId              = standardApp.id
-    implicit val hc: HeaderCarrier = HeaderCarrier()
-    lazy val baseUrl               = s"http://localhost:$port"
+    val applicationId   = standardApp.id
+    given HeaderCarrier = HeaderCarrier()
+    lazy val baseUrl    = s"http://localhost:$port"
 
     val wsClient           = app.injector.instanceOf[WSClient]
     val requestorEmail     = "requestor@example.com".toLaxEmail
@@ -78,7 +79,7 @@ class AppCmdControllerISpec
     }
 
     "return 401 when Unauthorised is returned from connector" in new Setup {
-      stubFor(Environment.SANDBOX)(
+      stubFor(Environment.Sandbox)(
         get(urlPathEqualTo("/query"))
           .withQueryParam("applicationId", equalTo(applicationId.toString))
           .willReturn(
@@ -89,7 +90,7 @@ class AppCmdControllerISpec
           )
       )
 
-      stubFor(Environment.SANDBOX)(
+      stubFor(Environment.Sandbox)(
         patch(urlMatching(s"/application/$applicationId/dispatch"))
           .willReturn(
             aResponse()

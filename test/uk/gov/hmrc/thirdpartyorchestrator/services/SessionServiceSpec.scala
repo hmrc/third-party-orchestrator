@@ -16,11 +16,9 @@
 
 package uk.gov.hmrc.thirdpartyorchestrator.services
 
-import scala.concurrent.ExecutionContext.Implicits.global
-
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession, UserSessionId}
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
@@ -32,14 +30,14 @@ class SessionServiceSpec extends AsyncHmrcSpec {
 
   trait Setup extends ThirdPartyDeveloperConnectorMockModule with UserBuilder
       with LocalUserIdTracker {
-    implicit val hc: HeaderCarrier = HeaderCarrier()
+    given HeaderCarrier = HeaderCarrier()
 
     val underTest = new SessionService(ThirdPartyDeveloperConnectorMock.aMock)
 
     val email     = "thirdpartydeveloper@example.com".toLaxEmail
     val userId    = UserId.random
     val sessionId = UserSessionId.random
-    val session   = UserSession(sessionId, LoggedInState.LOGGED_IN, buildUser(email, "Bob", "Fleming").copy(userId = userId))
+    val session   = UserSession(sessionId, LoggedInState.LoggedIn, buildUser(email, "Bob", "Fleming").copy(userId = userId))
   }
 
   "fetchSession" should {

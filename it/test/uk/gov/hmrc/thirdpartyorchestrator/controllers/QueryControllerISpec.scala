@@ -16,10 +16,10 @@
 
 package uk.gov.hmrc.thirdpartyorchestrator.controllers
 
-import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.client.WireMock.*
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 
-import play.api.http.Status._
+import play.api.http.Status.*
 import play.api.http.{ContentTypes, HeaderNames}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
@@ -27,11 +27,11 @@ import play.api.libs.ws.{WSClient, WSResponse}
 import play.api.{Application, Configuration, Mode}
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
-import uk.gov.hmrc.apiplatform.modules.applications.query.domain.models.ParamNames
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.*
+import uk.gov.hmrc.apiplatform.modules.applications.query.domain.models.ParamName
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.common.utils
-import uk.gov.hmrc.thirdpartyorchestrator.utils._
+import uk.gov.hmrc.thirdpartyorchestrator.utils.*
 
 class QueryControllerISpec
     extends AsyncHmrcSpec
@@ -59,19 +59,19 @@ class QueryControllerISpec
       .build()
 
   trait Setup {
-    val applicationId              = standardApp.id
-    implicit val hc: HeaderCarrier = HeaderCarrier()
-    lazy val baseUrl               = s"http://localhost:$port"
+    val applicationId   = standardApp.id
+    given HeaderCarrier = HeaderCarrier()
+    lazy val baseUrl    = s"http://localhost:$port"
 
     val wsClient = app.injector.instanceOf[WSClient]
   }
 
   "QueryController" should {
     "return result passing environment down as query" in new Setup {
-      stubFor(Environment.SANDBOX)(
+      stubFor(Environment.Sandbox)(
         get(urlPathEqualTo(s"/query"))
-          .withQueryParam(ParamNames.ApplicationId, equalTo(s"$applicationId"))
-          .withQueryParam(ParamNames.Environment, equalTo("SANDBOX"))
+          .withQueryParam(ParamName.ApplicationId.text, equalTo(s"$applicationId"))
+          .withQueryParam(ParamName.Environment.text, equalTo("SANDBOX"))
           .willReturn(
             aResponse()
               .withStatus(OK)
@@ -84,7 +84,7 @@ class QueryControllerISpec
         wsClient
           .url(s"$baseUrl/environment/SANDBOX/query")
           .withHttpHeaders((HeaderNames.ACCEPT, ContentTypes.JSON))
-          .withQueryStringParameters((ParamNames.ApplicationId -> s"$applicationId"))
+          .withQueryStringParameters((ParamName.ApplicationId.text -> s"$applicationId"))
           .get()
       )
       response.status shouldBe OK
@@ -92,10 +92,10 @@ class QueryControllerISpec
     }
 
     "return result passing environment down as query for streamed response" in new Setup {
-      stubFor(Environment.SANDBOX)(
+      stubFor(Environment.Sandbox)(
         get(urlPathEqualTo(s"/query"))
-          .withQueryParam(ParamNames.ApplicationId, equalTo(s"$applicationId"))
-          .withQueryParam(ParamNames.Environment, equalTo("SANDBOX"))
+          .withQueryParam(ParamName.ApplicationId.text, equalTo(s"$applicationId"))
+          .withQueryParam(ParamName.Environment.text, equalTo("SANDBOX"))
           .withHeader(HeaderNames.ACCEPT, equalTo(STREAMED_JSON))
           .willReturn(
             aResponse()
@@ -108,7 +108,7 @@ class QueryControllerISpec
         wsClient
           .url(s"$baseUrl/environment/SANDBOX/query")
           .withHttpHeaders((HeaderNames.ACCEPT, STREAMED_JSON))
-          .withQueryStringParameters((ParamNames.ApplicationId -> s"$applicationId"))
+          .withQueryStringParameters((ParamName.ApplicationId.text -> s"$applicationId"))
           .get()
       )
       response.status shouldBe OK

@@ -25,83 +25,82 @@ import org.apache.pekko.util.ByteString
 
 import play.api.http.ContentTypes
 import play.api.libs.json.{JsValue, Json}
+import play.api.libs.ws.JsonBodyWritables
 import play.mvc.Http
-import uk.gov.hmrc.http._
+import uk.gov.hmrc.http.*
 import uk.gov.hmrc.http.client.{HttpClientV2, RequestBuilder}
-import uk.gov.hmrc.play.http.metrics.common._
 
 import uk.gov.hmrc.apiplatform.modules.applications.query.domain.models.ApplicationQuery
 import uk.gov.hmrc.apiplatform.modules.applications.query.domain.services.QueryParamsToQueryStringMap
 import uk.gov.hmrc.thirdpartyorchestrator.utils.{ApplicationLogger, EbridgeConfigurator}
 
 trait QueryConnector {
-  def query[T](qry: ApplicationQuery)(implicit hc: HeaderCarrier, rds: HttpReads[T]): Future[T]
-  def queryStream(qry: ApplicationQuery)(implicit hc: HeaderCarrier): Future[Source[ByteString, _]]
-  def postQuery[T](qry: ApplicationQuery)(implicit hc: HeaderCarrier, rds: HttpReads[T]): Future[T]
+  def query[T](qry: ApplicationQuery)(using HeaderCarrier, HttpReads[T]): Future[T]
+  def queryStream(qry: ApplicationQuery)(using HeaderCarrier): Future[Source[ByteString, ?]]
+  def postQuery[T](qry: ApplicationQuery)(using HeaderCarrier, HttpReads[T]): Future[T]
 
-  def query[T](qry: Map[String, Seq[String]])(implicit hc: HeaderCarrier, rds: HttpReads[T]): Future[T]
-  def queryStream(qry: Map[String, Seq[String]])(implicit hc: HeaderCarrier): Future[Source[ByteString, _]]
-  def postQuery[T](qry: Map[String, Seq[String]])(implicit hc: HeaderCarrier, rds: HttpReads[T]): Future[T]
+  def query[T](qry: Map[String, String])(using HeaderCarrier, HttpReads[T]): Future[T]
+  def queryStream(qry: Map[String, String])(using HeaderCarrier): Future[Source[ByteString, ?]]
+  def postQuery[T](qry: Map[String, Seq[String]])(using HeaderCarrier, HttpReads[T]): Future[T]
 }
 
-abstract class AbstractQueryConnector(implicit val ec: ExecutionContext, val mat: Materializer) extends QueryConnector with RecordMetrics {
+abstract class AbstractQueryConnector(using ExecutionContext, Materializer)
+    extends QueryConnector
+    with StreamHttpReadsInstances
+    with JsonBodyWritables {
+
   protected val serviceBaseUrl: String
 
-  val apiMetrics: ApiMetrics
+  val api = ApiName("third-party-application")
+  protected val metrics: ConnectorMetrics
 
   protected def http: HttpClientV2
 
-  val api = API("third-party-application")
-
   protected def configureEbridgeIfRequired(requestBuilder: RequestBuilder): RequestBuilder
 
-  override def query[T](qry: Map[String, Seq[String]])(implicit hc: HeaderCarrier, rds: HttpReads[T]): Future[T] = {
-    val simplifiedQry = qry.map {
-      case (k, vs) => k -> vs.mkString
-    }
+  override def query[T](qry: Map[String, String])(using HeaderCarrier, HttpReads[T]): Future[T] = {
     configureEbridgeIfRequired(
       http
-        .get(url"${serviceBaseUrl}/query?$simplifiedQry")
+        .get(url"${serviceBaseUrl}/query?$qry")
     )
-    .setHeader(play.api.http.HeaderNames.CONTENT_TYPE -> ContentTypes.JSON)
-    .execute[T]
+      .setHeader(play.api.http.HeaderNames.CONTENT_TYPE -> ContentTypes.JSON)
+      .execute[T]
   }
 
-  override def queryStream(qry: Map[String, Seq[String]])(implicit hc: HeaderCarrier): Future[Source[ByteString, _]] = {
-    val simplifiedQry = qry.map {
-      case (k, vs) => k -> vs.mkString
-    }
-
+  override def queryStream(qry: Map[String, String])(using HeaderCarrier): Future[Source[ByteString, ?]] = {
     configureEbridgeIfRequired(
       http
-        .get(url"${serviceBaseUrl}/query?${simplifiedQry}")
+        .get(url"${serviceBaseUrl}/query?${qry}")
     )
-    .setHeader(Http.HeaderNames.ACCEPT -> "application/stream+json")
-    .stream[Source[ByteString, _]]
+      .setHeader(Http.HeaderNames.ACCEPT -> "application/stream+json")
+      .stream[Source[ByteString, ?]]
   }
 
-  override def query[T](qry: ApplicationQuery)(implicit hc: HeaderCarrier, rds: HttpReads[T]): Future[T] = {
-    val params = QueryParamsToQueryStringMap.toQuery(qry)
+  override def query[T](qry: ApplicationQuery)(using HeaderCarrier, HttpReads[T]): Future[T] = {
+    val params = QueryParamsToQueryStringMap.toHttpQueryString(qry)
     query[T](params)
   }
 
-  override def queryStream(qry: ApplicationQuery)(implicit hc: HeaderCarrier): Future[Source[ByteString, _]] = {
-    val params = QueryParamsToQueryStringMap.toQuery(qry)
+  override def queryStream(qry: ApplicationQuery)(using HeaderCarrier): Future[Source[ByteString, ?]] = {
+    val params = QueryParamsToQueryStringMap.toHttpQueryString(qry)
     queryStream(params)
   }
 
-  override def postQuery[T](qry: Map[String, Seq[String]])(implicit hc: HeaderCarrier, rds: HttpReads[T]): Future[T] = {
+  override def postQuery[T](qry: Map[String, Seq[String]])(using HeaderCarrier, HttpReads[T]): Future[T] = {
     configureEbridgeIfRequired(
       http
         .post(url"${serviceBaseUrl}/query")
         .withBody[JsValue](Json.toJson(qry))
     )
-    .setHeader(play.api.http.HeaderNames.CONTENT_TYPE -> ContentTypes.JSON)
-    .execute[T]
+      .setHeader(play.api.http.HeaderNames.CONTENT_TYPE -> ContentTypes.JSON)
+      .execute[T]
   }
 
-  override def postQuery[T](qry: ApplicationQuery)(implicit hc: HeaderCarrier, rds: HttpReads[T]): Future[T] = {
+  override def postQuery[T](qry: ApplicationQuery)(using hc: HeaderCarrier, rds: HttpReads[T]): Future[T] = {
     val params = QueryParamsToQueryStringMap.toQuery(qry)
+      .map {
+        case (paramName, values) => paramName.text -> values
+      }
     postQuery[T](params)
   }
 }
@@ -111,9 +110,9 @@ abstract class AbstractQueryConnector(implicit val ec: ExecutionContext, val mat
 class PrincipalQueryConnector @Inject() (
     val config: PrincipalThirdPartyApplicationConnector.Config,
     val http: HttpClientV2,
-    val apiMetrics: ApiMetrics
-  )(implicit override val ec: ExecutionContext,
-    mat: Materializer
+    val metrics: ConnectorMetrics
+  )(using ExecutionContext,
+    Materializer
   ) extends AbstractQueryConnector {
 
   val serviceBaseUrl = config.serviceBaseUrl
@@ -126,9 +125,9 @@ class PrincipalQueryConnector @Inject() (
 class SubordinateQueryConnector @Inject() (
     val config: SubordinateThirdPartyApplicationConnector.Config,
     val http: HttpClientV2,
-    val apiMetrics: ApiMetrics
-  )(implicit override val ec: ExecutionContext,
-    mat: Materializer
+    val metrics: ConnectorMetrics
+  )(using ExecutionContext,
+    Materializer
   ) extends AbstractQueryConnector with ApplicationLogger {
 
   val serviceBaseUrl: String = config.serviceBaseUrl

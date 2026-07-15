@@ -26,14 +26,14 @@ import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 trait JsonUtils extends Results {
   self: BackendController =>
 
-  def withJsonBodyFromAnyContent[T](f: T => Future[Result])(implicit request: Request[AnyContent], reads: Reads[T], d: DummyImplicit): Future[Result] = {
+  def withJsonBodyFromAnyContent[T](f: T => Future[Result])(using request: Request[AnyContent], rds: Reads[T], d: DummyImplicit): Future[Result] = {
     request.body.asJson match {
       case Some(json) => withJson(json)(f)
       case _          => Future.successful(BadRequest("Invalid payload"))
     }
   }
 
-  private def withJson[T](json: JsValue)(f: T => Future[Result])(implicit reads: Reads[T]): Future[Result] = {
+  private def withJson[T](json: JsValue)(f: T => Future[Result])(using Reads[T]): Future[Result] = {
     Try(json.validate[T]) match {
       case Success(JsSuccess(payload, _)) => f(payload)
       case Success(JsError(errs))         => Future.successful(BadRequest("Invalid payload: " + JsError.toJson(errs)))

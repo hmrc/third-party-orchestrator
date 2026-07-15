@@ -49,5 +49,5 @@ object DispatchSuccessResult {
   object ApplicationJsonFormatters extends ApplicationJsonFormatters
    */
 
-  implicit val format: OFormat[DispatchSuccessResult] = Json.format[DispatchSuccessResult]
+  given OFormat[DispatchSuccessResult] = Json.format[DispatchSuccessResult]
 }

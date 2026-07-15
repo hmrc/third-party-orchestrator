@@ -30,7 +30,7 @@ import uk.gov.hmrc.thirdpartyorchestrator.utils.ApplicationLogger
 class TpaPassthruController @Inject() (
     principalTpaConnector: PrincipalThirdPartyApplicationConnector,
     cc: ControllerComponents
-  )(implicit val ec: ExecutionContext
+  )(using ExecutionContext
   ) extends BackendController(cc) with JsonUtils with ApplicationLogger with JsonExceptionMapper {
 
   def verifyUplift(verificationCode: String) = Action.async { implicit request =>

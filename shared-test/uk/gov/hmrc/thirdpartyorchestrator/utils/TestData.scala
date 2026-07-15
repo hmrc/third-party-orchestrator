@@ -29,7 +29,7 @@ trait TestData extends ApplicationWithCollaboratorsFixtures {
       name = ApplicationName("Test V1 Application"),
       access = CreationAccess.Standard,
       description = None,
-      environment = Environment.SANDBOX,
+      environment = Environment.Sandbox,
       collaborators = Set(admin),
       subscriptions = None,
       organisationId = None

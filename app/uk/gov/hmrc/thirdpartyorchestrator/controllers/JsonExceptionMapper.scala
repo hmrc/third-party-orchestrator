@@ -21,7 +21,7 @@ import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import uk.gov.hmrc.thirdpartyorchestrator.utils.ApplicationLogger
 
 trait JsonExceptionMapper {
-  self: BackendController with ApplicationLogger =>
+  self: BackendController & ApplicationLogger =>
 
   def asJson(e: Throwable) = {
     logger.error(s"An unexpected error occurred: ${e.getMessage}", e)

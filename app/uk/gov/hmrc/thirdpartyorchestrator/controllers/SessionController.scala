@@ -28,14 +28,14 @@ import uk.gov.hmrc.thirdpartyorchestrator.services.SessionService
 
 object SessionController {
   case class SessionRequest(sessionId: UserSessionId)
-  implicit val formatSession: OFormat[SessionRequest] = Json.format[SessionRequest]
+  given OFormat[SessionRequest] = Json.format[SessionRequest]
 }
 
 @Singleton()
 class SessionController @Inject() (
     sessionService: SessionService,
     cc: ControllerComponents
-  )(implicit val ec: ExecutionContext
+  )(using ExecutionContext
   ) extends BackendController(cc) with JsonUtils {
 
   import SessionController._
@@ -43,8 +43,8 @@ class SessionController @Inject() (
   def getDeveloperForSession(): Action[AnyContent] = Action.async { implicit request =>
     withJsonBodyFromAnyContent[SessionRequest] { sessionRequest =>
       sessionService.fetch(sessionRequest.sessionId).map {
-        case Some(session @ UserSession(_, LoggedInState.LOGGED_IN, _)) => Ok(Json.toJson(session.developer))
-        case _                                                          => NotFound("Unknown session id")
+        case Some(session @ UserSession(_, LoggedInState.LoggedIn, _)) => Ok(Json.toJson(session.developer))
+        case _                                                         => NotFound("Unknown session id")
       }
     }
   }

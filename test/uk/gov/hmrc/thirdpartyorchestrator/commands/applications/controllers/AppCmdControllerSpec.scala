@@ -23,15 +23,16 @@ import cats.data.NonEmptyList
 
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.Result
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborators.Developer
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, ApplicationWithCollaboratorsFixtures}
-import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models._
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.*
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
+import uk.gov.hmrc.apiplatform.modules.common.domain.services.NonEmptyListFormatters.given
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartyorchestrator.commands.applications.connectors.EnvironmentAwareAppCmdConnector
 import uk.gov.hmrc.thirdpartyorchestrator.commands.applications.mocks.CommandConnectorMockModule
@@ -44,11 +45,11 @@ class AppCmdControllerSpec extends AsyncHmrcSpec with FixedClock with Applicatio
       extends ApplicationFetcherMockModule
       with CommandConnectorMockModule {
 
-    implicit val headerCarrier: HeaderCarrier = HeaderCarrier()
-    val clientId: ClientId                    = clientIdTwo
-    val sandboxApplicationId: ApplicationId   = applicationIdTwo
+    given HeaderCarrier                     = HeaderCarrier()
+    val clientId: ClientId                  = clientIdTwo
+    val sandboxApplicationId: ApplicationId = applicationIdTwo
 
-    val sandboxApplication: ApplicationWithCollaborators = standardApp.withEnvironment(Environment.SANDBOX)
+    val sandboxApplication: ApplicationWithCollaborators = standardApp.withEnvironment(Environment.Sandbox)
     val productionApplicationId: ApplicationId           = applicationIdOne
 
     val productionApplication: ApplicationWithCollaborators = standardApp
@@ -120,7 +121,6 @@ class AppCmdControllerSpec extends AsyncHmrcSpec with FixedClock with Applicatio
         val result: Future[Result] = controller.dispatch(productionApplicationId)(request)
         status(result) shouldBe BAD_REQUEST
 
-        import uk.gov.hmrc.apiplatform.modules.common.domain.services.NonEmptyListFormatters._
         Json.fromJson[NonEmptyList[CommandFailure]](contentAsJson(result)).get shouldBe NonEmptyList.one(CommandFailures.ActorIsNotACollaboratorOnApp)
 
         CommandConnectorMocks.Prod.IssueCommand.verifyCalledWith(cmd, verifiedEmails)
@@ -136,7 +136,7 @@ class AppCmdControllerSpec extends AsyncHmrcSpec with FixedClock with Applicatio
         val inboundDispatchRequest: DispatchRequest  = DispatchRequest(cmd, verifiedEmails)
         val request: FakeRequest[JsValue]            = FakeRequest("PATCH", s"/environment/SANDBOX/application/$sandboxApplicationId").withBody(Json.toJson(inboundDispatchRequest))
 
-        status(controller.dispatchToEnvironment(Environment.SANDBOX, sandboxApplicationId)(request)) shouldBe OK
+        status(controller.dispatchToEnvironment(Environment.Sandbox, sandboxApplicationId)(request)) shouldBe OK
 
         CommandConnectorMocks.Prod.IssueCommand.verifyNoCommandsIssued()
         CommandConnectorMocks.Sandbox.IssueCommand.verifyCalledWith(cmd, verifiedEmails)

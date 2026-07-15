@@ -45,40 +45,40 @@ trait ThirdPartyApplicationConnectorMockModule extends MockitoSugar with Argumen
     object SearchApplications {
 
       def thenReturns(applications: PaginatedApplications) = {
-        when(aMock.searchApplications(*)(*)).thenReturn(successful(applications))
+        when(aMock.searchApplications(*)(using *)).thenReturn(successful(applications))
       }
 
       def thenThrowException(exception: Exception) =
-        when(aMock.searchApplications(*)(*)).thenReturn(failed(exception))
+        when(aMock.searchApplications(*)(using *)).thenReturn(failed(exception))
     }
 
     object Create {
 
       def thenReturns(request: CreateApplicationRequest)(response: ApplicationWithCollaborators) = {
-        when(aMock.create(eqTo(request))(*)).thenReturn(successful(response))
+        when(aMock.create(eqTo(request))(using *)).thenReturn(successful(response))
       }
     }
 
     object ValidateName {
 
       def thenReturns(request: ApplicationNameValidationRequest)(response: ApplicationNameValidationResult) = {
-        when(aMock.validateName(eqTo(request))(*)).thenReturn(successful(Some(response)))
+        when(aMock.validateName(eqTo(request))(using *)).thenReturn(successful(Some(response)))
       }
 
       def thenReturnsNone(request: ApplicationNameValidationRequest) =
-        when(aMock.validateName(eqTo(request))(*)).thenReturn(successful(None))
+        when(aMock.validateName(eqTo(request))(using *)).thenReturn(successful(None))
     }
 
     object GetAppsForResponsibleIndividualOrAdmin {
 
       def thenReturn(request: GetAppsForAdminOrRIRequest)(applications: List[ApplicationWithCollaborators]) =
-        when(aMock.getAppsForResponsibleIndividualOrAdmin(eqTo(request))(*)).thenReturn(successful(applications))
+        when(aMock.getAppsForResponsibleIndividualOrAdmin(eqTo(request))(using *)).thenReturn(successful(applications))
 
       def thenReturnEmptyList(request: GetAppsForAdminOrRIRequest) =
-        when(aMock.getAppsForResponsibleIndividualOrAdmin(eqTo(request))(*)).thenReturn(successful(List.empty))
+        when(aMock.getAppsForResponsibleIndividualOrAdmin(eqTo(request))(using *)).thenReturn(successful(List.empty))
 
       def thenThrowException(request: GetAppsForAdminOrRIRequest)(exception: Exception) =
-        when(aMock.getAppsForResponsibleIndividualOrAdmin(eqTo(request))(*)).thenReturn(failed(exception))
+        when(aMock.getAppsForResponsibleIndividualOrAdmin(eqTo(request))(using *)).thenReturn(failed(exception))
     }
   }
 
@@ -96,22 +96,22 @@ trait ThirdPartyApplicationConnectorMockModule extends MockitoSugar with Argumen
     object VerifyUplift {
 
       def succeedsWith(verifyCode: String) = {
-        when(aMock.verify(eqTo(verifyCode))(*)).thenReturn(successful(HttpResponse(Status.NO_CONTENT, "", Map.empty)))
+        when(aMock.verify(eqTo(verifyCode))(using *)).thenReturn(successful(HttpResponse(Status.NO_CONTENT, "", Map.empty)))
       }
 
       def failsWithStatus(verifyCode: String, status: Int) = {
-        when(aMock.verify(eqTo(verifyCode))(*)).thenReturn(successful(HttpResponse(status, "", Map.empty)))
+        when(aMock.verify(eqTo(verifyCode))(using *)).thenReturn(successful(HttpResponse(status, "", Map.empty)))
       }
     }
 
     object FetchAnswers {
 
       def succeedsWith(questionType: String) = {
-        when(aMock.fetchApplicationsByAnswer(eqTo(questionType))(*)).thenReturn(successful(HttpResponse(Status.OK, "", Map.empty)))
+        when(aMock.fetchApplicationsByAnswer(eqTo(questionType))(using *)).thenReturn(successful(HttpResponse(Status.OK, "", Map.empty)))
       }
 
       def failsWithStatus(questionType: String, status: Int) = {
-        when(aMock.fetchApplicationsByAnswer(eqTo(questionType))(*)).thenReturn(successful(HttpResponse(status, "", Map.empty)))
+        when(aMock.fetchApplicationsByAnswer(eqTo(questionType))(using *)).thenReturn(successful(HttpResponse(status, "", Map.empty)))
       }
     }
   }

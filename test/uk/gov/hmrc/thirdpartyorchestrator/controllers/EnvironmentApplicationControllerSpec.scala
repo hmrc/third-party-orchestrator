@@ -22,13 +22,13 @@ import org.scalatest.matchers.should.Matchers
 
 import play.api.http.{ContentTypes, HeaderNames, Status}
 import play.api.libs.json.Json
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaboratorsFixtures, Collaborators, PaginatedApplications}
 import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.{ApplicationNameValidationRequest, ApplicationNameValidationResult, ChangeApplicationNameValidationRequest}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartyorchestrator.mocks.connectors.ThirdPartyApplicationConnectorMockModule
@@ -38,7 +38,7 @@ class EnvironmentApplicationControllerSpec extends BaseControllerSpec with Match
   trait Setup
       extends UserBuilder with LocalUserIdTracker with ApplicationWithCollaboratorsFixtures with ThirdPartyApplicationConnectorMockModule {
 
-    implicit val hc: HeaderCarrier = HeaderCarrier()
+    given HeaderCarrier = HeaderCarrier()
 
     val applicationId = ApplicationId.random
     val clientId      = ClientId.random
@@ -51,7 +51,7 @@ class EnvironmentApplicationControllerSpec extends BaseControllerSpec with Match
     "return 200 if successful" in new Setup {
       val appRequest = FakeRequest("GET", s"/applications?clientId=12233455")
       EnvironmentAwareThirdPartyApplicationConnectorMock.Subordinate.SearchApplications.thenReturns(PaginatedApplications(List(application), 0, 0, 0, 0))
-      val result     = controller.searchApplications(Environment.SANDBOX)(appRequest)
+      val result     = controller.searchApplications(Environment.Sandbox)(appRequest)
       status(result) shouldBe Status.OK
     }
   }
@@ -65,7 +65,7 @@ class EnvironmentApplicationControllerSpec extends BaseControllerSpec with Match
       val response: ApplicationNameValidationResult = ApplicationNameValidationResult.Valid
       EnvironmentAwareThirdPartyApplicationConnectorMock.Subordinate.ValidateName.thenReturns(request)(response)
 
-      val result = controller.validateName(Environment.SANDBOX)(fakeRequest)
+      val result = controller.validateName(Environment.Sandbox)(fakeRequest)
       status(result) shouldBe Status.OK
       contentAsJson(result) shouldBe Json.toJson(response)
     }
@@ -77,7 +77,7 @@ class EnvironmentApplicationControllerSpec extends BaseControllerSpec with Match
         .withHeaders((HeaderNames.CONTENT_TYPE, ContentTypes.JSON))
       EnvironmentAwareThirdPartyApplicationConnectorMock.Subordinate.ValidateName.thenReturnsNone(request)
 
-      val result = controller.validateName(Environment.SANDBOX)(fakeRequest)
+      val result = controller.validateName(Environment.Sandbox)(fakeRequest)
       status(result) shouldBe Status.NOT_FOUND
     }
   }

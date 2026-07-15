@@ -32,7 +32,7 @@ import uk.gov.hmrc.thirdpartyorchestrator.utils.ApplicationLogger
 class EnvironmentApplicationController @Inject() (
     connector: EnvironmentAwareThirdPartyApplicationConnector,
     cc: ControllerComponents
-  )(implicit val ec: ExecutionContext
+  )(using ExecutionContext
   ) extends BackendController(cc) with JsonUtils with ApplicationLogger with WarnStillInUse {
 
   def searchApplications(environment: Environment): Action[AnyContent] = warnStillInUse("searchApplications") {
