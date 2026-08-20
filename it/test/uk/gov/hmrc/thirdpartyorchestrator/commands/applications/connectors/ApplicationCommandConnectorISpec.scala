@@ -62,12 +62,11 @@ class ApplicationCommandConnectorISpec
         CoreApplication(
           id = applicationId,
           token = ApplicationTokenData.one,
-          gatewayId = "gatewayId",
           name = ApplicationName("appName"),
           deployedTo = Environment.Production,
           description = Some("random description"),
           createdOn = instant,
-          lastAccess = Some(instant),
+          lastAccess = None,
           grantLength = GrantLength.EIGHTEEN_MONTHS,
           access = Access.Standard(),
           state = ApplicationState(State.Testing, None, None, None, updatedOn = instant),

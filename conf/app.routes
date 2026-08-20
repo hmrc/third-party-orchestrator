@@ -24,5 +24,5 @@ PATCH        /environment/:environment/application/:id                  uk.gov.h
 
 GET          /developer/:userId/applications                            uk.gov.hmrc.thirdpartyorchestrator.controllers.ApplicationController.getApplicationsByCollaborator(userId: SimpleUserId)
 
-GET         /environment/:environment/query                                     uk.gov.hmrc.thirdpartyorchestrator.controllers.QueryController.queryEnv(environment: Environment)
-GET         /query                                                              uk.gov.hmrc.thirdpartyorchestrator.controllers.QueryController.query()
+GET         /environment/:environment/query                             uk.gov.hmrc.thirdpartyorchestrator.controllers.QueryController.queryEnv(environment: Environment)
+GET         /query                                                      uk.gov.hmrc.thirdpartyorchestrator.controllers.QueryController.query()
