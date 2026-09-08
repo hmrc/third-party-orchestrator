@@ -34,6 +34,7 @@ import uk.gov.hmrc.apiplatform.modules.applications.query.domain.models.Applicat
 import uk.gov.hmrc.apiplatform.modules.applications.query.domain.services.QueryParamsToQueryStringMap
 import uk.gov.hmrc.thirdpartyorchestrator.utils.{ApplicationLogger, EbridgeConfigurator}
 import scala.concurrent.duration.DurationInt
+import org.apache.pekko.stream.OverflowStrategy
 
 trait QueryConnector {
   def query[T](qry: ApplicationQuery)(using HeaderCarrier, HttpReads[T]): Future[T]
@@ -76,6 +77,8 @@ abstract class AbstractQueryConnector(using ExecutionContext, Materializer)
     )
       .setHeader(Http.HeaderNames.ACCEPT -> "application/stream+json")
       .stream[Source[ByteString, ?]]
+      .map(_.buffer(100, OverflowStrategy.backpressure))
+
   }
 
   override def query[T](qry: ApplicationQuery)(using HeaderCarrier, HttpReads[T]): Future[T] = {
