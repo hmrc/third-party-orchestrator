@@ -17,10 +17,11 @@
 package uk.gov.hmrc.thirdpartyorchestrator.connectors
 
 import javax.inject.{Inject, Named, Singleton}
+import scala.concurrent.duration.DurationInt
 import scala.concurrent.{ExecutionContext, Future}
 
-import org.apache.pekko.stream.Materializer
 import org.apache.pekko.stream.scaladsl.Source
+import org.apache.pekko.stream.{Materializer, OverflowStrategy}
 import org.apache.pekko.util.ByteString
 
 import play.api.http.ContentTypes
@@ -33,8 +34,6 @@ import uk.gov.hmrc.http.client.{HttpClientV2, RequestBuilder}
 import uk.gov.hmrc.apiplatform.modules.applications.query.domain.models.ApplicationQuery
 import uk.gov.hmrc.apiplatform.modules.applications.query.domain.services.QueryParamsToQueryStringMap
 import uk.gov.hmrc.thirdpartyorchestrator.utils.{ApplicationLogger, EbridgeConfigurator}
-import scala.concurrent.duration.DurationInt
-import org.apache.pekko.stream.OverflowStrategy
 
 trait QueryConnector {
   def query[T](qry: ApplicationQuery)(using HeaderCarrier, HttpReads[T]): Future[T]
