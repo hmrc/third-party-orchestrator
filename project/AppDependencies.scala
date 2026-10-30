@@ -1,8 +1,7 @@
 import sbt.*
 
 object AppDependencies {
-  private val bootstrapVersion    = "10.7.1"
-  private val mockitoScalaVersion = "2.2.1"
+  private val bootstrapVersion    = "10.8.0"
 
   private val commonDomainVersion    = "1.4.0"
   private val appEventVersion        = "1.3.0"
@@ -24,7 +23,6 @@ object AppDependencies {
     "uk.gov.hmrc" %% "bootstrap-test-play-30"                   % bootstrapVersion,
     "uk.gov.hmrc" %% "api-platform-common-domain-fixtures"      % commonDomainVersion,
     "uk.gov.hmrc" %% "api-platform-tpd-domain-fixtures"         % tpdDomainVersion,
-    "uk.gov.hmrc" %% "api-platform-application-domain-fixtures" % appDomainVersion,
-    "org.mockito" %% "mockito-scala-scalatest"                  % mockitoScalaVersion
+    "uk.gov.hmrc" %% "api-platform-application-domain-fixtures" % appDomainVersion
   ).map(_ % "test")
 }
